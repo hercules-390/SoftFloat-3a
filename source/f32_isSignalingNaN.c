@@ -34,8 +34,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#include <stdbool.h>
-#include "platform.h"
+#ifdef HAVE_PLATFORM_H 
+#include "platform.h" 
+#endif
+#if !defined(false) 
+#include <stdbool.h> 
+#endif
 #include "internals.h"
 #include "specialize.h"
 #include "softfloat.h"

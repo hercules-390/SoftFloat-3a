@@ -1,0 +1,152 @@
+#! /usr/bin/env rexx
+
+Trace "O"
+signal on novalue name novalue
+numeric digits 12
+
+parse source _src
+parse lower var _src _sys _env _cmd .
+z = filespec("n", _cmd)
+parse var z .local~self "." .
+
+.local~cpyr.0 = 0
+
+parse arg args
+args = space(args)
+args = __argsort(args)
+argc = words(args)
+
+if  argc = 0 then do
+    call __log "need an argument (source to be normalized)! "
+    exit
+end
+
+call time("R")
+call __start
+
+do  iarg = 1 to argc
+    stdbool = 0
+    stdint  = 0
+    platform = 0
+
+    argv = strip(word(args, iarg))
+    if  \__exists( argv ) then do
+        call __log "Not found :"argv
+        iterate iarg
+    end
+    msg = "Checked :"argv
+    address hostemu 'execio * diskr "'argv'" (finis stem stmt.'
+    do  i = 1 to stmt.0
+
+        temp = space(stmt.i)
+        if  abbrev(temp, "#include") = 0 then ,
+            iterate
+        parse var temp . header .
+        if  left(header,1) = """" then do
+            s = 2
+            l = pos("""", header, 2) - 2
+        end
+        else ,
+        if  left(header,1) = "<" then do
+            s = 2
+            l = pos(">", header, 2) - 2
+        end
+        else do
+            s = 1
+            l = length(header)
+        end
+        header = substr(header, s, l )
+        if  header = "platform.h" then ,
+            platform = 1
+        if  header = "stdbool.h" then ,
+            stdbool = 1
+        if  header = "stdint.h" then ,
+            stdint = 1
+        if  stdint + stdbool + platform = 3 then,
+            leave i
+    end
+    if  stdint + stdbool + platform = 0 then do
+        call __log msg
+        iterate iarg
+    end
+    call __log msg "- Normalizing :"stdint + stdbool + platform
+
+    norm.0 = 0
+    done = 0
+    do  i = 1 to stmt.0
+        temp = space(stmt.i)
+        if  abbrev(temp, "#include") = 0 then do
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = stmt.i ;
+            iterate i
+        end
+        if  platform = 1 then do
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#ifdef HAVE_PLATFORM_H "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#include ""platform.h"" "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#endif"
+            platform = 0
+        end
+        if  stdbool = 1 then do
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#if !defined(false) "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#include <stdbool.h> "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#endif"
+            stdbool = 0
+        end
+        if  stdint = 1 then do
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#if !defined(int32_t) "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#include <stdint.h>             /* C99 standard integers */ "
+            j = norm.0 + 1 ; norm.0 = j;
+            norm.j = "#endif"
+            stdint = 0
+        end
+        if  pos("platform.h", stmt.i ) > 0 then ,
+            iterate i
+        if  pos("stdbool.h", stmt.i ) > 0 then ,
+            iterate i
+        if  pos("stdint.h", stmt.i ) > 0 then ,
+            iterate i
+        j = norm.0 + 1 ; norm.0 = j;
+        norm.j = stmt.i
+    end
+
+    address hostemu 'execio 'norm.0' diskw "'argv'" (finis stem norm.'
+
+end
+call __leave time('E')
+exit
+
+/*	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*/
+logic_error:
+say  "**"copies(" -",35)
+say  "**"
+say  "** Logic error at line '"sigl"' "
+say  "**"
+say  "**"copies(" -",35)
+exit
+
+/*	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*/
+novalue:
+say  "**"copies(" -",35)
+say  "**"
+say  "** Novalue trapped, line '"sigl"' var '"condition("D")"' "
+say  "**"
+say  "**"copies(" -",35)
+exit
+
+::requires  "esyzutil.rx"
+::requires  "hostemu" LIBRARY
+
+
+
+
+

@@ -10,6 +10,7 @@
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
+#cmakedefine HAVE_STDBOOL_H
 #cmakedefine HAVE_STDINT_H
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
