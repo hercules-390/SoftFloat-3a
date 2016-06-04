@@ -1,0 +1,30 @@
+the tool chosen to build the package is CMAKE
+
+<somewhere>
+
+
+clone/download the current sources
+from .... ( to be filled later )
+into the <source>  directory
+
+create a binary directory ( where the build will take place )
+<binary>
+
+for ease of use <source> an <binary> should be at the same level
+
+also to save some typing the cmake setup assumes
+that the <binary> will have the format xxxxxxxx.yyyyyyyy
+
+where xxxxxxxx will be the last part of the install prefix
+and yyyyyyyy will be the build type Release/Debug for now
+
+for this setup just
+cd <binary>
+cmake ../<source>
+make/nmake
+
+for a different naming convention or layout
+
+cd <binary>
+cmake <full source path> -DINSTALL_PREFIX=<the install prefix>  -DBUILD_TYPE=<the build type>
+
