@@ -1,3 +1,4 @@
+/* stdint.h standard header */
 #ifndef _STDINT
 #define _STDINT
 /*  NB: assumes

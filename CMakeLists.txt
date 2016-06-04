@@ -1,7 +1,7 @@
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Global settings
 #
-cmake_minimum_required( VERSION 3.4 )
+cmake_minimum_required( VERSION 3.2 )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   check for an in-source build
@@ -89,8 +89,6 @@ if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
 
 	include( GIT_Revision )
 	message( "@@ Building SoftFloat revision ${GIT_WC_REVISION}" )
-else()
-    set(REVISION_STRING "Final" )
 endif()
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -130,6 +128,18 @@ endif()
 set( CMAKE_C_FLAGS_DEBUG    "${CMAKE_C_FLAGS_DEBUG}   ${CDEFS_DEBUG}" )
 set( CMAKE_C_FLAGS_RELEASE  "${CMAKE_C_FLAGS_RELEASE} ${CDEFS_RELEASE}" )
 
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   generate platform.h
+#
+if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME} )
+	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME}
+    	            ${CMAKE_BINARY_DIR}/platform.h )
+elseif( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
+	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in
+    	            ${CMAKE_BINARY_DIR}/platform.h )
+else()
+	message( FATAL_ERROR "** Unable to find platform.h.in" )
+endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   generate stdbool.h
@@ -144,19 +154,6 @@ if( NOT HAVE_STDBOOL_H )
 endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   generate platform.h
-#
-if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME} )
-	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME}
-    	            ${CMAKE_BINARY_DIR}/platform.h )
-elseif( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
-	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in
-    	            ${CMAKE_BINARY_DIR}/platform.h )
-else()
-	message( FATAL_ERROR "** Unable to find platform.h.in" )
-endif()
-
-# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   generate stdint.h
 #
 if( NOT HAVE_STDINT_H )
@@ -166,19 +163,6 @@ if( NOT HAVE_STDINT_H )
     else()
 
     endif()
-endif()
-
-# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   generate platform.h
-#
-if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME} )
-	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME}
-    	            ${CMAKE_BINARY_DIR}/platform.h )
-elseif( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
-	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in
-    	            ${CMAKE_BINARY_DIR}/platform.h )
-else()
-	message( FATAL_ERROR "** Unable to find platform.h.in" )
 endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -198,11 +182,6 @@ endif()
 #
 include_directories(    BEFORE
                     ${CMAKE_BINARY_DIR}
-                    ${CMAKE_SOURCE_DIR}/include
-                    )
-include_directories(    BEFORE
-                    ${CMAKE_BINARY_DIR}
-                    ${CMAKE_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/source/8086-SSE
                     ${CMAKE_SOURCE_DIR}/source/include
                     )
@@ -527,6 +506,7 @@ add_library( SoftFloat_shared SHARED ${SoftFloat_SRCS} )
 set_target_properties(  SoftFloat_shared PROPERTIES
 						OUTPUT_NAME SoftFloat
                         PUBLIC_HEADER "${public_headers}" )
+
 install( TARGETS SoftFloat_shared
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
