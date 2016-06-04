@@ -1,39 +1,3 @@
-#ifndef IN_PLATFORM_H
-#define IN_PLATFORM_H
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#define LITTLEENDIAN 1
-#define INLINE inline
-#define INLINE_LEVEL 5
-#define SOFTFLOAT_FAST_INT64
-#define SOFTFLOAT_FAST_DIV64TO32
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#define _CRT_SECURE_NO_WARNINGS
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#cmakedefine HAVE_STDBOOL_H
-#cmakedefine HAVE_STDINT_H
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#ifndef HAVE_STDBOOL_H
-#ifndef _STDBOOL
-#define _STDBOOL
-
-#define false   0
-#define true    1
-
-#define bool int
-
-#endif /* #ifndef _STDBOOL */
-#endif /* #ifndef HAVE_STDBOOL_H */
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#ifndef HAVE_STDINT_H
 #ifndef _STDINT
 #define _STDINT
 /*  NB: assumes
@@ -196,8 +160,3 @@ typedef _ULonglong uintmax_t;
 #define INTMAX_C(x)		INT64_C(x)
 #define UINTMAX_C(x)	UINT64_C(x)
 #endif /* #ifndef _STDINT */
-#endif /* #ifndef HAVE_STDINT_H */
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*/
-#endif /* #ifndef IN_PLATFORM_H */

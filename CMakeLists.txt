@@ -98,6 +98,7 @@ endif()
 #
 include( CheckIncludeFile )
 include( CheckHeader )
+check_header( stdbool.h )
 check_header( stdint.h )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -128,6 +129,44 @@ endif()
 
 set( CMAKE_C_FLAGS_DEBUG    "${CMAKE_C_FLAGS_DEBUG}   ${CDEFS_DEBUG}" )
 set( CMAKE_C_FLAGS_RELEASE  "${CMAKE_C_FLAGS_RELEASE} ${CDEFS_RELEASE}" )
+
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   generate stdbool.h
+#
+if( NOT HAVE_STDBOOL_H )
+    if( EXISTS ${CMAKE_SOURCE_DIR}/stdbool.h.in )
+	    configure_file( ${CMAKE_SOURCE_DIR}/stdbool.h.in
+    	                ${CMAKE_BINARY_DIR}/stdbool.h )
+    else()
+
+    endif()
+endif()
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   generate platform.h
+#
+if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME} )
+	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME}
+    	            ${CMAKE_BINARY_DIR}/platform.h )
+elseif( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
+	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in
+    	            ${CMAKE_BINARY_DIR}/platform.h )
+else()
+	message( FATAL_ERROR "** Unable to find platform.h.in" )
+endif()
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   generate stdint.h
+#
+if( NOT HAVE_STDINT_H )
+    if( EXISTS ${CMAKE_SOURCE_DIR}/stdint.h.in )
+	    configure_file( ${CMAKE_SOURCE_DIR}/stdint.h.in
+    	                ${CMAKE_BINARY_DIR}/stdint.h )
+    else()
+
+    endif()
+endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   generate platform.h
