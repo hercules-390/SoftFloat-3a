@@ -211,7 +211,6 @@ include_directories(    BEFORE
 #   the public headers
 file( GLOB public_headers
         RELATIVE "${CMAKE_SOURCE_DIR}" "source/include/*.h" )
-Trace( public_headers )
 list( SORT public_headers )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
