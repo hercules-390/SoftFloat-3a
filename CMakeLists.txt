@@ -2,6 +2,25 @@
 #   Global settings
 #
 cmake_minimum_required( VERSION 3.2 )
+cmake_policy(SET CMP0048 NEW)
+
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   the directory with the CMAKE user modules
+if( EXISTS "${CMAKE_SOURCE_DIR}/cmake/modules" )
+    set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules" )
+    include( Vdump )
+    include( Trace )
+else()
+	message( FATAL_ERROR "
+Cmake modules directory not found '${CMAKE_SOURCE_DIR}/cmake/modules'
+" )
+endif()
+
+set( TRAVIS $ENV{TRAVIS} )
+if( TRAVIS )
+    message( "@@ Remote build ( Travis ) " )
+else()
+    message( "@@ Local  build" )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   check for an in-source build
@@ -25,26 +44,13 @@ if( "${SOURCE_DIR}" STREQUAL "${BINARY_DIR}" )
 endif( )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   the directory with the CMAKE user modules
-#
-if( EXISTS "${CMAKE_SOURCE_DIR}/cmake/modules" )
-    set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules" )
-    include( Vdump )
-    include( Trace )
-else()
-	message( FATAL_ERROR "
-Cmake modules directory not found '${CMAKE_SOURCE_DIR}/cmake/modules'
-" )
-endif()
-
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	install prefix, and build type
 #
-get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
-get_filename_component( BINARY_DIR ${CMAKE_BINARY_DIR} NAME )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if( NOT DEFINED INSTALL_PREFIX )
+    get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
+    get_filename_component( BINARY_DIR ${CMAKE_BINARY_DIR} NAME )
 	string( REGEX MATCH "([^\\.]*)" INSTALL_PREFIX ${BINARY_DIR} )
 	if(	BINARY_DIR STREQUAL INSTALL_PREFIX )
 		message( FATAL_ERROR "
@@ -57,6 +63,8 @@ set( CMAKE_INSTALL_PREFIX  "${INSTALL_PREFIX}" CACHE PATH "" FORCE )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if( NOT DEFINED BUILD_TYPE )
+    get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
+    get_filename_component( BINARY_DIR ${CMAKE_BINARY_DIR} NAME )
 	string( REGEX MATCH "([^.]*\$)" BUILD_TYPE ${BINARY_DIR} )
 	if(	BINARY_DIR STREQUAL BUILD_TYPE )
 		message( FATAL_ERROR "
@@ -75,6 +83,7 @@ Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}
 endif()
 set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
 
+endif( TRAVIS )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   define the project
@@ -116,8 +125,8 @@ endif()
 #  	CDEFS
 #
 if( WIN32 )
-    set( CDEFS_DEBUG            "/D HAVE_PLATFORM_H /D DEBUG" )
-    set( CDEFS_RELEASE          "/D HAVE_PLATFORM_H /D NDEBUG" )
+    set( CDEFS_DEBUG            "/D HAVE_PLATFORM_H /D _DEBUG" )
+    set( CDEFS_RELEASE          "/D HAVE_PLATFORM_H /D _NDEBUG" )
 
 else()
     set( CDEFS_DEBUG            "-D HAVE_PLATFORM_H -D DEBUG" )
