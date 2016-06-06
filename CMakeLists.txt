@@ -519,6 +519,9 @@ install( TARGETS SoftFloat_shared
         PUBLIC_HEADER DESTINATION include)
 endif()
 
+install(FILES "COPYING.txt" DESTINATION "." )
+install(FILES "README.txt"  DESTINATION "." )
+install(FILES "README.html" DESTINATION "." )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the cpack installers definitions
