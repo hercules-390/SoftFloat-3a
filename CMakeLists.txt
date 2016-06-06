@@ -21,7 +21,6 @@ if( TRAVIS )
     message( "@@ Remote build ( Travis ) " )
 else()
     message( "@@ Local  build" )
-
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   check for an in-source build
 #   and make sure the user doesn't play dirty with symlinks
@@ -97,7 +96,7 @@ find_package( Git )
 if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
 
 	include( GIT_Revision )
-	message( "@@ Building SoftFloat revision ${GIT_WC_REVISION}" )
+	message( "@@ Building ${PROJECT_NAME} revision ${GIT_WC_REVISION}" )
 endif()
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -177,13 +176,13 @@ endif()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat.pc
 #
-if(     EXISTS ${CMAKE_SOURCE_DIR}/SoftFloat.pc.in )
-	configure_file( ${CMAKE_SOURCE_DIR}/SoftFloat.pc.in
-    	            ${CMAKE_BINARY_DIR}/SoftFloat.pc @ONLY )
-    install(    FILES ${CMAKE_BINARY_DIR}/SoftFloat.pc
+if(     EXISTS ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.pc.in )
+	configure_file( ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}.pc.in
+    	            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY )
+    install(    FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
                 DESTINATION lib/pkgconfig )
 else()
-        message( "@@ will not install 'SoftFloat.pc' " )
+        message( "@@ will not install '${PROJECT_NAME}.pc' " )
 endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -505,7 +504,6 @@ set_target_properties(  SoftFloat PROPERTIES
 						PUBLIC_HEADER "${public_headers}" )
 install( TARGETS SoftFloat
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -517,10 +515,28 @@ set_target_properties(  SoftFloat_shared PROPERTIES
                         PUBLIC_HEADER "${public_headers}" )
 
 install( TARGETS SoftFloat_shared
-        ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 endif()
 
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   the cpack installers definitions
+#
+if( WIN32 )
+    set( CPACK_GENERATOR "ZIP" )
+else()
+    set( CPACK_GENERATOR "TGZ" )
+endif()
+
+set( CPACK_PACKAGE_NAME         "${PROJECT_NAME}" )
+#set( CPACK_PACKAGE_VERSION      "${${PROJECT_NAME}_VERSION}" )
+set( CPACK_PACKAGE_FILE_NAME    "${CPACK_PACKAGE_NAME}" )
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   the cpack installers
+#
+include(CPack)
+
 get_filename_component( CURRENT_LIST_FILE "${CMAKE_CURRENT_LIST_FILE}" NAME)
-Vdump( "${CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" )
+Vdump( "${CURRENT_LIST_FILE}" "at_exit" )
