@@ -58,12 +58,12 @@ int_fast32_t f32_to_i32( float32_t a, uint_fast8_t roundingMode, bool exact )
 
     uA.f = a;
     uiA = uA.ui;
-    sign = signF32UI( uiA );
+    sign = signF32UI( uiA );                /* Separate components of float32                   */
     exp  = expF32UI( uiA );
     sig  = fracF32UI( uiA );
-    if ( (exp == 0xFF) && sig ) sign = 0;
-    if ( exp ) sig |= 0x00800000;
-    sig64 = (uint_fast64_t) sig<<32;
+    if ( (exp == 0xFF) && sig ) sign = 0;   /* If infinity, set positive sign                   */
+    if ( exp ) sig |= 0x00800000;           /* If not tiny, make implicit units digit explicit  */
+    sig64 = (uint_fast64_t) sig<<32;        /* Move significand to high word of uint-64         */
     shiftCount = 0xAF - exp;
     if ( 0 < shiftCount ) {
         sig64 = softfloat_shiftRightJam64( sig64, shiftCount );

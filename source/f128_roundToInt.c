@@ -119,7 +119,12 @@ float128_t
             uiZ.v64 = uiA64 & packToF128UI64( 1, 0, 0 );
             uiZ.v0  = 0;
             switch ( roundingMode ) {
-             case softfloat_round_near_even:
+#ifdef IBM_IEEE
+            case softfloat_round_odd:                       /* Round to odd: result is 1 with sign of input                 */
+                uiZ.v64 = packToF128UI64(signF128UI64(uiA64), 0x3FFF, 0);
+                break;
+#endif /* IBM_IEEE  */         case softfloat_round_near_even:
+            case softfloat_round_near_even:
                 if ( ! (fracF128UI64( uiA64 ) | uiA0) ) break;
              case softfloat_round_near_maxMag:
                 if ( exp == 0x3FFE ) uiZ.v64 |= packToF128UI64( 0, 0x3FFF, 0 );
@@ -146,7 +151,12 @@ float128_t
             if ( ! ((uiZ.v64 & roundBitsMask) | uiA0) ) {
                 uiZ.v64 &= ~lastBitMask;
             }
-        } else if ( roundingMode != softfloat_round_minMag ) {
+        } 
+#ifdef IBM_IEEE
+        else if ((roundingMode == softfloat_round_odd) && (uiZ.v64 & roundBitsMask) | uiA0 )
+            uiZ.v64 |= lastBitMask;
+#endif
+        else if ( roundingMode != softfloat_round_minMag ) {
             if (
                 signF128UI64( uiZ.v64 ) ^ (roundingMode == softfloat_round_max)
             ) {

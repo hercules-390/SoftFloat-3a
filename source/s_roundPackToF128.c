@@ -145,6 +145,15 @@ float128_t
     } else {
         if ( ! (sig64 | sig0) ) exp = 0;
     }
+#ifdef IBM_IEEE
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact (sigExtra==0), no rounding                                   */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd                                                                     */
+    /* if truncated result is already odd, below does not change result.                            */
+    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
+    sig0 |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+#endif  /* IBM_IEEE  */
     uiZ64 = packToF128UI64( sign, exp, sig64 );
     uiZ0  = sig0;
  uiZ:

@@ -73,6 +73,15 @@ uint_fast64_t
                  (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
                       & roundNearEven);
     }
+#ifdef IBM_IEEE
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact (sigExtra==0), no rounding                                   */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd                                                                     */
+    /* if truncated result is already odd, below does not change result.                            */
+    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
+    sig |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+#endif  /* IBM_IEEE  */
     if ( sign && sig ) goto invalid;
     if ( exact && sigExtra ) {
         softfloat_exceptionFlags |= softfloat_flag_inexact;

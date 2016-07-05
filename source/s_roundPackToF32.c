@@ -89,6 +89,17 @@ float32_t
     }
     if ( roundBits ) softfloat_exceptionFlags |= softfloat_flag_inexact;
     sig = (sig + roundIncrement)>>7;
+
+#ifdef IBM_IEEE
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact, no rounding                                                 */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd                                                                     */
+    /* if truncated result is already odd, below does not change result.                            */
+    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
+    sig |= (uint_fast32_t)(roundBits && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+#endif  /* IBM_IEEE  */
+
     sig &= ~(uint_fast32_t) (! (roundBits ^ 0x40) & roundNearEven);
     uiZ = packToF32UI( sign, sig ? exp : 0, sig );
  uiZ:

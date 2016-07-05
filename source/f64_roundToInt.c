@@ -67,7 +67,11 @@ float64_t f64_roundToInt( float64_t a, uint_fast8_t roundingMode, bool exact )
         if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
         uiZ = uiA & packToF64UI( 1, 0, 0 );
         switch ( roundingMode ) {
-         case softfloat_round_near_even:
+#ifdef IBM_IEEE
+        case softfloat_round_odd:                       /* Round to odd: result is 1 with sign of input                 */
+            uiZ = packToF64UI(signF64UI(uiA), 0x3FF, 0);
+            break;
+#endif /* IBM_IEEE  */         case softfloat_round_near_even:
             if ( ! fracF64UI( uiA ) ) break;
          case softfloat_round_near_maxMag:
             if ( exp == 0x3FE ) uiZ |= packToF64UI( 0, 0x3FF, 0 );
@@ -100,7 +104,12 @@ float64_t f64_roundToInt( float64_t a, uint_fast8_t roundingMode, bool exact )
     } else if ( roundingMode == softfloat_round_near_even ) {
         uiZ += lastBitMask>>1;
         if ( ! (uiZ & roundBitsMask) ) uiZ &= ~lastBitMask;
-    } else if ( roundingMode != softfloat_round_minMag ) {
+    } 
+#ifdef IBM_IEEE
+    else if ((roundingMode == softfloat_round_odd) && (uiZ & roundBitsMask))
+        uiZ |= lastBitMask;
+#endif
+    else if ( roundingMode != softfloat_round_minMag ) {
         if ( signF64UI( uiZ ) ^ (roundingMode == softfloat_round_max) ) {
             uiZ += roundBitsMask;
         }

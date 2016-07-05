@@ -34,6 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+=============================================================================*/
 
 /*============================================================================
 | Note:  If SoftFloat is made available as a general library for programs to
@@ -55,6 +62,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "softfloat_types.h"
 
+/****************************************************************************************/
+/*                                                                                      */
+#define IBM_IEEE            /* Compile Softfloat to be compliant with with IBM IEEE     */
+/*                                                                                      */
+/****************************************************************************************/
+
 /*----------------------------------------------------------------------------
 | Software floating-point underflow tininess-detection mode.
 *----------------------------------------------------------------------------*/
@@ -68,6 +81,16 @@ enum {
 | Software floating-point rounding mode.
 *----------------------------------------------------------------------------*/
 extern uint_fast8_t softfloat_roundingMode;
+#ifdef IBM_IEEE
+enum {
+    softfloat_round_near_even = 0,
+    softfloat_round_minMag = 1,
+    softfloat_round_min = 2,
+    softfloat_round_max = 3,
+    softfloat_round_near_maxMag = 4,
+    softfloat_round_odd = 5
+};
+#else
 enum {
     softfloat_round_near_even   = 0,
     softfloat_round_minMag      = 1,
@@ -75,6 +98,7 @@ enum {
     softfloat_round_max         = 3,
     softfloat_round_near_maxMag = 4
 };
+#endif /*  IBM_IEEE*/
 
 /*----------------------------------------------------------------------------
 | Software floating-point exception flags.

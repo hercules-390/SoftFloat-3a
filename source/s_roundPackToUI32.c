@@ -67,6 +67,16 @@ uint_fast32_t
     sig += roundIncrement;
     if ( sig & UINT64_C( 0xFFFFFF8000000000 ) ) goto invalid;
     z = sig>>7;
+#ifdef IBM_IEEE
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact, no rounding                                                 */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd                                                                     */
+    /* if truncated result is already odd, below does not change result.                            */
+    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
+    z |= (uint_fast32_t)(roundBits && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+#endif  /* IBM_IEEE  */
+
     z &= ~(uint_fast32_t) (! (roundBits ^ 0x40) & roundNearEven);
     if ( sign && z ) goto invalid;
     if ( exact && roundBits ) {

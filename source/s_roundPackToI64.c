@@ -49,8 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int_fast64_t
  softfloat_roundPackToI64(
      bool sign,
-     uint_fast64_t sig,
-     uint_fast64_t sigExtra,
+     uint_fast64_t sig,         /* significand portion to left of rounding point (integer portion)      */
+     uint_fast64_t sigExtra,    /* significand portion to right of rounding point (fractional portion)  */
      uint_fast8_t roundingMode,
      bool exact
  )
@@ -60,7 +60,7 @@ int_fast64_t
     int_fast64_t z;
 
     roundNearEven = (roundingMode == softfloat_round_near_even);
-    doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
+    doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);     /* anything fractional means rounding needed   */
     if ( ! roundNearEven && (roundingMode != softfloat_round_near_maxMag) ) {
         doIncrement =
             (roundingMode
@@ -69,12 +69,21 @@ int_fast64_t
     }
     if ( doIncrement ) {
         ++sig;
-        if ( ! sig ) goto invalid;
+        if ( ! sig ) goto invalid;      /* if true, means 0xFFFFFFFFFFFFFFFF -> 0x0, overflow, raise invalid, */
         sig &=
             ~(uint_fast64_t)
                  (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
                       & roundNearEven);
     }
+#ifdef IBM_IEEE
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact (sigExtra==0), no rounding                                   */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd                                                                     */
+    /* if truncated result is already odd, below does not change result.                            */
+    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
+    sig |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+#endif  /* IBM_IEEE  */
     uZ.ui = sign ? -sig : sig;
     z = uZ.i;
     if ( z && ((z < 0) ^ sign) ) goto invalid;
@@ -84,7 +93,7 @@ int_fast64_t
     return z;
  invalid:
     softfloat_raiseFlags( softfloat_flag_invalid );
-    return
+    return                                                  /* return maximum magnitude with correct sign       */
         sign ? -INT64_C( 0x7FFFFFFFFFFFFFFF ) - 1
             : INT64_C( 0x7FFFFFFFFFFFFFFF );
 
