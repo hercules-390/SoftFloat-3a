@@ -34,6 +34,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+=============================================================================*/
+
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -87,9 +96,13 @@ uint_fast64_t
         softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
     return sig;
- invalid:
+ invalid:        /* negative sign and non-zero rounded significand. */
     softfloat_raiseFlags( softfloat_flag_invalid );
+#ifdef IBM_IEEE
+    return UINT64_C( 0x0000000000000000 );
+#else
     return UINT64_C( 0xFFFFFFFFFFFFFFFF );
+#endif /*  IBM_IEEE  */
 
 }
 
