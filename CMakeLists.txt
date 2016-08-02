@@ -491,10 +491,27 @@ foreach( _s IN LISTS _l )
             source/${_s} )
 endforeach()
 
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   Hercules-required modifications to SoftFloat
+set(    _l
+        f32_scaledResult.c
+        f64_scaledResult.c
+        f128_scaledResult.c
+    )
+list( SORT _l )
+set(    SoftFloat_HERCMODS "" )
+foreach( _s IN LISTS _l )
+    list(   APPEND
+            SoftFloat_HERCMODS
+            hercsource/${_s} )
+endforeach()
+
+
 set(    SoftFloat_SRCS
         ${SoftFloat_PRIMITIVES}
         ${SoftFloat_SPECIALISED}
-        ${SoftFloat_OTHERS} )
+        ${SoftFloat_OTHERS}
+        ${SoftFloat_HERCMODS} )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the static library

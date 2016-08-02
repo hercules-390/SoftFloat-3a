@@ -34,6 +34,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Saved rounded result with unbounded unbiased exponent to enable
+    return of a scaled rounded result, required by many instructions.
+ 2) Added rounding mode softfloat_rounding_odd, which corresponds to
+    IBM Round For Shorter precision (RFS).  (not coded yet)
+=============================================================================*/
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -62,6 +75,10 @@ float128_t
     struct uint128 sig128;
     union ui128_f128 uZ;
 
+#ifdef IBM_IEEE
+    struct uint128 savesig;                 /* Savearea for rounded pre-underflow significand   */
+#endif /* IBM_IEEE */
+
     roundingMode = softfloat_roundingMode;
     roundNearEven = (roundingMode == softfloat_round_near_even);
     doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
@@ -71,9 +88,37 @@ float128_t
                  == (sign ? softfloat_round_min : softfloat_round_max))
                 && sigExtra;
     }
-    if ( 0x7FFD <= (uint32_t) exp ) {
-        if ( exp < 0 ) {
-            isTiny =
+
+#ifdef IBM_IEEE
+    if (doIncrement) {
+        sig128 = softfloat_add128(sig64, sig0, 0, 1);
+        savesig.v64 = sig128.v64;
+        savesig.v0  =
+            sig128.v0
+            & ~(uint64_t)
+            (!(sigExtra & UINT64_C(0x7FFFFFFFFFFFFFFF))
+                & roundNearEven);
+    }
+    else {
+        savesig.v64 = sig64;
+        savesig.v0 = sig0;
+    }
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact, no rounding                                                 */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd.  Or'ing in a one-in the low-order bit achieves this                */
+    savesig.v0 |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+
+    savesig = softfloat_shortShiftLeft128(savesig.v64, savesig.v0, 15);
+    softfloat_rawExp   = exp - 16383;
+    softfloat_rawSig64 = savesig.v64;
+    softfloat_rawSig0  = savesig.v0;
+    softfloat_rawSign  = sign;
+#endif  /*   IBM_IEEE   */
+
+    if ( 0x7FFD <= (uint32_t) exp ) {               /* if not overflow          */
+        if ( exp < 0 ) {                            /* if underflow             */
+            isTiny =                                /* isTiny always true in IBM_IEEE (tininesss before rounding)   */
                    (softfloat_detectTininess
                         == softfloat_tininess_beforeRounding)
                 || (exp < -1)
@@ -84,16 +129,16 @@ float128_t
                        UINT64_C( 0x0001FFFFFFFFFFFF ),
                        UINT64_C( 0xFFFFFFFFFFFFFFFF )
                    );
-            sig128Extra =
+            sig128Extra =                           /* denormalize input value to enable zero exponent              */
                 softfloat_shiftRightJam128Extra( sig64, sig0, sigExtra, -exp );
             sig64 = sig128Extra.v.v64;
             sig0  = sig128Extra.v.v0;
             sigExtra = sig128Extra.extra;
             exp = 0;
-            if ( isTiny && sigExtra ) {
+            if ( isTiny && sigExtra ) {             /* if one-bits shifted out, it's underflow                      */
                 softfloat_raiseFlags( softfloat_flag_underflow );
             }
-            doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
+            doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);     /* recalculate rounding increment       */
             if (
                    ! roundNearEven
                 && (roundingMode != softfloat_round_near_maxMag)
@@ -103,9 +148,9 @@ float128_t
                          == (sign ? softfloat_round_min : softfloat_round_max))
                         && sigExtra;
             }
-        } else if (
-               (0x7FFD < exp)
-            || ((exp == 0x7FFD)
+        } else if (                         /* test for overflow or overflow after rounding                         */
+               (0x7FFD < exp)               /* test for extant overflow                                             */
+            || ((exp == 0x7FFD)             /* test for maxmag sig and max exp and increment needed, = overflow     */
                     && softfloat_eq128( 
                            sig64,
                            sig0,
@@ -122,7 +167,7 @@ float128_t
                 || (roundingMode
                         == (sign ? softfloat_round_min : softfloat_round_max))
             ) {
-                uiZ64 = packToF128UI64( sign, 0x7FFF, 0 );
+                uiZ64 = packToF128UI64( sign, 0x7FFF, 0 );      /* set up to return infinity of correct sign        */
                 uiZ0  = 0;
             } else {
                 uiZ64 =
@@ -134,7 +179,9 @@ float128_t
         }
     }
     if ( sigExtra ) softfloat_exceptionFlags |= softfloat_flag_inexact;
-    if ( doIncrement ) {
+
+#ifdef IBM_IEEE
+    if ( doIncrement && isTiny ) {
         sig128 = softfloat_add128( sig64, sig0, 0, 1 );
         sig64 = sig128.v64;
         sig0 =
@@ -142,20 +189,35 @@ float128_t
                 & ~(uint64_t)
                        (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
                             & roundNearEven);
+        /* secret sauce below for round to odd                                                          */
+        /* if pre-rounding result is exact, no rounding                                                 */
+        /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+        /* or increment to next odd.  Or'ing in a one-in the low-order bit achieves this                */
+        sig0 |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
     } else {
         if ( ! (sig64 | sig0) ) exp = 0;
+        sig64 = savesig.v64;
+        sig0 = savesig.v0;
     }
-#ifdef IBM_IEEE
-    /* secret sauce below for round to odd                                                          */
-    /* if pre-rounding result is exact (sigExtra==0), no rounding                                   */
-    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
-    /* or increment to next odd                                                                     */
-    /* if truncated result is already odd, below does not change result.                            */
-    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
-    sig0 |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+
+#else   /* not defined IBM_IEEE  */
+    if (doIncrement) {
+        sig128 = softfloat_add128(sig64, sig0, 0, 1);
+        sig64 = sig128.v64;
+        sig0 =
+            sig128.v0
+            & ~(uint64_t)
+            (!(sigExtra & UINT64_C(0x7FFFFFFFFFFFFFFF))
+                & roundNearEven);
+    }
+    else {
+        if (!(sig64 | sig0)) exp = 0;
+    }
 #endif  /* IBM_IEEE  */
-    uiZ64 = packToF128UI64( sign, exp, sig64 );
-    uiZ0  = sig0;
+
+    uiZ64 = packToF128UI64(sign, exp, sig64);
+    uiZ0 = sig0;
+
  uiZ:
     uZ.ui.v64 = uiZ64;
     uZ.ui.v0  = uiZ0;

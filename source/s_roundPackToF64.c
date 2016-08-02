@@ -34,6 +34,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Saved rounded result with unbounded unbiased exponent to enable
+    return of a scaled rounded result, required by many instructions.
+ 2) Added rounding mode softfloat_rounding_odd, which corresponds to
+    IBM Round For Shorter precision (RFS).
+=============================================================================*/
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -56,6 +69,10 @@ float64_t
     uint_fast64_t uiZ;
     union ui64_f64 uZ;
 
+#ifdef IBM_IEEE
+    uint_fast64_t savesig;              /* Savearea for rounded pre-underflow significand   */
+#endif /* IBM_IEEE */
+
     roundingMode = softfloat_roundingMode;
     roundNearEven = (roundingMode == softfloat_round_near_even);
     roundIncrement = 0x200;
@@ -67,6 +84,21 @@ float64_t
                 : 0;
     }
     roundBits = sig & 0x3FF;
+
+#ifdef IBM_IEEE
+    savesig = (sig + roundIncrement) >> 10;
+    /* secret sauce below for round to odd                                                          */
+    /* if pre-rounding result is exact, no rounding                                                 */
+    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
+    /* or increment to next odd.  Or'ing in a one-in the low-order bit achieves this                */
+    savesig |=  (uint_fast64_t)(roundBits && (roundingMode == softfloat_round_odd));
+    savesig &= ~(uint_fast64_t)(!(roundBits ^ 0x200) & roundNearEven);
+    softfloat_rawSig64 = savesig << 10;                 /* Save rounded significand for scaling     */
+    softfloat_rawSig0  = 0;                             /* Zero bits 64-128 of rounded result       */
+    softfloat_rawExp   = exp - 1023;                    /* Save unbiased exponent                   */
+    softfloat_rawSign  = sign;                          /* Save result sign                         */
+#endif /* IBM_IEEE */
+
     if ( 0x7FD <= (uint16_t) exp ) {
         if ( exp < 0 ) {
             isTiny =
@@ -91,20 +123,23 @@ float64_t
         }
     }
     if ( roundBits ) softfloat_exceptionFlags |= softfloat_flag_inexact;
-    sig = (sig + roundIncrement)>>10;
 
 #ifdef IBM_IEEE
-    /* secret sauce below for round to odd                                                          */
-    /* if pre-rounding result is exact, no rounding                                                 */
-    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
-    /* or increment to next odd                                                                     */
-    /* if truncated result is already odd, below does not change result.                            */
-    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
-    sig |= (uint_fast64_t)(roundBits && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
+    /*  NB:  isTiny is always true on underflow because IBM IEEE requires detect tininess before rounding       */
+    if (isTiny) {                                       /* if tiny, we must round the shifted subnormal         */
+        savesig  =  (sig + roundIncrement) >> 10;          /* apply rounding factor                                */
+        savesig |=  (uint_fast64_t)(roundBits && (roundingMode == softfloat_round_odd)); /* ensure odd if needed */
+        savesig &= ~(uint_fast64_t)(!(roundBits ^ 0x200) & roundNearEven); /* ensure even if RNTE and a tie      */
+    }
+    uiZ = packToF64UI(sign, savesig ? exp : 0, savesig); 
+#else
+    sig = (sig + roundIncrement) >> 10;
+    sig &= ~(uint_fast64_t) (! (roundBits ^ 0x200) & roundNearEven);
+    uiZ = packToF64UI(sign, sig ? exp : 0, sig); 
 #endif  /* IBM_IEEE  */
 
-    sig &= ~(uint_fast64_t) (! (roundBits ^ 0x200) & roundNearEven);
-    uiZ = packToF64UI( sign, sig ? exp : 0, sig );
+
+
  uiZ:
     uZ.ui = uiZ;
     return uZ.f;

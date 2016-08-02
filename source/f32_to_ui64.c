@@ -40,6 +40,9 @@ in the z/Architecture Principles of Operation, SA22-7832-10, by
 Stephen R. Orso.  Said modifications identified by compilation conditioned
 on preprocessor variable IBM_IEEE.
 All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Changed value returned on negative non-zero input from max uint-64 to
+    zero.  (Figure 19-19 on page 19-26 of SA22-7832-10.)
 =============================================================================*/
 
 #ifdef HAVE_PLATFORM_H 

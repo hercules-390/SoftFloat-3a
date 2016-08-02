@@ -112,6 +112,48 @@ enum {
     softfloat_flag_invalid   = 16
 };
 
+#ifdef IBM_IEEE
+/*----------------------------------------------------------------------------
+| Raw unbiased unbounded exponent and raw rounded significand, used for return
+| of scaled results following a trappable overflow or underflow.  Because
+| trappability is dependent on the caller's state, not Softfloat's, these
+| values are generated for every rounding.
+|
+| The 128-bit rounded significand is stored with the binary point between 
+| the second and third bits (from the left).  
+|
+|                  -----------------------------------------------
+| bit              | 0 1 V 2 3 4 5 6 7 8 9 10 11 12 13 14... 127 |
+| Place value      | 2 1 | fractional portion of signficifand    |
+|                  -----------------------------------------------
+|
+| Note: place value is one higher than the power of two for that digit position. 
+|
+| Examples:
+|   decimal 3 is represented as 11.000000000000000 ... 000
+|   decimal 1 is represented as 01.000000000000000 ... 000
+|
+| The exponent bias is reduced by one to account for this; the leftmost digit
+| appears only when rounding or arithmetic generate a carry into the 2's 
+| position. 
+|
+| The routines fxxx_returnScaledResult() uses these values to generate 
+| scaled results.
+*----------------------------------------------------------------------------*/
+
+extern uint_fast64_t softfloat_rawSig64;        /* Rounded significand bits 1-63    */
+extern uint_fast64_t softfloat_rawSig0;         /* Rounded significand bits 64-128  */
+extern int_fast16_t  softfloat_rawExp;          /* signed unbiased exponent         */
+extern bool          softfloat_rawSign;         /* sign of result                   */
+
+float32_t  f32_scaledResult(int_fast16_t);      /* return scaled float32 result     */
+float64_t  f64_scaledResult(int_fast16_t);      /* return scaled float64 result     */
+float128_t f128_scaledResult(int_fast16_t);     /* return scaled float128 result    */
+
+#endif /* IBM_IEEE  */
+
+
+
 /*----------------------------------------------------------------------------
 | Routine to raise any or all of the software floating-point exception flags.
 *----------------------------------------------------------------------------*/

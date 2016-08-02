@@ -40,6 +40,10 @@ in the z/Architecture Principles of Operation, SA22-7832-10, by
 Stephen R. Orso.  Said modifications identified by compilation conditioned
 on preprocessor variable IBM_IEEE.
 All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Replaced NaN propagation rules with those required to conform to 
+    SA22-7832-10.  Multiple figures describe these rules; see Figure 19-13 
+    on page 19-13 for the description for the Add instruction. 
 =============================================================================*/
 
 #ifdef HAVE_PLATFORM_H 

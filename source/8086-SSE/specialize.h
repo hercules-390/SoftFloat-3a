@@ -35,11 +35,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 =============================================================================*/
 
 /*============================================================================
-   Modifications to comply with IBM IEEE Binary Floating Point, as defined
-   in the z/Architecture Principles of Operation, SA22-7832-10, by
-   Stephen R. Orso.  Said modifications identified by compilation condition 
-   on preprocessor variable IBM_IEEE.
-   All such modifications placed in the public domain by Stephen R. Orso
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation condition 
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications: 
+ 1) Changed default for detect tininess to before rounding, per SA22-7832-10
+    page 19-22, Programming Notes, 3(b) second occurance second paragraph
+    right hand column.
+ 2) Changed default NaNs from negative to positive signs per SA22-7832-10
+    page 9-3, left hand column, heading "Default QNaN."
 =============================================================================*/
 
 
