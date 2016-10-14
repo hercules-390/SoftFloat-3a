@@ -279,9 +279,9 @@ set(    _l
         s_f32UIToCommonNaN.c
         s_f64UIToCommonNaN.c
  #[[    s_propagateNaNExtF80UI.c                                         ]]
-        s_propagateNaNF128UI.c
-        s_propagateNaNF32UI.c
-        s_propagateNaNF64UI.c
+        ../${HERCMODS}s_propagateNaNF128UI.c
+        ../${HERCMODS}s_propagateNaNF32UI.c
+        ../${HERCMODS}s_propagateNaNF64UI.c
         softfloat_raiseFlags.c
     )
 list( SORT _l )
