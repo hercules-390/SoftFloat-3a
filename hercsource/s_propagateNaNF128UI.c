@@ -34,6 +34,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Replaced NaN propagation rules with those required to conform to
+    SA22-7832-10.  Multiple figures describe these rules; see Figure 19-13
+    on page 19-13 for the description for the Add instruction.
+=============================================================================*/
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -56,6 +68,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 | If either original floating-point value is a signaling NaN, the invalid
 | exception is raised.
 *----------------------------------------------------------------------------*/
+
+#ifdef IBM_IEEE
+/*----------------------------------------------------------------------------
+| Note: Above comment is incorrect whether compiled for the IBM_IEEE case
+| or the default case.  Under no circumstances are the payloads combined.
+| Only one of the two payloads is propagated.
+*----------------------------------------------------------------------------*/
+#endif
+
 struct uint128
  softfloat_propagateNaNF128UI(
      uint_fast64_t uiA64,
@@ -64,6 +85,34 @@ struct uint128
      uint_fast64_t uiB0
  )
 {
+#ifdef IBM_IEEE         /* IBM NaN propagation rules defined (consistently) in many tables      */
+                        /* in SA22-7832-10; see for example Table 19-13 on page 19-16.          */
+                        /* In short:                                                            */
+                        /*    If A is SNaN, return QNaN(A)                                      */
+                        /*    If B is SNaN, return QNaN(B)                                      */
+                        /*    If A is QNaN, return A                                            */
+                        /*    If B is QNaN, return B                                            */
+
+    bool isSigNaNA;
+    bool isSigNaNB;
+    struct uint128 uiZ;
+
+    isSigNaNA = softfloat_isSigNaNF128UI(uiA64, uiA0);
+    isSigNaNB = softfloat_isSigNaNF128UI(uiB64, uiB0);
+    if (isSigNaNA || isSigNaNB)
+        softfloat_raiseFlags(softfloat_flag_invalid);
+    if (isSigNaNA || (!isSigNaNB  && isNaNF128UI(uiA64, uiA0))) {
+        uiZ.v64 = uiA64;
+        uiZ.v0 = uiA0;
+    }
+    else {
+        uiZ.v64 = uiB64;
+        uiZ.v0 = uiB0;
+    }
+    uiZ.v64 |= UINT64_C(0x0000800000000000);
+    return uiZ;
+
+#else
     bool isSigNaNA;
     struct uint128 uiZ;
 
@@ -82,6 +131,8 @@ struct uint128
     }
     uiZ.v64 |= UINT64_C( 0x0000800000000000 );
     return uiZ;
+
+#endif
 
 }
 

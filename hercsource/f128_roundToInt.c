@@ -34,6 +34,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Added rounding mode softfloat_round_stickybit, which corresponds to
+    IBM Round For Shorter precision (RFS).
+ 2) Added setting flag softfloat_flagIncremented if result of roundToInt()
+    included incrementation.
+=============================================================================*/
+
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -119,6 +133,11 @@ float128_t
             uiZ.v64 = uiA64 & packToF128UI64( 1, 0, 0 );
             uiZ.v0  = 0;
             switch ( roundingMode ) {
+#ifdef IBM_IEEE
+             case softfloat_round_stickybit:                       /* Round to odd: result is 1 with sign of input                 */
+                uiZ.v64 = packToF128UI64(signF128UI64(uiA64), 0x3FFF, 0);
+                break;
+#endif /* IBM_IEEE  */
              case softfloat_round_near_even:
                 if ( ! (fracF128UI64( uiA64 ) | uiA0) ) break;
              case softfloat_round_near_maxMag:
@@ -146,6 +165,10 @@ float128_t
             if ( ! ((uiZ.v64 & roundBitsMask) | uiA0) ) {
                 uiZ.v64 &= ~lastBitMask;
             }
+#ifdef IBM_IEEE
+        } else if ((roundingMode == softfloat_round_stickybit) && (uiZ.v64 & roundBitsMask) | uiA0 ) {
+            uiZ.v64 |= lastBitMask;
+#endif
         } else if ( roundingMode != softfloat_round_minMag ) {
             if (
                 signF128UI64( uiZ.v64 ) ^ (roundingMode == softfloat_round_max)
@@ -159,6 +182,10 @@ float128_t
         softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
  uiZ:
+#ifdef IBM_IEEE
+    if (softfloat_lt128(uiA64, uiA0, uiZ.v64, uiZ.v0 ))
+        softfloat_exceptionFlags |= softfloat_flag_incremented;
+#endif /* IBM_IEEE  */
     uZ.ui = uiZ;
     return uZ.f;
 

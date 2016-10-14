@@ -69,6 +69,8 @@ float128_t  f128_scaledResult(int_fast16_t scale)
 {
     int_fast32_t exp;
     union ui128_f128 uZ;
+    struct exp32_sig128 z;
+    struct uint128 uA;
 
     exp = softfloat_rawExp + 16382 + scale;
 
@@ -76,16 +78,37 @@ float128_t  f128_scaledResult(int_fast16_t scale)
     /* added to the exponent in packToF128UI64 so that the units position disappears and the exponent is    */
     /* incremented.  So going in, the exponent limit must be one less than the float128 maximum of 0x7FFE.  */
 
+    /* Note also that, unlike the C << operator, the function softfloat_shortShiftLeft128 behaves very      */
+    /* badly when passed a shift count of zero.  When passed zero, softfloat_shortShiftLeft128 or's the     */
+    /* the second half of the 128-bit significand into the first.  Not a bug, really, because this          */
+    /* function is not a part of the Softfloat 3a API, but troubling nontheless.  Softfloat 3b did not      */
+    /* change this behavior.                                                                                */
+
     if (exp < 0 || exp > 0x7FFD)
     {
-        uZ.ui.v64 = (defaultNaNF128UI64 & UINT64_C(0x0000800000000000)) | UINT64_C(0x00000DEAD0000000);
+        uZ.ui.v64 = (defaultNaNF128UI64 & ~UINT64_C(0x0000800000000000)) | UINT64_C(0x00000DEAD0000000);
         uZ.ui.v0 = defaultNaNF128UI0;
     }
     else
     {
-        uZ.ui = softfloat_shortShiftRight128(softfloat_rawSig64,softfloat_rawSig0, 14);
-        uZ.ui.v64 = packToF128UI64(softfloat_rawSign, exp, uZ.ui.v64); 
+        uA = softfloat_shortShiftRight128(softfloat_rawSig64, softfloat_rawSig0, 14);
+        if (softfloat_rawTiny && (uA.v64 < 0x0001000000000000ULL))          /* result an unnormallized subnormal?  */
+        {
+            z = softfloat_normSubnormalF128Sig(uA.v64, uA.v0);
+            exp += (z.exp - 1);
+            uZ.ui.v64 = packToF128UI64(softfloat_rawSign, exp, z.sig.v64);  /* should not be needed  */
+            uZ.ui.v0 = z.sig.v0;
+        }
+        else
+        {
+            uZ.ui.v64 = packToF128UI64(softfloat_rawSign, exp, uA.v64); 
+            uZ.ui.v0 = uA.v0;
+        }
     }
+
+    softfloat_exceptionFlags &= ~(softfloat_flag_inexact | softfloat_flag_incremented | softfloat_flag_tiny);
+    softfloat_exceptionFlags |= (softfloat_rawInexact ?  softfloat_flag_inexact     : 0) |
+                                (softfloat_rawIncre   ?  softfloat_flag_incremented : 0);
 
     return uZ.f;
 

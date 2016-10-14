@@ -3,6 +3,8 @@
 #
 cmake_minimum_required( VERSION 3.2 )
 cmake_policy(SET CMP0048 NEW)
+set( HERCMODS "../hercsource/" )
+
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the directory with the CMAKE user modules
@@ -190,20 +192,39 @@ endif()
 #
 include_directories(    BEFORE
                     ${CMAKE_BINARY_DIR}
+                    ${CMAKE_SOURCE_DIR}/hercsource  #[[ required to pick up modified header files ]]
                     ${CMAKE_SOURCE_DIR}/source/8086-SSE
                     ${CMAKE_SOURCE_DIR}/source/include
                     )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   the public headers
+#   SoftFloat Public Headers
+
+set(    _l
+        source/include/softfloat_types.h
+        hercsource/softfloat.h    
+    )
+list( SORT _l )
+set( public_headers "" )
+foreach( _s IN LISTS _l )
+    list(   APPEND
+            public_headers
+            source/include/${_s} )
+endforeach()
+
+
+ #[[  Remaining header files are not required to use Softfloat from other applications.
 file( GLOB public_headers
         RELATIVE "${CMAKE_SOURCE_DIR}" "source/include/*.h" )
+list( REMOVE_ITEM public_headers "source/include/softfloat.h")
+list( APPEND public_headers "source/${HERCMODS}softfloat.h" )
 list( SORT public_headers )
+ ]]
 
+message( STATUS ${public_headers} )
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the sources
 #
-
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Primitives
 set(    _l
@@ -247,17 +268,17 @@ endforeach()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Specialised
 set(    _l
-        extF80M_isSignalingNaN.c
-        f128M_isSignalingNaN.c
-        s_commonNaNToExtF80UI.c
+ #[[    extF80M_isSignalingNaN.c   extF80 and "M" variants not required  ]]
+ #[[    f128M_isSignalingNaN.c                                           ]]
+ #[[    s_commonNaNToExtF80UI.c                                          ]]
         s_commonNaNToF128UI.c
         s_commonNaNToF32UI.c
         s_commonNaNToF64UI.c
-        s_extF80UIToCommonNaN.c
+ #[[    s_extF80UIToCommonNaN.c                                          ]]
         s_f128UIToCommonNaN.c
         s_f32UIToCommonNaN.c
         s_f64UIToCommonNaN.c
-        s_propagateNaNExtF80UI.c
+ #[[    s_propagateNaNExtF80UI.c                                         ]]
         s_propagateNaNF128UI.c
         s_propagateNaNF32UI.c
         s_propagateNaNF64UI.c
@@ -274,7 +295,7 @@ endforeach()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Others
 set(    _l
-        extF80_add.c
+  #[[   extF80_add.c    ********************** extF80/extMF80 is not used by Hercules
         extF80_div.c
         extF80_eq_signaling.c
         extF80_eq.c
@@ -322,7 +343,7 @@ set(    _l
         extF80M_to_ui32_r_minMag.c
         extF80M_to_ui32.c
         extF80M_to_ui64_r_minMag.c
-        extF80M_to_ui64.c
+        extF80M_to_ui64.c         ************************ ]]
         f128_add.c
         f128_div.c
         f128_eq_signaling.c
@@ -335,10 +356,10 @@ set(    _l
         f128_mul.c
         f128_mulAdd.c
         f128_rem.c
-        f128_roundToInt.c
+        ${HERCMODS}f128_roundToInt.c
         f128_sqrt.c
         f128_sub.c
-        f128_to_extF80.c
+ #[[    f128_to_extF80.c                                    ]]
         f128_to_f32.c
         f128_to_f64.c
         f128_to_i32_r_minMag.c
@@ -348,8 +369,8 @@ set(    _l
         f128_to_ui32_r_minMag.c
         f128_to_ui32.c
         f128_to_ui64_r_minMag.c
-        f128_to_ui64.c
-        f128M_add.c
+        ${HERCMODS}f128_to_ui64.c
+  #[[   f128M_add.c                    Pointer versions of functions are not used by Hercules
         f128M_div.c
         f128M_eq_signaling.c
         f128M_eq.c
@@ -373,7 +394,7 @@ set(    _l
         f128M_to_ui32_r_minMag.c
         f128M_to_ui32.c
         f128M_to_ui64_r_minMag.c
-        f128M_to_ui64.c
+        f128M_to_ui64.c                 ******************* ]]
         f32_add.c
         f32_div.c
         f32_eq_signaling.c
@@ -386,13 +407,13 @@ set(    _l
         f32_mul.c
         f32_mulAdd.c
         f32_rem.c
-        f32_roundToInt.c
+        ${HERCMODS}f32_roundToInt.c
         f32_sqrt.c
         f32_sub.c
-        f32_to_extF80.c
-        f32_to_extF80M.c
+ #[[    f32_to_extF80.c    ]]
+ #[[    f32_to_extF80M.c   ]]
         f32_to_f128.c
-        f32_to_f128M.c
+ #[[    f32_to_f128M.c     ]]
         f32_to_f64.c
         f32_to_i32_r_minMag.c
         f32_to_i32.c
@@ -401,7 +422,7 @@ set(    _l
         f32_to_ui32_r_minMag.c
         f32_to_ui32.c
         f32_to_ui64_r_minMag.c
-        f32_to_ui64.c
+        ${HERCMODS}f32_to_ui64.c
         f64_add.c
         f64_div.c
         f64_eq_signaling.c
@@ -414,13 +435,13 @@ set(    _l
         f64_mul.c
         f64_mulAdd.c
         f64_rem.c
-        f64_roundToInt.c
+        ${HERCMODS}f64_roundToInt.c
         f64_sqrt.c
         f64_sub.c
-        f64_to_extF80.c
-        f64_to_extF80M.c
+ #[[    f64_to_extF80.c             ]]
+ #[[    f64_to_extF80M.c            ]]
         f64_to_f128.c
-        f64_to_f128M.c
+ #[[    f64_to_f128M.c              ]]
         f64_to_f32.c
         f64_to_i32_r_minMag.c
         f64_to_i32.c
@@ -429,57 +450,57 @@ set(    _l
         f64_to_ui32_r_minMag.c
         f64_to_ui32.c
         f64_to_ui64_r_minMag.c
-        f64_to_ui64.c
-        i32_to_extF80.c
-        i32_to_extF80M.c
+        ${HERCMODS}f64_to_ui64.c
+ #[[    i32_to_extF80.c             ]]
+ #[[    i32_to_extF80M.c            ]]
         i32_to_f128.c
-        i32_to_f128M.c
+ #[[    i32_to_f128M.c              ]]
         i32_to_f32.c
         i32_to_f64.c
-        i64_to_extF80.c
-        i64_to_extF80M.c
+ #[[    i64_to_extF80.c             ]]
+ #[[    i64_to_extF80M.c            ]]
         i64_to_f128.c
-        i64_to_f128M.c
+ #[[    i64_to_f128M.c              ]]
         i64_to_f32.c
         i64_to_f64.c
-        s_addMagsExtF80.c
-        s_addMagsF128.c
-        s_addMagsF32.c
-        s_addMagsF64.c
+ #[[    s_addMagsExtF80.c           ]]
+        ${HERCMODS}s_addMagsF128.c
+        ${HERCMODS}s_addMagsF32.c
+        ${HERCMODS}s_addMagsF64.c
         s_mulAddF128.c
-        s_mulAddF32.c
-        s_mulAddF64.c
-        s_normRoundPackToExtF80.c
+        ${HERCMODS}s_mulAddF32.c
+        ${HERCMODS}s_mulAddF64.c
+ #[[    s_normRoundPackToExtF80.c   ]]
         s_normRoundPackToF128.c
         s_normRoundPackToF32.c
         s_normRoundPackToF64.c
-        s_normSubnormalExtF80Sig.c
+ #[[    s_normSubnormalExtF80Sig.c  ]]
         s_normSubnormalF128Sig.c
         s_normSubnormalF32Sig.c
         s_normSubnormalF64Sig.c
         s_roundPackToExtF80.c
-        s_roundPackToF128.c
-        s_roundPackToF32.c
-        s_roundPackToF64.c
-        s_roundPackToI32.c
-        s_roundPackToI64.c
-        s_roundPackToUI32.c
-        s_roundPackToUI64.c
-        s_subMagsExtF80.c
+        ${HERCMODS}s_roundPackToF128.c
+        ${HERCMODS}s_roundPackToF32.c
+        ${HERCMODS}s_roundPackToF64.c
+        ${HERCMODS}s_roundPackToI32.c
+        ${HERCMODS}s_roundPackToI64.c
+        ${HERCMODS}s_roundPackToUI32.c
+        ${HERCMODS}s_roundPackToUI64.c
+ #[[    s_subMagsExtF80.c           ]]
         s_subMagsF128.c
         s_subMagsF32.c
         s_subMagsF64.c
-        softfloat_state.c
-        ui32_to_extF80.c
-        ui32_to_extF80M.c
+        ${HERCMODS}softfloat_state.c
+ #[[    ui32_to_extF80.c            ]]
+ #[[    ui32_to_extF80M.c           ]]
         ui32_to_f128.c
-        ui32_to_f128M.c
+ #[[    ui32_to_f128M.c             ]]
         ui32_to_f32.c
         ui32_to_f64.c
-        ui64_to_extF80.c
-        ui64_to_extF80M.c
+ #[[    ui64_to_extF80.c            ]]
+ #[[    ui64_to_extF80M.c           ]]
         ui64_to_f128.c
-        ui64_to_f128M.c
+ #[[    ui64_to_f128M.c             ]]
         ui64_to_f32.c
         ui64_to_f64.c
     )
@@ -492,7 +513,7 @@ foreach( _s IN LISTS _l )
 endforeach()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   Hercules-required modifications to SoftFloat
+#   Hercules-required additions to SoftFloat
 set(    _l
         f32_scaledResult.c
         f64_scaledResult.c

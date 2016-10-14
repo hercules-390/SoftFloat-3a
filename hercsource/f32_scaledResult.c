@@ -71,6 +71,9 @@ f32_scaledResult(int_fast16_t scale)
 {
     int_fast32_t exp;
     union ui32_f32 uZ;
+#ifdef IBM_IEEE
+    struct exp16_sig32 z;
+#endif  /* IBM_IEEE */
 
     exp = softfloat_rawExp + 126 + scale;
 
@@ -79,9 +82,20 @@ f32_scaledResult(int_fast16_t scale)
     /* incremented.  So going in, the exponent limit must be one less than the float32 maximum of 0xFE.     */
 
     if (exp < 0 || exp > 0xFD)
-        uZ.ui = (defaultNaNF32UI & UINT32_C(0x00400000)) | UINT32_C(0x0000DEAD);  /* Create SNaN 'DEAD'   */
+        uZ.ui = (defaultNaNF32UI & ~UINT32_C(0x00400000)) | UINT32_C(0x0000DEAD);  /* Create SNaN 'DEAD'   */
     else
-        uZ.ui = packToF32UI(softfloat_rawSign, exp, (uint_fast32_t)(softfloat_rawSig64 >> 39));
+        if (softfloat_rawSig64 < 0x0400000000000000ULL)          /* result a subnormal?  */
+        {
+            z = softfloat_normSubnormalF32Sig((uint_fast32_t)(softfloat_rawSig64 >> 39));
+            exp += z.exp - 1;
+            uZ.ui = packToF32UI(softfloat_rawSign, exp, z.sig);
+        }
+        else
+            uZ.ui = packToF32UI(softfloat_rawSign, exp, (uint_fast32_t)(softfloat_rawSig64 >> 39));
+
+    softfloat_exceptionFlags &= ~(softfloat_flag_inexact | softfloat_flag_incremented);
+    softfloat_exceptionFlags |= (softfloat_rawInexact ?  softfloat_flag_inexact     : 0) | 
+                                (softfloat_rawIncre   ?  softfloat_flag_incremented : 0);
 
     return uZ.f;
 

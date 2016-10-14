@@ -34,20 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-/*============================================================================
-Modifications to comply with IBM IEEE Binary Floating Point, as defined
-in the z/Architecture Principles of Operation, SA22-7832-10, by
-Stephen R. Orso.  Said modifications identified by compilation conditioned
-on preprocessor variable IBM_IEEE.
-All such modifications placed in the public domain by Stephen R. Orso
-Modifications:
- 1) Changed value returned on negative non-zero input from max uint-64 to 
-    zero, per SA22-7832-10 Figure 19-19 on page 19-26.  
- 2) Added rounding mode softfloat_rounding_odd, which corresponds to
-    IBM Round For Shorter precision (RFS).
-=============================================================================*/
-
-
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -87,27 +73,14 @@ uint_fast64_t
                  (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
                       & roundNearEven);
     }
-#ifdef IBM_IEEE
-    /* secret sauce below for round to odd                                                          */
-    /* if pre-rounding result is exact (sigExtra==0), no rounding                                   */
-    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
-    /* or increment to next odd                                                                     */
-    /* if truncated result is already odd, below does not change result.                            */
-    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
-    sig |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
-#endif  /* IBM_IEEE  */
     if ( sign && sig ) goto invalid;
     if ( exact && sigExtra ) {
         softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
     return sig;
- invalid:        /* negative sign and non-zero rounded significand. */
+ invalid:
     softfloat_raiseFlags( softfloat_flag_invalid );
-#ifdef IBM_IEEE
-    return UINT64_C( 0x0000000000000000 );
-#else
     return UINT64_C( 0xFFFFFFFFFFFFFFFF );
-#endif /*  IBM_IEEE  */
 
 }
 

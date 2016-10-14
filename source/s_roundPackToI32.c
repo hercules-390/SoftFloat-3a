@@ -34,17 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-/*============================================================================
-Modifications to comply with IBM IEEE Binary Floating Point, as defined
-in the z/Architecture Principles of Operation, SA22-7832-10, by
-Stephen R. Orso.  Said modifications identified by compilation conditioned
-on preprocessor variable IBM_IEEE.
-All such modifications placed in the public domain by Stephen R. Orso
-Modifications:
- 1) Added rounding mode softfloat_rounding_odd, which corresponds to 
-    IBM Round For Shorter precision (RFS).
-=============================================================================*/
-
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -68,37 +57,24 @@ int_fast32_t
     int_fast32_t z;
 
     roundNearEven = (roundingMode == softfloat_round_near_even);
-    roundIncrement = 0x40;                      /* Initial rounding increment                   */ 
+    roundIncrement = 0x40;
     if ( ! roundNearEven && (roundingMode != softfloat_round_near_maxMag) ) {
         roundIncrement =
             (roundingMode
                  == (sign ? softfloat_round_min : softfloat_round_max))
-                ? 0x7F                          /* increment if neg. and round_min or pos. and round max            */
-                : 0;                            /* "increment" if other than Near Even, Near maxMag, Min, or Max    */
+                ? 0x7F
+                : 0;
     }
-    roundBits = sig & 0x7F;                     /* Save rounding bits for later                                     */
-    sig += roundIncrement;                      /* Round up iff non-zero rounding increment                         */
+    roundBits = sig & 0x7F;
+    sig += roundIncrement;
     if ( sig & UINT64_C( 0xFFFFFF8000000000 ) ) goto invalid;
-    sig32 = sig>>7;                             /* Shift rounding bits (right of units digit) out                   */
-#ifdef IBM_IEEE
-                    /* secret sauce below for round to odd                                                          */
-                    /* if pre-rounding result is exact, no rounding                                                 */
-                    /* rounding increment for round to odd is always zero, so alternatives are truncation to odd    */
-                    /* or increment to next odd                                                                     */
-                    /* if truncated result is already odd, below does not change result.                            */
-                    /* if truncated result is even, below increases magnitude to next higher magnitute odd value    */
-    sig32 |= (uint_fast32_t)(roundBits && (roundingMode == softfloat_round_odd));   /* ensure odd valued result if round to odd   */
-#endif  /* IBM_IEEE  */
-                    /* secret sauce is in the below for RNTE                        */ 
-                    /* - if roundbits = 0x40 (tie between round up and down)        */
-                    /*   and rounding mode is RNTE,                                 */
-                    /*   turn off units digit (force even).  Could be up or down    */
-    sig32 &= ~(uint_fast32_t)(!(roundBits ^ 0x40) & roundNearEven);   /* Round to nearest, ties to even             */
-    uZ.ui = sign ? -sig32 : sig32;                              /* Negate result if negative input                  */
+    sig32 = sig>>7;
+    sig32 &= ~(uint_fast32_t) (! (roundBits ^ 0x40) & roundNearEven);
+    uZ.ui = sign ? -sig32 : sig32;
     z = uZ.i;
     if ( z && ((z < 0) ^ sign) ) goto invalid;
-    if ( exact && roundBits ) {                                 /* exact result requested, but rounding bits nonzero        */
-        softfloat_exceptionFlags |= softfloat_flag_inexact;     /* Raise IEEE Inexact                                */
+    if ( exact && roundBits ) {
+        softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
     return z;
  invalid:

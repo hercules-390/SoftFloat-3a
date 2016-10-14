@@ -37,12 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef specialize_h
 #define specialize_h 1
 
-#if !defined(false) 
-#include <stdbool.h> 
-#endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
-#endif
+#include <stdbool.h>
+#include <stdint.h>
 #include "softfloat_types.h"
 
 /*----------------------------------------------------------------------------

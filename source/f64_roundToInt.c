@@ -34,17 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-/*============================================================================
-Modifications to comply with IBM IEEE Binary Floating Point, as defined
-in the z/Architecture Principles of Operation, SA22-7832-10, by
-Stephen R. Orso.  Said modifications identified by compilation conditioned
-on preprocessor variable IBM_IEEE.
-All such modifications placed in the public domain by Stephen R. Orso
-Modifications:
- 1) Added rounding mode softfloat_rounding_odd, which corresponds to
-    IBM Round For Shorter precision (RFS).
-=============================================================================*/
-
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -78,11 +67,7 @@ float64_t f64_roundToInt( float64_t a, uint_fast8_t roundingMode, bool exact )
         if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
         uiZ = uiA & packToF64UI( 1, 0, 0 );
         switch ( roundingMode ) {
-#ifdef IBM_IEEE
-        case softfloat_round_odd:                       /* Round to odd: result is 1 with sign of input                 */
-            uiZ = packToF64UI(signF64UI(uiA), 0x3FF, 0);
-            break;
-#endif /* IBM_IEEE  */         case softfloat_round_near_even:
+         case softfloat_round_near_even:
             if ( ! fracF64UI( uiA ) ) break;
          case softfloat_round_near_maxMag:
             if ( exp == 0x3FE ) uiZ |= packToF64UI( 0, 0x3FF, 0 );
@@ -115,12 +100,7 @@ float64_t f64_roundToInt( float64_t a, uint_fast8_t roundingMode, bool exact )
     } else if ( roundingMode == softfloat_round_near_even ) {
         uiZ += lastBitMask>>1;
         if ( ! (uiZ & roundBitsMask) ) uiZ &= ~lastBitMask;
-    } 
-#ifdef IBM_IEEE
-    else if ((roundingMode == softfloat_round_odd) && (uiZ & roundBitsMask))
-        uiZ |= lastBitMask;
-#endif
-    else if ( roundingMode != softfloat_round_minMag ) {
+    } else if ( roundingMode != softfloat_round_minMag ) {
         if ( signF64UI( uiZ ) ^ (roundingMode == softfloat_round_max) ) {
             uiZ += roundBitsMask;
         }

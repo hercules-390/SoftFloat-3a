@@ -34,6 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications:
+ 1) Changed value returned on negative non-zero input from max uint-64 to
+    zero.  (Figure 19-19 on page 19-26 of SA22-7832-10.)
+=============================================================================*/
+
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -46,58 +57,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "internals.h"
 #include "softfloat.h"
 
-uint_fast64_t f64_to_ui64( float64_t a, uint_fast8_t roundingMode, bool exact )
+uint_fast64_t
+ f128_to_ui64( float128_t a, uint_fast8_t roundingMode, bool exact )
 {
-    union ui64_f64 uA;
-    uint_fast64_t uiA;
+    union ui128_f128 uA;
+    uint_fast64_t uiA64, uiA0;
     bool sign;
-    int_fast16_t exp;
-    uint_fast64_t sig;
-    int_fast16_t shiftCount;
-#ifdef SOFTFLOAT_FAST_INT64
+    int_fast32_t exp, shiftCount;
+    uint_fast64_t sig64, sig0;
+    struct uint128 sig128;
     struct uint64_extra sigExtra;
-#else
-    uint32_t extSig[3];
-#endif
 
     uA.f = a;
-    uiA = uA.ui;
-    sign = signF64UI( uiA );
-    exp  = expF64UI( uiA );
-    sig  = fracF64UI( uiA );
-    if ( exp ) sig |= UINT64_C( 0x0010000000000000 );
-    shiftCount = 0x433 - exp;
-#ifdef SOFTFLOAT_FAST_INT64
+    uiA64 = uA.ui.v64;
+    uiA0  = uA.ui.v0;
+    sign = signF128UI64( uiA64 );
+    exp  = expF128UI64( uiA64 );
+    shiftCount = 0x402F - exp;
     if ( shiftCount <= 0 ) {
-        if ( shiftCount < -11 ) {
+        if ( shiftCount < -15 ) {
             softfloat_raiseFlags( softfloat_flag_invalid );
-            return UINT64_C( 0xFFFFFFFFFFFFFFFF );
-        }
-        sigExtra.v = sig<<-shiftCount;
-        sigExtra.extra = 0;
-    } else {
-        sigExtra = softfloat_shiftRightJam64Extra( sig, 0, shiftCount );
-    }
-    return
-        softfloat_roundPackToUI64(
-            sign, sigExtra.v, sigExtra.extra, roundingMode, exact );
+#ifdef IBM_IEEE
+            return sign ? UINT64_C(0) : UINT64_C(0xFFFFFFFFFFFFFFFF);
 #else
-    extSig[indexWord( 3, 0 )] = 0;
-    if ( shiftCount <= 0 ) {
-        if ( shiftCount < -11 ) {
-            softfloat_raiseFlags( softfloat_flag_invalid );
-            return UINT64_C( 0xFFFFFFFFFFFFFFFF );
+            return UINT64_C(0xFFFFFFFFFFFFFFFF);
+#endif // IBM_IEEE
         }
-        sig <<= -shiftCount;
-        extSig[indexWord( 3, 2 )] = sig>>32;
-        extSig[indexWord( 3, 1 )] = sig;
+        sig64 = fracF128UI64( uiA64 ) | UINT64_C( 0x0001000000000000 );
+        sig0  = uiA0;
+        if ( shiftCount ) {
+            sig128 = softfloat_shortShiftLeft128( sig64, sig0, -shiftCount );
+            sig64 = sig128.v64;
+            sig0  = sig128.v0;
+        }
     } else {
-        extSig[indexWord( 3, 2 )] = sig>>32;
-        extSig[indexWord( 3, 1 )] = sig;
-        softfloat_shiftRightJam96M( extSig, shiftCount, extSig );
+        sig64 = fracF128UI64( uiA64 );
+        sig0  = uiA0;
+        if ( exp ) sig64 |= UINT64_C( 0x0001000000000000 );
+        sigExtra = softfloat_shiftRightJam64Extra( sig64, sig0, shiftCount );
+        sig64 = sigExtra.v;
+        sig0  = sigExtra.extra;
     }
-    return softfloat_roundPackMToUI64( sign, extSig, roundingMode, exact );
-#endif
+    return softfloat_roundPackToUI64( sign, sig64, sig0, roundingMode, exact );
 
 }
 

@@ -70,6 +70,7 @@ f64_scaledResult(int_fast16_t scale)
 {
     int_fast32_t exp;
     union ui64_f64 uZ;
+    struct exp16_sig64 z;
 
     exp = softfloat_rawExp + 1022 + scale;
 
@@ -78,9 +79,20 @@ f64_scaledResult(int_fast16_t scale)
     /* incremented.  So going in, the exponent limit must be one less than the float64 maximum of 0x7FE.    */
 
     if (exp < 0 || exp > 0x7FD)
-        uZ.ui = (defaultNaNF64UI & UINT64_C(0x0040000000000000)) | UINT64_C(0x0000DEAD00000000);  /* Create SNaN 'DEAD'   */
+        uZ.ui = (defaultNaNF64UI & ~UINT64_C(0x00080000000000000)) | UINT64_C(0x0000DEAD00000000);  /* Create SNaN 'DEAD'   */
     else
-        uZ.ui = packToF64UI(softfloat_rawSign, exp, softfloat_rawSig64 >> 10);
+        if (softfloat_rawSig64 < 0x4000000000000000ULL)          /* result a real subnormal?  */
+        {                               /* ..yes, need to normalize the subnormal for scaling   */
+            z = softfloat_normSubnormalF64Sig(softfloat_rawSig64>>10);
+            exp += z.exp - 1;
+            uZ.ui = packToF64UI(softfloat_rawSign, exp, z.sig);
+        }
+        else
+            uZ.ui = packToF64UI(softfloat_rawSign, exp, softfloat_rawSig64 >> 10);
+
+    softfloat_exceptionFlags &= ~(softfloat_flag_inexact | softfloat_flag_incremented);
+    softfloat_exceptionFlags |= (softfloat_rawInexact ?  softfloat_flag_inexact     : 0) |
+                                (softfloat_rawIncre   ?  softfloat_flag_incremented : 0);
 
     return uZ.f;
 

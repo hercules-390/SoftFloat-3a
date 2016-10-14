@@ -34,17 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-/*============================================================================
-Modifications to comply with IBM IEEE Binary Floating Point, as defined
-in the z/Architecture Principles of Operation, SA22-7832-10, by
-Stephen R. Orso.  Said modifications identified by compilation conditioned
-on preprocessor variable IBM_IEEE.
-All such modifications placed in the public domain by Stephen R. Orso
-Modifications:
- 1) Changed value returned on negative non-zero input from max uint-64 to
-    zero.  (Figure 19-19 on page 19-26 of SA22-7832-10.)
-=============================================================================*/
-
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -77,11 +66,7 @@ uint_fast64_t
     if ( shiftCount <= 0 ) {
         if ( shiftCount < -15 ) {
             softfloat_raiseFlags( softfloat_flag_invalid );
-#ifdef IBM_IEEE
-            return UINT64_C(0);
-#else
-            return UINT64_C(0xFFFFFFFFFFFFFFFF);
-#endif // IBM_IEEE
+            return UINT64_C( 0xFFFFFFFFFFFFFFFF );
         }
         sig64 = fracF128UI64( uiA64 ) | UINT64_C( 0x0001000000000000 );
         sig0  = uiA0;

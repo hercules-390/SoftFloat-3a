@@ -34,6 +34,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation condition 
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+Modifications: 
+ 1) Changed default for detect tininess to before rounding, per SA22-7832-10
+    page 19-22, Programming Notes, 3(b) second occurance second paragraph
+    right hand column.
+ 2) Changed default NaNs from negative to positive signs per SA22-7832-10
+    page 9-3, left hand column, heading "Default QNaN."
+=============================================================================*/
+
+
 #ifndef specialize_h
 #define specialize_h 1
 
@@ -45,10 +60,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include "softfloat_types.h"
 
+#define IBM_IEEE                /* must do here as well as in softfloat.h */   /* @SRO  */
+
 /*----------------------------------------------------------------------------
 | Default value for `softfloat_detectTininess'.
 *----------------------------------------------------------------------------*/
+#ifdef IBM_IEEE
+#define init_detectTininess softfloat_tininess_beforeRounding;
+#else
 #define init_detectTininess softfloat_tininess_afterRounding;
+#endif
 
 /*----------------------------------------------------------------------------
 | "Common NaN" structure, used to transfer NaN representations from one format
@@ -66,7 +87,12 @@ struct commonNaN {
 /*----------------------------------------------------------------------------
 | The bit pattern for a default generated 32-bit floating-point NaN.
 *----------------------------------------------------------------------------*/
+#ifdef IBM_IEEE         /* Default NaN is positive QNaN, SA22-7832-10 page 9-3 */
+#define defaultNaNF32UI 0x7FC00000
+#else
 #define defaultNaNF32UI 0xFFC00000
+#endif  /* #ifdef IBM_EEEE  */
+
 
 /*----------------------------------------------------------------------------
 | Returns true when 32-bit unsigned integer `uiA' has the bit pattern of a
@@ -101,7 +127,11 @@ uint_fast32_t
 /*----------------------------------------------------------------------------
 | The bit pattern for a default generated 64-bit floating-point NaN.
 *----------------------------------------------------------------------------*/
+#ifdef IBM_IEEE         /* Default NaN is positive QNaN, SA22-7832-10 page 9-3 */
+#define defaultNaNF64UI UINT64_C( 0x7FF8000000000000 )
+#else
 #define defaultNaNF64UI UINT64_C( 0xFFF8000000000000 )
+#endif  /* #ifdef IBM_EEEE  */
 
 /*----------------------------------------------------------------------------
 | Returns true when 64-bit unsigned integer `uiA' has the bit pattern of a
@@ -192,8 +222,13 @@ struct uint128
 /*----------------------------------------------------------------------------
 | The bit pattern for a default generated 128-bit floating-point NaN.
 *----------------------------------------------------------------------------*/
+#ifdef IBM_IEEE         /* Default NaN is positive QNaN, SA22-7832-10 page 9-3 */
+#define defaultNaNF128UI64 UINT64_C( 0x7FFF800000000000 )
+#define defaultNaNF128UI0  UINT64_C( 0 )
+#else
 #define defaultNaNF128UI64 UINT64_C( 0xFFFF800000000000 )
 #define defaultNaNF128UI0  UINT64_C( 0 )
+#endif  /* #ifdef IBM_EEEE  */
 
 /*----------------------------------------------------------------------------
 | Returns true when the 128-bit unsigned integer formed from concatenating

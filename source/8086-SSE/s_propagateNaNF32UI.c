@@ -34,18 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-/*============================================================================
-Modifications to comply with IBM IEEE Binary Floating Point, as defined
-in the z/Architecture Principles of Operation, SA22-7832-10, by
-Stephen R. Orso.  Said modifications identified by compilation conditioned
-on preprocessor variable IBM_IEEE.
-All such modifications placed in the public domain by Stephen R. Orso
-Modifications:
- 1) Replaced NaN propagation rules with those required to conform to 
-    SA22-7832-10.  Multiple figures describe these rules; see Figure 19-13 
-    on page 19-13 for the description for the Add instruction. 
-=============================================================================*/
-
 #ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
 #endif
@@ -65,39 +53,9 @@ Modifications:
 | the combined NaN result.  If either `uiA' or `uiB' has the pattern of a
 | signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
-
-#ifdef IBM_IEEE
-/*----------------------------------------------------------------------------
-| Note: Above comment is incorrect whether compiled for the IBM_IEEE case
-| or the default case.  Under no circumstances are the payloads combined.
-| Only one of the two payloads is propagated.
-*----------------------------------------------------------------------------*/
-#endif
-
 uint_fast32_t
  softfloat_propagateNaNF32UI( uint_fast32_t uiA, uint_fast32_t uiB )
 {
-
-#ifdef IBM_IEEE     /* IBM NaN propagation rules defined (consistently) in many tables      */
-                    /* in SA22-7832-10; see for example Table 19-13 on page 19-16.          */
-                    /* In short:                                                            */
-                    /*    If A is SNaN, return QNaN(A)                                      */
-                    /*    If B is SNaN, return QNaN(B)                                      */
-                    /*    If A is QNaN, return A                                            */
-                    /*    If B is QNaN, return B                                            */
-
-    bool isSigNaNA;
-    bool isSigNaNB;
-
-    isSigNaNA = softfloat_isSigNaNF32UI(uiA);
-    isSigNaNB = softfloat_isSigNaNF32UI(uiB);
-    if (isSigNaNA || isSigNaNB)
-        softfloat_raiseFlags(softfloat_flag_invalid);
-    if (isSigNaNA) return uiA | 0x00400000;
-    if (isSigNaNB) return uiB | 0x00400000;
-    return (isNaNF32UI(uiA) ? uiA : uiB) | 0x00400000;
-
-#else
     bool isSigNaNA;
 
     isSigNaNA = softfloat_isSigNaNF32UI( uiA );
@@ -106,6 +64,6 @@ uint_fast32_t
         if ( isSigNaNA ) return uiA | 0x00400000;
     }
     return (isNaNF32UI( uiA ) ? uiA : uiB) | 0x00400000;
-#endif
+
 }
 
