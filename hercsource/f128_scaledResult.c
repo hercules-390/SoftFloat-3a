@@ -72,7 +72,7 @@ float128_t  f128_scaledResult(int_fast16_t scale)
     struct exp32_sig128 z;
     struct uint128 uA;
 
-    exp = softfloat_rawExp + 16382 + scale;
+    exp = softfloat_raw.Exp + 16382 + scale;
 
     /* Note that the high-order bit of the saved significand is the units position.  This is effectively    */
     /* added to the exponent in packToF128UI64 so that the units position disappears and the exponent is    */
@@ -91,24 +91,24 @@ float128_t  f128_scaledResult(int_fast16_t scale)
     }
     else
     {
-        uA = softfloat_shortShiftRight128(softfloat_rawSig64, softfloat_rawSig0, 14);
-        if (softfloat_rawTiny && (uA.v64 < 0x0001000000000000ULL))          /* result an unnormallized subnormal?  */
+        uA = softfloat_shortShiftRight128(softfloat_raw.Sig64, softfloat_raw.Sig0, 14);
+        if (softfloat_raw.Tiny && (uA.v64 < 0x0001000000000000ULL))          /* result an unnormallized subnormal?  */
         {
             z = softfloat_normSubnormalF128Sig(uA.v64, uA.v0);
             exp += (z.exp - 1);
-            uZ.ui.v64 = packToF128UI64(softfloat_rawSign, exp, z.sig.v64);  /* should not be needed  */
+            uZ.ui.v64 = packToF128UI64(softfloat_raw.Sign, exp, z.sig.v64);  /* should not be needed  */
             uZ.ui.v0 = z.sig.v0;
         }
         else
         {
-            uZ.ui.v64 = packToF128UI64(softfloat_rawSign, exp, uA.v64); 
+            uZ.ui.v64 = packToF128UI64(softfloat_raw.Sign, exp, uA.v64); 
             uZ.ui.v0 = uA.v0;
         }
     }
 
     softfloat_exceptionFlags &= ~(softfloat_flag_inexact | softfloat_flag_incremented | softfloat_flag_tiny);
-    softfloat_exceptionFlags |= (softfloat_rawInexact ?  softfloat_flag_inexact     : 0) |
-                                (softfloat_rawIncre   ?  softfloat_flag_incremented : 0);
+    softfloat_exceptionFlags |= (softfloat_raw.Inexact ?  softfloat_flag_inexact     : 0) |
+                                (softfloat_raw.Incre   ?  softfloat_flag_incremented : 0);
 
     return uZ.f;
 

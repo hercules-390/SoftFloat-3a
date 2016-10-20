@@ -192,7 +192,6 @@ endif()
 #
 include_directories(    BEFORE
                     ${CMAKE_BINARY_DIR}
-                    ${CMAKE_SOURCE_DIR}/hercsource  #[[ required to pick up modified header files ]]
                     ${CMAKE_SOURCE_DIR}/source/8086-SSE
                     ${CMAKE_SOURCE_DIR}/source/include
                     )
@@ -201,8 +200,8 @@ include_directories(    BEFORE
 #   SoftFloat Public Headers
 
 set(    _l
-        source/include/softfloat_types.h
-        hercsource/softfloat.h    
+        softfloat_types.h
+        softfloat.h    
     )
 list( SORT _l )
 set( public_headers "" )
@@ -221,7 +220,6 @@ list( APPEND public_headers "source/${HERCMODS}softfloat.h" )
 list( SORT public_headers )
  ]]
 
-message( STATUS ${public_headers} )
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the sources
 #
@@ -282,7 +280,7 @@ set(    _l
         ../${HERCMODS}s_propagateNaNF128UI.c
         ../${HERCMODS}s_propagateNaNF32UI.c
         ../${HERCMODS}s_propagateNaNF64UI.c
-        softfloat_raiseFlags.c
+ #[[    softfloat_raiseFlags.c    Function call replaced by macro        ]]
     )
 list( SORT _l )
 set(    SoftFloat_SPECIALISED "" )
@@ -343,7 +341,7 @@ set(    _l
         extF80M_to_ui32_r_minMag.c
         extF80M_to_ui32.c
         extF80M_to_ui64_r_minMag.c
-        extF80M_to_ui64.c         ************************ ]]
+        extF80M_to_ui64.c         ******************************************* ]]
         f128_add.c
         f128_div.c
         f128_eq_signaling.c

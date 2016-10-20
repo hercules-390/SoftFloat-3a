@@ -95,19 +95,25 @@ Modifications:
 | scaled results.
 *----------------------------------------------------------------------------*/
 
-uint_fast64_t softfloat_rawSig64;       /* Rounded significand bits 0-63                        */
-uint_fast64_t softfloat_rawSig0;        /* Rounded significand bits 64-128                      */
-int_fast16_t  softfloat_rawExp;         /* signed unbiased exponent                             */
-bool          softfloat_rawSign;        /* sign of result                                       */
-bool          softfloat_rawInexact;     /* Is raw result inexact                                */
-bool          softfloat_rawIncre;       /* Has rounded result been incremented                  */
-bool          softfloat_rawTiny;        /* Was rounded result a subnormal                       */
+/* SF_THREAD_LOCAL uint_fast64_t softfloat_rawSig64;       /* Rounded significand bits 0-63                        */
+/* SF_THREAD_LOCAL uint_fast64_t softfloat_rawSig0;        /* Rounded significand bits 64-128                      */
+/* SF_THREAD_LOCAL int_fast16_t  softfloat_rawExp;         /* signed unbiased exponent                             */
+/* SF_THREAD_LOCAL bool          softfloat_rawSign;        /* sign of result                                       */
+/* SF_THREAD_LOCAL bool          softfloat_rawInexact;     /* Is raw result inexact                                */
+/* SF_THREAD_LOCAL bool          softfloat_rawIncre;       /* Has rounded result been incremented                  */
+/* SF_THREAD_LOCAL bool          softfloat_rawTiny;        /* Was rounded result a subnormal                       */
 
-#endif /* IBM_IEEE  */
+SF_THREAD_LOCAL softfloat_raw_t softfloat_raw;          /* Scaled results structure from softfloat.h            */
 
+SF_THREAD_LOCAL uint_fast8_t softfloat_roundingMode = softfloat_round_near_even;
+uint_fast8_t softfloat_detectTininess = init_detectTininess;
+SF_THREAD_LOCAL uint_fast8_t softfloat_exceptionFlags;
+
+#else
 uint_fast8_t softfloat_roundingMode = softfloat_round_near_even;
 uint_fast8_t softfloat_detectTininess = init_detectTininess;
 uint_fast8_t softfloat_exceptionFlags = 0;
+#endif /* IBM_IEEE  */
 
 uint_fast8_t extF80_roundingPrecision = 80;
 

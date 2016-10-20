@@ -118,14 +118,14 @@ float128_t
     savesig.v.v0 |= (uint_fast64_t)(sigExtra && (roundingMode == softfloat_round_stickybit));
     saveincre = softfloat_lt128(sig64, sig0, savesig.v.v64, savesig.v.v0);  /* save incremented status of rounded result   */
 
-    softfloat_rawExp   = exp - 16382;               /* Save rounded result for later scaling                    */
+    softfloat_raw.Exp   = exp - 16382;               /* Save rounded result for later scaling                    */
     savesig2 = softfloat_shortShiftLeft128(savesig.v.v64, savesig.v.v0, 14);
-    softfloat_rawSig64 = savesig2.v64;
-    softfloat_rawSig0  = savesig2.v0 | sigExtra >> 50;    /* 64 - 14, include upper 14 bits of Extra in rawsig0 */
-    softfloat_rawSign  = sign;                      /* Save sign                                                */
-    softfloat_rawIncre = saveincre;                 /* save rounding incremented status                         */
-    softfloat_rawInexact = sigExtra;                /* Save inexact status of raw result                        */
-    softfloat_rawTiny = false;                      /* assume not a tiny result                                 */
+    softfloat_raw.Sig64 = savesig2.v64;
+    softfloat_raw.Sig0  = savesig2.v0 | sigExtra >> 50;    /* 64 - 14, include upper 14 bits of Extra in rawsig0 */
+    softfloat_raw.Sign  = sign;                      /* Save sign                                                */
+    softfloat_raw.Incre = saveincre;                 /* save rounding incremented status                         */
+    softfloat_raw.Inexact = sigExtra;                /* Save inexact status of raw result                        */
+    softfloat_raw.Tiny = false;                      /* assume not a tiny result                                 */
     isTiny = false;                                 /* Assume not a subnormal result for the moment.            */
 
     /* ************************************************************************************ */
@@ -162,7 +162,7 @@ float128_t
             /* zero                                                                                 */
             /* ************************************************************************************ */
 
-            softfloat_rawTiny = isTiny;
+            softfloat_raw.Tiny = isTiny;
             softfloat_exceptionFlags |= softfloat_flag_tiny;
 #endif /* IBM_IEEE  */
             if ( isTiny && sigExtra ) {

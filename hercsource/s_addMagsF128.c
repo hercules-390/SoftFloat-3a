@@ -88,22 +88,22 @@ float128_t
         sigZ = softfloat_add128( sigA.v64, sigA.v0, sigB.v64, sigB.v0 );
         if ( ! expA ) {
 #ifdef IBM_IEEE
-            softfloat_rawIncre = 0;                                 /* Result was not incremented                       */
-            softfloat_rawInexact = 0;                               /* Result is not inexact                            */
-            softfloat_rawSign = signZ;                              /* Save result sign                                 */
+            softfloat_raw.Incre = 0;                                 /* Result was not incremented                       */
+            softfloat_raw.Inexact = 0;                               /* Result is not inexact                            */
+            softfloat_raw.Sign = signZ;                              /* Save result sign                                 */
             if (!(sigZ.v64 & 0xFFFF000000000000ULL) && (sigZ.v64 || sigZ.v0)) {
                 softfloat_exceptionFlags |= softfloat_flag_tiny;    /* nonzero result is tiny      */
                 uiZ = softfloat_shortShiftLeft128(sigZ.v64, sigZ.v0, 14);
-                softfloat_rawExp = -16382;                          /* Save semi-unbiased exponent                      */
-                softfloat_rawSig64 = uiZ.v64;                       /* Save significand part 1                          */
-                softfloat_rawSig0 = uiZ.v0;                         /* Save significand part 2                          */
-                softfloat_rawTiny = true;                           /* indicate this is a subnormal for scaling         */
+                softfloat_raw.Exp = -16382;                          /* Save semi-unbiased exponent                      */
+                softfloat_raw.Sig64 = uiZ.v64;                       /* Save significand part 1                          */
+                softfloat_raw.Sig0 = uiZ.v0;                         /* Save significand part 2                          */
+                softfloat_raw.Tiny = true;                           /* indicate this is a subnormal for scaling         */
             }
             else {
-                softfloat_rawExp = 0;                               /* Set saved raw value to zero                      */
-                softfloat_rawSig64 = 0;
-                softfloat_rawSig0 = 0;
-                softfloat_rawTiny = false;                           /* indicate this is a subnormal for scaling         */
+                softfloat_raw.Exp = 0;                               /* Set saved raw value to zero                      */
+                softfloat_raw.Sig64 = 0;
+                softfloat_raw.Sig0 = 0;
+                softfloat_raw.Tiny = false;                           /* indicate this is a subnormal for scaling         */
             }
 #endif /* IBM_IEEE  */
             uiZ.v64 = packToF128UI64( signZ, 0, sigZ.v64 );

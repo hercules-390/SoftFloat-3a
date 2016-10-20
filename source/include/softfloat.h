@@ -34,6 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
+/*============================================================================
+Modifications to comply with IBM IEEE Binary Floating Point, as defined
+in the z/Architecture Principles of Operation, SA22-7832-10, by
+Stephen R. Orso.  Said modifications identified by compilation conditioned
+on preprocessor variable IBM_IEEE.
+All such modifications placed in the public domain by Stephen R. Orso
+=============================================================================*/
 
 /*============================================================================
 | Note:  If SoftFloat is made available as a general library for programs to
@@ -55,6 +62,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "softfloat_types.h"
 
+/****************************************************************************************/
+/*                                                                                      */
+#define IBM_IEEE            /* Compile Softfloat to be compliant with with IBM IEEE     */
+/*                                                                                      */
+/****************************************************************************************/
+
+#ifdef IBM_IEEE
+
+ /* We never need anything fancy from softfloat_raiseFlag(), so there is no need    */
+ /* to call a function.  A macro that does the logical or is quite sufficient.      */
+
+# define softfloat_raiseFlags(flags) softfloat_exceptionFlags |= flags
+
+# ifndef SF_THREAD_LOCAL
+#  if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
+#   define SF_THREAD_LOCAL _Thread_local
+
+#  elif defined _WIN32 && (          /* Windows platform and             */      \
+        defined _MSC_VER ||          /* ..Visual Studio C or             */      \
+        defined __ICL ||             /* ..Intel C or                     */      \
+        defined __DMC__ ||           /* ..Digital Mars C or              */      \
+        defined __BORLANDC__ )       /* ..Borland (Embarcadero) C        */
+#   define SF_THREAD_LOCAL __declspec(thread) 
+
+/* note that ICC (linux) and Clang are reportedly covered by __GNUC__   */
+#  elif defined __GNUC__ ||          /* ..GNG C or variants or           */      \
+        defined __SUNPRO_C ||        /* ..SunPro (Oracle) C or           */      \
+        defined __xlC__              /* ..IBM C                          */
+#   define SF_THREAD_LOCAL __thread
+
+#  else
+#   error "Cannot define SF_THREAD_LOCAL.  No Softfloat thread safety."
+#   define SF_THREAD_LOCAL ""
+#  endif /* compiler detection*/
+# endif  /* SF_THREAD_LOCAL  */
+
+#endif /* IBM_IEEE  */
+
 /*----------------------------------------------------------------------------
 | Software floating-point underflow tininess-detection mode.
 *----------------------------------------------------------------------------*/
@@ -67,31 +112,115 @@ enum {
 /*----------------------------------------------------------------------------
 | Software floating-point rounding mode.
 *----------------------------------------------------------------------------*/
+#ifdef IBM_IEEE 
+extern SF_THREAD_LOCAL  uint_fast8_t softfloat_roundingMode;
+#else
 extern uint_fast8_t softfloat_roundingMode;
+#endif  /* IBM_IEEE */
 enum {
-    softfloat_round_near_even   = 0,
-    softfloat_round_minMag      = 1,
-    softfloat_round_min         = 2,
-    softfloat_round_max         = 3,
+    softfloat_round_near_even = 0,
+    softfloat_round_minMag = 1,
+    softfloat_round_min = 2,
+    softfloat_round_max = 3,
     softfloat_round_near_maxMag = 4
+#ifdef IBM_IEEE
+    , softfloat_round_stickybit = 5
+#endif /*  IBM_IEEE*/
 };
 
 /*----------------------------------------------------------------------------
 | Software floating-point exception flags.
 *----------------------------------------------------------------------------*/
-extern uint_fast8_t softfloat_exceptionFlags;
+#ifdef IBM_IEEE
+extern SF_THREAD_LOCAL uint_fast8_t softfloat_exceptionFlags;
+#else
+extern  uint_fast8_t softfloat_exceptionFlags;
+#endif /*  IBM_IEEE  */
 enum {
     softfloat_flag_inexact   =  1,
     softfloat_flag_underflow =  2,
     softfloat_flag_overflow  =  4,
     softfloat_flag_infinite  =  8,
     softfloat_flag_invalid   = 16
+#ifdef IBM_IEEE
+    , softfloat_flag_incremented = 32
+    , softfloat_flag_tiny = 64
+#endif  /*  IBM_IEEE   */
 };
+
+#ifdef IBM_IEEE
+/*----------------------------------------------------------------------------
+| Raw unbiased unbounded exponent and raw rounded significand, used for return
+| of scaled results following a trappable overflow or underflow.  Because
+| trappability is dependent on the caller's state, not Softfloat's, these
+| values are generated for every rounding.
+|
+| The 128-bit rounded significand is stored with the binary point between 
+| the second and third bits (from the left).  
+|
+|                  -----------------------------------------------
+| bit              | 0 1 V 2 3 4 5 6 7 8 9 10 11 12 13 14... 127 |
+| Place value      | 2 1 | fractional portion of significand     |
+|                  -----------------------------------------------
+|
+| Note: place value is one higher than the power of two for that digit position. 
+|
+| Examples:
+|   decimal 3 is represented as 11.000000000000000 ... 000
+|   decimal 1 is represented as 01.000000000000000 ... 000
+|
+| The exponent bias is reduced by one to account for this; the leftmost digit
+| appears only when rounding or arithmetic generate a carry into the 2's 
+| position. 
+|
+| The booleans softfloat_rawInexact and softfloat_rawIncre preserve the
+| status of the original result.  For non-trap results, the original result
+| is replaced by a non-finite value and Inexact and Incre are not returned.
+| When the scaled result is return, these booleans are used to update
+| the softfloat_exceptionFlags.
+|
+| softfloat_rawTiny is used by the scaled result routines to ensure a
+| renormalization of the scaled tiny result.  This avoids using the
+| softfloat_exceptionFlags value that reports tiny because that flag is part
+| of the external interface of Softfloat, not part of the internal state.
+|
+| The routines fxxx_returnScaledResult() uses these values to generate 
+| scaled results.
+*----------------------------------------------------------------------------*/
+
+  /* The following struct should really be in softfloat_types.h, but doing it here      */
+  /*   limits the modification footprint                                                */
+typedef struct {                /* fields needed to return a scaled result  */
+    uint_fast64_t Sig64;        /* Rounded significand bits 1-63    */
+    uint_fast64_t Sig0;         /* Rounded significand bits 64-128  */
+    int_fast16_t  Exp;          /* signed unbiased exponent         */
+    bool          Sign;         /* sign of result                   */
+    bool          Inexact;      /* Is raw result inexact            */
+    bool          Incre;        /* Was rounded result incremented   */
+    bool          Tiny;         /* Was rounded result a subnormal   */
+        } softfloat_raw_t;
+
+extern SF_THREAD_LOCAL softfloat_raw_t softfloat_raw;
+
+float32_t  f32_scaledResult(int_fast16_t);      /* return scaled float32 result     */
+float64_t  f64_scaledResult(int_fast16_t);      /* return scaled float64 result     */
+float128_t f128_scaledResult(int_fast16_t);     /* return scaled float128 result    */
+
+#endif /* IBM_IEEE  */
+
+
 
 /*----------------------------------------------------------------------------
 | Routine to raise any or all of the software floating-point exception flags.
 *----------------------------------------------------------------------------*/
+
+/* IBM_IEEE versions of Softfloat do not require function functionality; all
+   traps are detected and managed by the caller.  A macro (above) defines 
+   the logical or that is at the core of softfloat_raiseFlags()              */
+
+#ifndef IBM_IEEE
 void softfloat_raiseFlags( uint_fast8_t );
+#endif
 
 /*----------------------------------------------------------------------------
 | Integer-to-floating-point conversion routines.

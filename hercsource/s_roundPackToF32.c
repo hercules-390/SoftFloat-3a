@@ -99,12 +99,12 @@ float32_t
     savesig    &=  ~(uint_fast32_t)(!(roundBits ^ 0x40) & roundNearEven);
     saveincre  =   (savesig << 7) > sig;                    /* Was raw result incremented                               */
 
-    softfloat_rawIncre  =  saveincre;                       /* Save incremented status of result for scaling            */
-    softfloat_rawSig64  =  ((uint_fast64_t)savesig) << 39;  /* 32 + 7; save rounded significand for scaling             */
-    softfloat_rawSig0   =  0;                               /* Zero bits 64-128 of rounded result                       */
-    softfloat_rawExp    =  exp - 126;                       /* Save unbiased exponent (bias  is one less than IBM       */
-    softfloat_rawSign   =  sign;                            /* Save result sign                                         */
-    softfloat_rawInexact = roundBits;                       /* Save inexact status of raw result                        */
+    softfloat_raw.Incre  =  saveincre;                       /* Save incremented status of result for scaling            */
+    softfloat_raw.Sig64  =  ((uint_fast64_t)savesig) << 39;  /* 32 + 7; save rounded significand for scaling             */
+    softfloat_raw.Sig0   =  0;                               /* Zero bits 64-128 of rounded result                       */
+    softfloat_raw.Exp    =  exp - 126;                       /* Save unbiased exponent (bias  is one less than IBM       */
+    softfloat_raw.Sign   =  sign;                            /* Save result sign                                         */
+    softfloat_raw.Inexact = roundBits;                       /* Save inexact status of raw result                        */
     isTiny = false;                                         /* Assume not a subnormal result for the moment.            */
 #endif /* IBM_IEEE */
 
@@ -141,7 +141,7 @@ float32_t
 
 #ifdef IBM_IEEE
     /*  NB:  isTiny is always true on underflow because IBM IEEE requires detect tininess before rounding       */
-    softfloat_rawTiny = isTiny;                         /* preserve Tiny flag for return of scaled results      */
+    softfloat_raw.Tiny = isTiny;                         /* preserve Tiny flag for return of scaled results      */
     if (isTiny) {                                       /* if tiny, we must round the shifted subnormal         */
         savesig = (sig + roundIncrement) >> 7;          /* apply rounding factor                                */
         savesig |= (uint_fast32_t)(roundBits && (roundingMode == softfloat_round_stickybit)); /* ensure odd if needed */

@@ -94,13 +94,13 @@ float32_t
             uiZ = (uiA + uiB) & 0x7FFFFFFF;                     /* Sum the significands and exclude sign bits       */
             if (!(uiZ & 0xFF800000) && uiZ)                     /* If exp zero and sig non-zero, then subnormal     */
             {                                                   /* ..yes, save information for scaled result        */
-                softfloat_rawIncre = false;                     /* Not incremented                                  */
-                softfloat_rawInexact = false;                   /* Not inexact                                      */
-                softfloat_rawSig64 = (uint_fast64_t)(uiA + uiB & 0x7FFFFFFF) << 39;  /* 32 + 7; save significand for scaling       */
-                softfloat_rawSig0 = 0;                          /* Zero bits 64-128 of rounded result               */
-                softfloat_rawExp = -126;                        /* Indicate subnormal in exponent                   */
-                softfloat_rawSign = signZ;                      /* Save result sign                                 */
-                softfloat_rawTiny = true;                       /* Indicate a subnormal result                      */
+                softfloat_raw.Incre = false;                     /* Not incremented                                  */
+                softfloat_raw.Inexact = false;                   /* Not inexact                                      */
+                softfloat_raw.Sig64 = (uint_fast64_t)(uiA + uiB & 0x7FFFFFFF) << 39;  /* 32 + 7; save significand for scaling       */
+                softfloat_raw.Sig0 = 0;                          /* Zero bits 64-128 of rounded result               */
+                softfloat_raw.Exp = -126;                        /* Indicate subnormal in exponent                   */
+                softfloat_raw.Sign = signZ;                      /* Save result sign                                 */
+                softfloat_raw.Tiny = true;                       /* Indicate a subnormal result                      */
                 softfloat_exceptionFlags |= softfloat_flag_tiny;        /* Indicate result is tiny                  */
             }
             uiZ = packToF32UI(signZ, 0, uiZ);                   /* Pack up a zero or a subnormal                    */

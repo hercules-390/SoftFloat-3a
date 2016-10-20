@@ -75,7 +75,7 @@ f32_scaledResult(int_fast16_t scale)
     struct exp16_sig32 z;
 #endif  /* IBM_IEEE */
 
-    exp = softfloat_rawExp + 126 + scale;
+    exp = softfloat_raw.Exp + 126 + scale;
 
     /* Note that the high-order bit of the saved significand is the units position.  This is effectively    */
     /* added to the exponent in packToF32UI so that the units position disappears and the exponent is       */
@@ -84,18 +84,18 @@ f32_scaledResult(int_fast16_t scale)
     if (exp < 0 || exp > 0xFD)
         uZ.ui = (defaultNaNF32UI & ~UINT32_C(0x00400000)) | UINT32_C(0x0000DEAD);  /* Create SNaN 'DEAD'   */
     else
-        if (softfloat_rawSig64 < 0x0400000000000000ULL)          /* result a subnormal?  */
+        if (softfloat_raw.Sig64 < 0x0400000000000000ULL)          /* result a subnormal?  */
         {
-            z = softfloat_normSubnormalF32Sig((uint_fast32_t)(softfloat_rawSig64 >> 39));
+            z = softfloat_normSubnormalF32Sig((uint_fast32_t)(softfloat_raw.Sig64 >> 39));
             exp += z.exp - 1;
-            uZ.ui = packToF32UI(softfloat_rawSign, exp, z.sig);
+            uZ.ui = packToF32UI(softfloat_raw.Sign, exp, z.sig);
         }
         else
-            uZ.ui = packToF32UI(softfloat_rawSign, exp, (uint_fast32_t)(softfloat_rawSig64 >> 39));
+            uZ.ui = packToF32UI(softfloat_raw.Sign, exp, (uint_fast32_t)(softfloat_raw.Sig64 >> 39));
 
     softfloat_exceptionFlags &= ~(softfloat_flag_inexact | softfloat_flag_incremented);
-    softfloat_exceptionFlags |= (softfloat_rawInexact ?  softfloat_flag_inexact     : 0) | 
-                                (softfloat_rawIncre   ?  softfloat_flag_incremented : 0);
+    softfloat_exceptionFlags |= (softfloat_raw.Inexact ?  softfloat_flag_inexact     : 0) | 
+                                (softfloat_raw.Incre   ?  softfloat_flag_incremented : 0);
 
     return uZ.f;
 
