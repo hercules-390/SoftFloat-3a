@@ -476,7 +476,7 @@ set(    _l
         s_normSubnormalF128Sig.c
         s_normSubnormalF32Sig.c
         s_normSubnormalF64Sig.c
-        s_roundPackToExtF80.c
+#[[     s_roundPackToExtF80.c       ]]        
         ${HERCMODS}s_roundPackToF128.c
         ${HERCMODS}s_roundPackToF32.c
         ${HERCMODS}s_roundPackToF64.c
