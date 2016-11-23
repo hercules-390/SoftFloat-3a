@@ -28,9 +28,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Debug --install&#x0D;&#x0A;"
-				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Debug --install --rebuild"
-				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Debug --uninstall"
+				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --install --arch 32 --config Debug --pkgname .&#x0D;&#x0A;"
+				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --rebuild --install --arch 32 --config Debug --pkgname ."
+				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --uninstall --arch 32 --config Debug --pkgname ."
 				Output="$(OutDir)"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;_MSVC_"
 				IncludeSearchPath="$(ProjectDir)source\include;$(ProjectDir)"
@@ -49,9 +49,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Debug --install&#x0D;&#x0A;"
-				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Debug --install --rebuild"
-				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Debug --uninstall"
+				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --install --arch 64 --config Debug --pkgname .&#x0D;&#x0A;"
+				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --rebuild --install --arch 64 --config Debug --pkgname ."
+				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --uninstall --arch 64 --config Debug --pkgname ."
 				Output="$(OutDir)"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;_MSVC_"
 				IncludeSearchPath="$(ProjectDir)source\include;$(ProjectDir)"
@@ -70,9 +70,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Release --install&#x0D;&#x0A;"
-				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Release --install --rebuild"
-				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 32 --config Release --uninstall"
+				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --install --arch 32 --config Release --pkgname .&#x0D;&#x0A;"
+				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --rebuild --install --arch 32 --config Release --pkgname ."
+				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --uninstall --arch 32 --config Release --pkgname ."
 				Output="$(OutDir)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_MSVC_"
 				IncludeSearchPath="$(ProjectDir)source\include;$(ProjectDir)"
@@ -91,9 +91,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Release --install&#x0D;&#x0A;"
-				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Release --install --rebuild"
-				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --pkgname . --arch 64 --config Release --uninstall"
+				BuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --install --arch 64 --config Release --pkgname .&#x0D;&#x0A;"
+				ReBuildCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --rebuild --install --arch 64 --config Release --pkgname ."
+				CleanCommandLine="cd ..\$(ProjectName)&#x0D;&#x0A;&quot;$(ProjectDir)build.cmd&quot; --uninstall --arch 64 --config Release --pkgname ."
 				Output="$(OutDir)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_MSVC_"
 				IncludeSearchPath="$(ProjectDir)source\include;$(ProjectDir)"
