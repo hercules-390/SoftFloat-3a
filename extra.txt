@@ -1,0 +1,16 @@
+#------------------------------------------------------------------------------
+#   Define additional files to be installed
+#------------------------------------------------------------------------------
+
+install( FILES     "COPYING.txt" DESTINATION  .  )
+install( FILES     "README.txt"  DESTINATION  .  )
+install( FILES     "README.html" DESTINATION  .  )
+install( DIRECTORY "doc/"        DESTINATION doc )
+
+#------------------------------------------------------------------------------
+
+if( WIN32 )
+install( FILES "${CMAKE_BINARY_DIR}/${FULLNAME}.pdb" DESTINATION lib )
+endif()
+
+#------------------------------------------------------------------------------
