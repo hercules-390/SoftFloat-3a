@@ -1,0 +1,1416 @@
+#!/bin/bash
+
+  #  If this bash script works then it was written by Fish.
+  #  If it doesn't then I don't know who the heck wrote it.
+
+  _versnum="2.0"
+  _versdate="November, 2016"
+
+#------------------------------------------------------------------------------
+#                                   BUILD
+#------------------------------------------------------------------------------
+help()
+{
+  errmsg ""
+  errmsg "    NAME"
+  errmsg ""
+  errmsg "        $nx0   --   Builds and installs a Hercules external package"
+  errmsg ""
+  errmsg "    SYNOPSIS"
+  errmsg ""
+  errmsg "        $nx0   [ { -d   | --pkgdir    }    pkgdir               ]"
+  errmsg "                [ { -n   | --pkgname   }    pkgname              ]"
+  errmsg "                [ { -a   | --arch      }  64      | 32    | BOTH ]"
+  errmsg "                [ { -c   | --config    }  Release | Debug | BOTH ]"
+  errmsg "                [ { -all | --all       }                         ]"
+  errmsg "                [ { -r   | --rebuild   }                         ]"
+  errmsg "                [ { -i   | --install   }  [ instdir ]            ]"
+  errmsg "                [ { -u   | --uninstall }  [ uinstdir ]           ]"
+  errmsg "                [ { -f   | --force     }                         ]"
+  errmsg "                [ { -su  | --sudo      }                         ]"
+  errmsg ""
+  errmsg "    ARGUMENTS"
+  errmsg ""
+  errmsg "        pkgdir     The package directory where the CMakeLists.txt"
+  errmsg "                   file exists.  This is usually the name of the"
+  errmsg "                   package's primary source directory (i.e. its"
+  errmsg "                   repository directory).  The default when not"
+  errmsg "                   specified is the same directory as where $nx0"
+  errmsg "                   is running from."
+  errmsg ""
+  errmsg "        pkgname    The single word alphanumeric package name.  The"
+  errmsg "                   default if not specified is derived from the last"
+  errmsg "                   directory component of pkgdir.  The value \".\" may"
+  errmsg "                   be specified to derive from the last component of"
+  errmsg "                   the current directory instead."
+  errmsg ""
+  errmsg "        arch       The build architecture. Use '32' to build an x86"
+  errmsg "                   32-bit version of the package. Use '64' to build"
+  errmsg "                   an x64 64-bit version of the package. Use 'BOTH'"
+  errmsg "                   to build both architectures.  The default is 64."
+  errmsg ""
+  errmsg "        config     The build configuration. Specify 'Debug' to build"
+  errmsg "                   an unoptimized debug version of the product.  Use"
+  errmsg "                   Release to build an optimized version (which also"
+  errmsg "                   has debugging symbols).  The default is Release."
+  errmsg ""
+  errmsg "        install    Install the package into the specified directory."
+  errmsg "                   If not specified the package won't be installed."
+  errmsg ""
+  errmsg "        instdir    The package installation directory.  If specified"
+  errmsg "                   the given directory MUST exist.  If not specified"
+  errmsg "                   the directory specified in a previous run is used"
+  errmsg "                   if such is possible.  Otherwise the CMake default"
+  errmsg "                   installation directory is used instead, which for"
+  errmsg "                   Linux is /usr/local."
+  errmsg ""
+  errmsg "        uninstall  Uninstalls the previously installed package."
+  errmsg ""
+  errmsg "        uinstdir   The directory where the package was installed.  If"
+  errmsg "                   specified without the force option, the value MUST"
+  errmsg "                   match the install directory used in a previous run."
+  errmsg "                   If not specified, then the install directory from"
+  errmsg "                   the previous run is retrieved from the CMake cache"
+  errmsg "                   and used instead.  If the directory isn't found in"
+  errmsg "                   CMake's cache the package default install directory"
+  errmsg "                   is used instead.  The directory MUST exist."
+  errmsg ""
+  errmsg "    OPTIONS"
+  errmsg ""
+  errmsg "        all        Shorthand for \"--arch BOTH --config BOTH\"."
+  errmsg ""
+  errmsg "        rebuild    Forces a complete reconfigure and rebuild."
+  errmsg ""
+  errmsg "        force      Overrides CMake's cached install directory used in"
+  errmsg "                   a previous run and forces the uninstall to use the"
+  errmsg "                   specified directory instead.  It effectively forces"
+  errmsg "                   a complete CMake reconfigure just like the rebuild"
+  errmsg "                   option does but is used exclusively for uninstalls."
+  errmsg ""
+  errmsg "        sudo       Prefix install or uninstall command with \"sudo\"."
+  errmsg "                   Use this option if installing to or uninstalling"
+  errmsg "                   from /usr/local or anywhere else requiring root."
+  errmsg ""
+  errmsg "    NOTES"
+  errmsg ""
+  errmsg "        $nx0 first creates a build directory in the current directory,"
+  errmsg "        changes to the build directory, invokes the cmake command (to"
+  errmsg "        create the makefile) and then issues the make and make install"
+  errmsg "        commands to actually build and install the specified package"
+  errmsg "        for the specified architecture and configuration combination."
+  errmsg "        The name of the build directory is derived from the package's"
+  errmsg "        name and the specified architetcure/configuration combination."
+  errmsg ""
+  errmsg "    EXIT STATUS"
+  errmsg ""
+  errmsg "        0      All requested actions successfully completed."
+  errmsg "        n      One or more builds/installs failed w/error(s) where 'n'"
+  errmsg "               is the highest return code detected."
+  errmsg ""
+  errmsg "    AUTHOR"
+  errmsg ""
+  errmsg "        \"Fish\"  (David B. Trout)"
+  errmsg ""
+  errmsg "    VERSION"
+  errmsg ""
+  errmsg "        $_versnum     ($_versdate)"
+  errmsg ""
+
+  quit
+}
+
+#------------------------------------------------------------------------------
+#                                  INIT
+#------------------------------------------------------------------------------
+init()
+{
+  pushd "." >/dev/null 2>&1
+
+  #  Define some constants...
+
+  dp0="$(dirname  "$0")"
+  nx0="$(basename "$0")"
+
+  x0="${nx0##*.}"
+  n0="${nx0%.*}"
+
+  nx0_cmdline="$nx0 $*"
+
+  rc=0
+  maxrc=0
+
+  tool1="cmake"
+
+  #  Options as listed in help...
+
+  pkgdir=""
+  pkgname=""
+  install=""
+  instdir=""
+  uninstall=""
+  uinstdir=""
+  arch=""
+  config=""
+  rebuild=""
+  force=""
+  bldall=""
+  sudo=""
+
+  #  Default values...
+
+  def_pkgdir="$dp0"
+  def_arch="64"
+  def_config="Release"
+
+  parse_args  $@
+}
+
+#------------------------------------------------------------------------------
+#                              push_shopt
+#------------------------------------------------------------------------------
+push_shopt()
+{
+  if [[ -z $shopt_idx ]]; then shopt_idx="-1"; fi
+  shopt_idx=$(( $shopt_idx + 1 ))
+  shopt_opt[ $shopt_idx ]=$2
+  shopt -q $2
+  shopt_val[ $shopt_idx ]=$?
+  eval shopt $1 $2
+}
+
+#------------------------------------------------------------------------------
+#                              pop_shopt
+#------------------------------------------------------------------------------
+pop_shopt()
+{
+  if [[ -n $shopt_idx ]] && (( $shopt_idx >= 0 )); then
+    if (( ${shopt_val[ $shopt_idx ]} == 0 )); then
+      eval shopt -s ${shopt_opt[ $shopt_idx ]}
+    else
+      eval shopt -u ${shopt_opt[ $shopt_idx ]}
+    fi
+    shopt_idx=$(( $shopt_idx - 1 ))
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                               trace
+#------------------------------------------------------------------------------
+trace()
+{
+  if [[ -n $debug ]]  || \
+     [[ -n $DEBUG ]]; then
+    logmsg  "++ $1"
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                               logmsg
+#------------------------------------------------------------------------------
+logmsg()
+{
+  stdmsg  "stdout"  "$1"
+}
+
+#------------------------------------------------------------------------------
+#                               errmsg
+#------------------------------------------------------------------------------
+errmsg()
+{
+  stdmsg  "stderr"  "$1"
+  setrc1
+}
+
+#------------------------------------------------------------------------------
+#                               stdmsg
+#------------------------------------------------------------------------------
+stdmsg()
+{
+  local  _stdxxx="$1"
+  local  _msg="$2"
+
+  push_shopt -s nocasematch
+
+  if [[ $_stdxxx != "stdout" ]]  && \
+     [[ $_stdxxx != "stderr" ]]; then
+    _stdxxx=stdout
+  fi
+
+  if [[ $_stdxxx == "stdout" ]]; then
+    echo "$_msg"
+  else
+    echo "$_msg" 1>&2
+  fi
+
+  pop_shopt
+}
+
+#------------------------------------------------------------------------------
+#                              load_tools
+#------------------------------------------------------------------------------
+load_tools()
+{
+  local       _tool="$( which        "$tool1"  2>/dev/null )"
+  if [[   -z $_tool ]]  || \
+     [[ ! -x $_tool ]]; then errmsg "'$tool1' not found."
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                              fullpath
+#------------------------------------------------------------------------------
+fullpath()
+{
+  # Upon return $fullpath will contain full path or empty string if not found.
+  # If optional argument 2 is passed then that variable also set to $fullpath.
+
+  fullpath="$(readlink -e "$1")"
+
+  if [[ -n $fullpath ]] && [[ -n $2 ]]; then
+    eval $2="\$fullpath"
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                               isfile
+#------------------------------------------------------------------------------
+isfile()
+{
+  # isfile $foo; if [[ -n $isfile ]]; then isfile; else notfile; fi
+
+  if [[ -f $1 ]]; then isfile=1; else isfile=""; fi
+}
+
+#------------------------------------------------------------------------------
+#                               isdir
+#------------------------------------------------------------------------------
+isdir()
+{
+  # isdir $foo; if [[ -n $isdir ]]; then isdir; else notdir; fi
+
+  if [[ -d $1 ]]; then isdir=1; else isdir=""; fi
+}
+
+#------------------------------------------------------------------------------
+#                               tempfn
+#------------------------------------------------------------------------------
+tempfn()
+{
+  # Usage: tempfn tmpfn ext
+  # Upon return, $tmpfn will contain filename.ext
+
+  local _tmpf="$(mktemp)"
+  _tmpf="${_tmpf}.$2"
+  eval $1="\$_tmpf"
+}
+
+#------------------------------------------------------------------------------
+#                             normalize_dir
+#------------------------------------------------------------------------------
+normalize_dir()
+{
+  #  Note: while Windows paths can contain mixed path separators ('/' or '\')
+  #  Linux paths can only have one and ONLY one path separator character '/'
+  #  so all we need to do here is to check for the trailing separator.
+  
+  local var_name="$1"
+  local var_value="$2"
+
+  if [[ -n $var_value ]]; then
+    #  Remove trailing separator if there is one
+    if [[ $var_value       != "/" ]] && \
+       [[ ${var_value: -1} == "/" ]]; then
+      var_value=${var_value:0:${#var_value}-1}
+    fi
+  fi
+
+  eval $var_name="\$var_value"
+}
+
+#------------------------------------------------------------------------------
+#                             is_valid_dir
+#------------------------------------------------------------------------------
+is_valid_dir()
+{
+  #  Return value 'is_valid_dir' defined if valid, otherwise undefined.
+
+  #  Passed variable will ALWAYS be updated (normalized) REGARDLESS of
+  #  whether it is determined to be valid or not.
+
+  #  Use quiet option to preserve rc/maxrc value if only interested in
+  #  the 'is_valid_dir' return value.  Otherwise an error message will
+  #  be issued and 'rc' & 'maxrc' will be updated if directory invalid.
+
+  is_valid_dir=1
+
+  local var_name=$1
+  local var_value=$2
+  local quiet=$3
+  local norm_val=""
+
+  normalize_dir   norm_val  "$var_value"
+  fullpath      "$norm_val"
+
+  if [[ -z $fullpath ]]; then
+    is_valid_dir=""
+    if [[ -z $quiet ]]; then
+      errmsg "ERROR: $var_name \"$var_value\" not found."
+    fi
+  else
+    norm_val=$fullpath
+    isdir "$norm_val"
+    if [[ -z $isdir ]]; then
+      is_valid_dir=""
+      if [[ -z $quiet ]]; then
+        errmsg "ERROR: $var_name \"$var_value\" is not a directory."
+      fi
+    fi
+  fi
+
+  eval $var_name="\$norm_val"
+}
+
+#------------------------------------------------------------------------------
+#                             isalphanum
+#------------------------------------------------------------------------------
+isalphanum()
+{
+  # isalphanum $foo; if [[ -n $isalphanum ]]; then isalphanum; else notalphanum; fi
+
+  isalphanum=""
+
+  if [[ "$1" =~ [a-zA-Z0-9]+ ]]; then
+    # (ensure first char is letter not number)
+    if [[ "${1:0:1}" =~ [a-zA-Z0-9] ]]; then
+      isalphanum="1"
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                           get_cache_value
+#------------------------------------------------------------------------------
+get_cache_value()
+{
+  local _cachefile="$1"
+  local _varname="$2"
+
+  cache_value=""
+
+  if [ -f $_cachefile ]; then
+
+    local _cache_re="(^.*):(.*)=(.*)$"
+    local _orig_IFS="$IFS"
+
+    IFS=""
+
+    while read -r _stmt || [[ -n "$_stmt" ]]; do
+
+      if [[ $_stmt             =~ $_cache_re ]]  && \
+         [[ ${BASH_REMATCH[1]} == $_varname  ]]; then
+
+          cache_value=${BASH_REMATCH[3]}
+          break
+      fi
+
+    done < "$_cachefile"
+
+    IFS="$_orig_IFS"
+
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                         (parse_args helper)
+#------------------------------------------------------------------------------
+isopt()
+{
+  # isopt $foo; if [[ -n $isopt ]]; then isopt; else notopt; fi
+
+  #  Examines first character of passed value to determine
+  #  whether it's the next option or not. If it starts with
+  #  a '/' or '-' then it's the next option. Else it's not.
+
+  isopt="$1"
+
+  if [[ -n $isopt ]]            && \
+     [[ ${isopt:0:1} != "/" ]]  && \
+     [[ ${isopt:0:1} != "-" ]]; then
+    isopt=""
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                         (parse_args helper)
+#------------------------------------------------------------------------------
+parseopt()
+{
+  #  This function expects the next two command line arguments
+  #  $1 and $2 to be passed to it.  $1 is expected to be a true
+  #  option (its first character should start with a / or -).
+  #
+  #  Both arguments are then examined and the results are placed
+  #  into the following variables:
+  #
+  #    $opt        The current option as-is (e.g. "-d")
+  #
+  #    $optname    Just the characters following the '-' (e.g. "d")
+  #
+  #    $optval     The next token following the option (i.e. $2),
+  #                but only if it's not an option itself (not isopt).
+  #                Otherwise optval is set to empty/undefined since
+  #                it is not actually an option value but is instead
+  #                the next option.
+
+  opt="$1"
+  optval="$2"
+  optname="${opt:1}"
+
+  local _saved_isopt="$isopt"
+  isopt "$optval"
+  local _optval_isopt="$isopt"
+  isopt="$_saved_isopt"
+
+  if [[ -n $_optval_isopt ]]; then
+    optval=""
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                              parse_args
+#------------------------------------------------------------------------------
+parse_args()
+{
+  rc=0
+
+  push_shopt -s nocasematch
+
+  if [[ $1 == "?"      ]]; then help; fi
+  if [[ $1 == "/?"     ]]; then help; fi
+  if [[ $1 == "-?"     ]]; then help; fi
+  if [[ $1 == "-h"     ]]; then help; fi
+  if [[ $1 == "--help" ]]; then help; fi
+
+  load_tools
+
+  #  Abort if required tool(s) not found
+
+  if (( $rc != 0 )); then quit; fi
+
+  #  Parse command line options...
+
+  while [[ -n $1 ]]
+  do
+
+    cmdline_arg="$1"
+
+    isopt     "$1"
+    parseopt  "$1"  "$2"
+
+    shift 1
+
+    if [[ -n $isopt ]]; then
+
+      case "$optname" in
+
+        # ------------------------------------
+        #  Options that require an argument
+        # ------------------------------------
+
+        d)
+
+          if [[ -z $optval ]]; then parse_missing_optarg; else
+            pkgdir="$optval"
+            shift 1 # (consume this option's value)
+          fi
+          ;;
+
+        n)
+
+          if [[ -z $optval ]]; then parse_missing_optarg; else
+            pkgname="$optval"
+            shift 1 # (consume this option's value)
+          fi
+          ;;
+
+        a)
+
+          if [[ -z $optval ]]; then parse_missing_optarg; else
+            arch="$optval"
+            shift 1 # (consume this option's value)
+          fi
+          ;;
+
+        c)
+
+          if [[ -z $optval ]]; then parse_missing_optarg; else
+            config="$optval"
+            shift 1 # (consume this option's value)
+          fi
+          ;;
+
+        # ------------------------------------
+        #  Options whose argument is optional
+        # ------------------------------------
+
+        i)
+
+          install=1
+          
+          if [[ -n $optval ]]; then
+            instdir="$optval"
+            shift 1 # (consume this option's value)
+          fi
+          ;;
+
+        # ------------------------------------
+        #  Options that are just switches
+        # ------------------------------------
+
+        h)
+
+          help
+          ;;
+
+        u)
+
+          uninstall=1
+          ;;
+
+        r)
+
+          rebuild=1
+          ;;
+
+        f)
+
+          force=1
+          ;;
+
+        all)
+
+          bldall=1
+          ;;
+
+        su)
+
+          sudo="sudo"
+          ;;
+
+        # ------------------------------------
+        #       (none of the above)
+        # ------------------------------------
+
+        *)  # (check if "--xxxx" long option)
+
+          isopt "$optname"
+
+          if [[ -z $isopt ]]; then
+
+            parse_unknown_opt
+
+          else
+
+            # ------------------------------------
+            #  Long "--xxxxx" option parsing...
+            #  We use $1 here (instead of $2)
+            #  since shift 1 was already done.
+            # ------------------------------------
+
+            parseopt "$optname"  "$1"
+
+            case "$optname" in
+
+              # ------------------------------------
+              #  Options that require an argument
+              # ------------------------------------
+
+              pkgdir)
+
+                if [[ -z $optval ]]; then parse_missing_optarg; else
+                  pkgdir="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              pkgname)
+
+                if [[ -z $optval ]]; then parse_missing_optarg; else
+                  pkgname="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              arch)
+
+                if [[ -z $optval ]]; then parse_missing_optarg; else
+                  arch="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              config)
+
+                if [[ -z $optval ]]; then parse_missing_optarg; else
+                  config="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              # ------------------------------------
+              #  Options whose argument is optional
+              # ------------------------------------
+
+              install)
+
+                install=1
+
+                if [[ -n $optval ]]; then
+                  instdir="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              uninstall)
+
+                uninstall=1
+
+                if [[ -n $optval ]]; then
+                  uinstdir="$optval"
+                  shift 1 # (consume this option's value)
+                fi
+                ;;
+
+              # ------------------------------------
+              #  Options that are just switches
+              # ------------------------------------
+
+              help)
+
+                help
+                ;;
+
+              rebuild)
+
+                rebuild=1
+                ;;
+
+              force)
+
+                force=1
+                ;;
+
+              all)
+
+                bldall=1
+                ;;
+
+              sudo)
+
+                sudo="sudo"
+                ;;
+
+              version)
+
+                errmsg "$nx0 version $_versnum ($_versdate)"
+                ;;
+
+              # ------------------------------------
+              #       (none of the above)
+              # ------------------------------------
+
+              *)
+
+                parse_unknown_opt
+                ;;
+
+            esac
+
+          fi
+
+          ;;
+      esac
+
+    else
+
+      # ------------------------------------
+      #  Must be a positional option.
+      #  Set optname identical to opt
+      #  and empty meaningless optval.
+      # ------------------------------------
+
+      optname="$opt"
+      optval=""
+
+      #  We do not have any positional arguments...
+
+      parse_unknown_arg
+
+      #  ...but if we did, this is how we'd do it.
+
+      if [ ]; then # (beg disabled code block)
+      if [[ -z $positional_argument_1 ]]; then
+        positional_argument_1="$opt"
+      else
+        if [[ -z $positional_argument_2 ]]; then
+          positional_argument_2="$opt"
+        else
+          if [[ -z $positional_argument_3 ]]; then
+            positional_argument_3="$opt"
+          else
+            parse_unknown_arg
+          fi
+        fi
+      fi
+      fi # (end disabled code block)
+
+    fi
+  done
+
+  pop_shopt
+
+  trace "Debug: values after parsing:"
+  trace ""
+  trace "pkgdir    = \"$pkgdir\""
+  trace "pkgname   = \"$pkgname\""
+  trace "install   = \"$install\""
+  trace "instdir   = \"$instdir\""
+  trace "uninstall = \"$uninstall\""
+  trace "uinstdir  = \"$uinstdir\""
+  trace "arch      = \"$arch\""
+  trace "config    = \"$config\""
+  trace "rebuild   = \"$rebuild\""
+  trace "force     = \"$force\""
+  trace "bldall    = \"$bldall\""
+  trace ""
+
+  if (( $rc != 0 )); then quit; fi
+
+  validate_args
+}
+
+#------------------------------------------------------------------------------
+#                         (parse_args helper)
+#------------------------------------------------------------------------------
+parse_unknown_arg()
+{
+  errmsg "ERROR: Unrecognized/extraneous argument '$cmdline_arg'."
+}
+parse_unknown_opt()
+{
+  errmsg "ERROR: Unknown/unsupported option '$cmdline_arg'."
+}
+parse_missing_optarg()
+{
+  errmsg "ERROR: Option '$cmdline_arg' is missing its required argument."
+}
+
+#------------------------------------------------------------------------------
+#                             validate_args
+#------------------------------------------------------------------------------
+validate_args()
+{
+  push_shopt -s nocasematch
+
+  #----------------------------------------------------------------------------
+  #  Validate pkgdir
+
+  #  Use default pkgdir if pkgdir is not defined yet
+
+  if [[ -z $pkgdir ]]; then
+    pkgdir="$def_pkgdir"
+  fi
+
+  is_valid_dir  pkgdir  "$pkgdir"
+
+  if (( $rc == 0 )); then
+    pushd "$pkgdir" >/dev/null 2>&1
+    fullpath "CMakeLists.txt"
+    popd >/dev/null 2>&1
+    if [[ -z $fullpath ]]; then
+      errmsg "ERROR: File \"CMakeLists.txt\" not found in pkgdir."
+      pkgdir=""
+    fi
+  fi
+
+  #----------------------------------------------------------------------------
+  #  Validate pkgname
+
+  while true; do
+
+    if [[ $pkgname == "." ]]; then
+
+      # derive pkgname from current directory
+      pkgname="$(basename "$(pwd)")"
+      pkgname="${pkgname//[^a-zA-Z0-9]}"
+
+    else
+
+      if [[ -z $pkgname ]]; then
+
+        # derive pkgname from pkgdir
+        pkgname="$(basename "$pkgdir")"
+        pkgname="${pkgname//[^a-zA-Z0-9]}"
+
+      fi
+    fi
+
+    # validate specific pkgname
+
+    isalphanum  "$pkgname"
+
+    if [[ -z $isalphanum ]]; then
+      errmsg "ERROR: Invalid pkgname \"$pkgname\"."
+      break
+    fi
+
+    break
+
+  done
+
+  #----------------------------------------------------------------------------
+  #  Validate instdir
+
+  if [[ -n $instdir ]]; then
+    is_valid_dir  instdir  "$instdir"
+    # (if invalid, errmsg already issued and rc/maxrc updated)
+  fi
+
+  #----------------------------------------------------------------------------
+  #  Validate uinstdir
+
+  if [[ -n $uinstdir ]]; then
+    is_valid_dir  uinstdir  "$uinstdir"
+    # (if invalid, errmsg already issued and rc/maxrc updated)
+  fi
+
+  #----------------------------------------------------------------------------
+  #  Validate build...
+
+  #  Ignore specified arch and config values if bldall was specified
+
+  if [[ -n $bldall ]]; then
+
+    if [[ -n $arch ]] && [[ $arch != "BOTH" ]]; then
+      logmsg "WARNING: arch ignored due to 'all' option."
+      arch=""
+    fi
+
+    if [[ -n $config ]] && [[ $config != "BOTH" ]]; then
+      logmsg "WARNING: config ignored due to 'all' option."
+      config=""
+    fi
+
+  else  # (use default values if not specified)
+
+    if [[ -z $arch ]]; then
+      arch="$def_arch"
+    fi
+    if [[ -z $config ]]; then
+      config="$def_config"
+    fi
+
+  fi
+
+  #  Validate arch and config if not bldall
+
+  if [[ -z $bldall ]]; then
+    if [[ $arch != "32"   ]]  && \
+       [[ $arch != "64"   ]]  && \
+       [[ $arch != "BOTH" ]]; then
+      errmsg "ERROR: Invalid architecture \"$arch\""
+    fi
+    if [[ "$config" != "Debug"   ]]  && \
+       [[ "$config" != "Release" ]]  && \
+       [[ "$config" != "BOTH"    ]]; then
+      errmsg "ERROR: Invalid configuration \"$config\""
+    fi
+  fi
+
+  #  Both 'arch' and 'config' == "BOTH" implies 'bldall'
+
+  if [[ $arch   == "BOTH" ]]  && \
+     [[ $config == "BOTH" ]]; then
+    arch=""
+    config=""
+    bldall=1
+  fi
+
+  #----------------------------------------------------------------------------
+  #  Validate arg sanity
+
+  #  Check for conflicting options, etc...
+
+  if [[ -n $install ]] && [[ -n $uninstall ]]; then
+    errmsg "ERROR: Cannot specify both install and uninstall."
+    errmsg "       Choose one or the other but not both."
+  else
+    if [[ -n $install ]] && [[ -n $force ]]; then
+      errmsg "ERROR: Option --force is only for uninstalls."
+      errmsg "       Specify --rebuild instead for installs."
+    else
+      if [[ -n $uninstall ]] && [[ -n $rebuild ]]; then
+        errmsg "ERROR: Option --rebuild is only for installs."
+        errmsg "       Specify --force instead for uninstalls."
+      fi
+    fi
+  fi
+
+  #----------------------------------------------------------------------------
+
+  pop_shopt
+
+  trace "Debug: values after validation:"
+  trace ""
+  trace "pkgdir    = \"$pkgdir\""
+  trace "pkgname   = \"$pkgname\""
+  trace "install   = \"$install\""
+  trace "instdir   = \"$instdir\""
+  trace "uninstall = \"$uninstall\""
+  trace "uinstdir  = \"$uinstdir\""
+  trace "arch      = \"$arch\""
+  trace "config    = \"$config\""
+  trace "rebuild   = \"$rebuild\""
+  trace "force     = \"$force\""
+  trace "bldall    = \"$bldall\""
+  trace ""
+
+  if (( $rc != 0 )); then quit; fi
+
+  BEGIN
+}
+
+#------------------------------------------------------------------------------
+#                           get_prev_instdir
+#------------------------------------------------------------------------------
+get_prev_instdir()
+{
+  prev_instdir=""
+
+  if [[ -f $cachefile ]]; then
+    get_cache_value  "$cachefile"  CMAKE_INSTALL_PREFIX
+    if [[ -n $cache_value ]]; then
+      normalize_dir  prev_instdir  "$cache_value"
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                        configure_is_needed
+#------------------------------------------------------------------------------
+configure_is_needed()
+{
+  configure_needed=1
+
+  if [[ -d $blddir ]]; then
+    rm -rf "$blddir"
+  fi
+
+  if [[ ! -d $blddir ]]; then
+    mkdir  "$blddir"
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                          is_configure_needed
+#------------------------------------------------------------------------------
+is_configure_needed()
+{
+  configure_needed=""
+
+  #  Initialization...
+
+  blddir="${pkgname}${arch}.${config}"
+  cachefile="${blddir}/CMakeCache.txt"
+  get_prev_instdir
+
+  #  configure is needed ONLY if:
+  #
+  #    rebuild specified, OR
+  #    blddir does NOT exist yet, OR
+  #    blddir does NOT contain makefile, OR
+  #    uninstall --force specified
+
+  if [[ -n $rebuild ]]; then
+    configure_is_needed
+  else
+    isdir "$blddir"
+    if [[ -z $isdir ]]; then
+      configure_is_needed
+    else
+      isfile "${blddir}/Makefile"
+      if [[ -z $isfile ]]; then
+        configure_is_needed
+      else
+        if [[ -n $uninstall ]] && \
+           [[ -n $force ]]; then
+          configure_is_needed
+        fi
+      fi
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                             is_make_needed
+#------------------------------------------------------------------------------
+is_make_needed()
+{
+  make_needed=1             # (safest default is to always do a make)
+
+  #  a make is NOT needed ONLY if:
+  #
+  #    configure is not needed, AND
+  #    uninstalling, AND
+  #    blddir DOES contain "install_manifest.txt"
+  #
+  #  Otherwise a make IS needed.
+
+  if [[ -z $configure_needed ]] && \
+     [[ -n $uninstall ]]; then
+    isfile "${blddir}/install_manifest.txt"
+    if [[ -n $isfile ]]; then
+      make_needed=""      # (make NOT needed since we're uninstalling)
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                           is_install_needed
+#------------------------------------------------------------------------------
+is_install_needed()
+{
+  install_needed=""
+
+  #  install is needed ONLY if:
+  #
+  #    install specified, OR
+  #    uninstall specified, AND
+  #    blddir does NOT contain "install_manifest.txt"
+
+  if [[ -n $install ]]; then
+    install_needed=1
+  else
+    if [[ -n $uninstall ]]; then
+      isfile "${blddir}/install_manifest.txt"
+      if [[ -z $isfile ]]; then
+        install_needed=1
+      fi
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                          is_uninstall_needed
+#------------------------------------------------------------------------------
+is_uninstall_needed()
+{
+  uninstall_needed=""
+
+  #  uninstall is needed ONLY if:
+  #
+  #    uninstall specified
+
+  if [[ -n $uninstall ]]; then
+    uninstall_needed=1
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                               BEGIN
+#------------------------------------------------------------------------------
+BEGIN()
+{
+  push_shopt -s nocasematch
+
+  if [[ -n $bldall ]]; then
+
+    do_build  "32"  "Debug"
+    do_build  "32"  "Release"
+    do_build  "64"  "Debug"
+    do_build  "64"  "Release"
+
+  else
+
+    if [[ $arch == "BOTH" ]]; then
+
+        do_build  "32"  "$config"
+        do_build  "64"  "$config"
+
+    else
+
+      if [[ $config == "BOTH" ]]; then
+
+        do_build  "$arch"  "Debug"
+        do_build  "$arch"  "Release"
+
+      else
+
+        do_build  "$arch"  "$config"
+
+      fi
+    fi
+  fi
+
+  pop_shopt
+
+  quit
+}
+
+#------------------------------------------------------------------------------
+#                               do_build
+#------------------------------------------------------------------------------
+do_build()
+{
+  #  Preserve variable values by using subshell (tricky but effective)
+
+  tmpf="$(mktemp)"        # (tmp file to pass subshell vars to parent)
+
+  # setlocal
+  (
+    arch="$1"
+    config="$2"
+
+    blddir="${pkgname}${arch}.${config}"
+    cachefile="${blddir}/CMakeCache.txt"
+    rc=0
+
+    #  Determine which steps are needed for this arch/config combination...
+
+    is_configure_needed       #  (skip configure if possible)
+    is_make_needed            #  (skip make      if possible)
+    is_install_needed         #  (skip install   if possible)
+    is_uninstall_needed       #  (skip uninstall if possible)
+
+    when=$(date +"%a %x at %H:%M:%S")
+    logmsg "cmdline = $nx0_cmdline"
+    logmsg ""
+    logmsg "Build of ${arch}-bit $config version of $pkgname begun on $when"
+
+    trace ""
+    trace "Debug: values for this arch/config build:"
+    trace ""
+    trace "prev_instdir     = \"$prev_instdir\""
+    trace "configure_needed = \"$configure_needed\""
+    trace "make_needed      = \"$make_needed\""
+    trace "install_needed   = \"$install_needed\""
+    trace "uninstall_needed = \"$uninstall_needed\""
+    trace ""
+
+    #  If they didn't specify an install or uninstall directory,
+    #  use the same value as previously configured, if possible.
+    #
+    #  If there is no previously configured directory then leave
+    #  the specified value undefined so the configure step knows
+    #  to use the CMake default instead.
+
+    if [[ -n $install ]]; then
+      if [[ -z $rebuild ]]; then
+        if [[ -z $instdir ]]; then
+          if [[ -n $prev_instdir ]]; then
+            instdir=$prev_instdir
+          fi
+        fi
+      fi
+    fi
+
+    if [[ -n $uninstall ]]; then
+      if [[ -z $force ]]; then
+        if [[ -z $uinstdir ]]; then
+          if [[ -n $prev_instdir ]]; then
+            uinstdir=$prev_instdir
+          fi
+        fi
+      fi
+    fi
+
+    if [[ -n $uninstall ]]; then
+      instdir=$uinstdir
+    fi
+
+    #  Check to make sure their instdir value matches the previously
+    #  configured directory if such exists.  They cannot specify one
+    #  directory on one run and then a completely different directory
+    #  on a subsequent run.  For uninstalls the instdir value was set
+    #  to their specified uinstdir just above so the below checks for
+    #  both uninstalls and installs too.
+
+    if [[ -z $configure_needed ]]; then
+      if [[ -n $instdir ]]; then
+        if [[ -n $prev_instdir ]]; then
+          if [[ $instdir != "$prev_instdir" ]]; then
+            if [[ -n $install ]]; then
+              errmsg ""
+              errmsg "ERROR: Specified instdir does not match previously configured value."
+              errmsg "       Use --rebuild to reconfigure if you wish to use a new value."
+            fi
+            if [[ -n $uninstall ]]; then
+              errmsg ""
+              errmsg "ERROR: Specified uinstdir does not match previously used instdir."
+              errmsg "       Use --force option to uninstall from the specified uinstdir."
+            fi
+          fi
+        fi
+      fi
+    fi
+
+    #  Do the build
+
+    pushd "$blddir" >/dev/null 2>&1
+
+      if (( $rc == 0 )); then do_configure; fi
+      if (( $rc == 0 )); then do_make;      fi
+      if (( $rc == 0 )); then do_install;   fi
+      if (( $rc == 0 )); then do_uninstall; fi
+
+    popd >/dev/null 2>&1
+
+    #  Display results
+
+    if (( $rc == 0 )); then res="SUCCEEDED"; else res="FAILED"; fi
+
+    logmsg ""
+    when=$(date +"%a %x at %H:%M:%S")
+    logmsg "Build $res on $when"
+    logmsg ""
+
+    #  Pass back return code to parent shell
+
+    echo "rc=$rc" > "$tmpf"
+  )
+  # endlocal
+
+  #  Retrieve return code from subshell
+
+  source "$tmpf"   # (treats $tmpf as part of current script, i.e. THIS script)
+  rm "$tmpf"       # (discard temporary file)
+  update_maxrc
+}
+
+#------------------------------------------------------------------------------
+#                             do_configure
+#------------------------------------------------------------------------------
+do_configure()
+{
+  if [[ -n $configure_needed ]]; then
+
+    logmsg ""; logmsg "Configuring ${pkgname}${arch}.${config} ..."; logmsg ""
+
+    if [[ -z $instdir ]]; then
+      install_prefix_opt=""
+    else
+      install_prefix_opt="-D INSTALL_PREFIX=$instdir"
+    fi
+
+    cmake  $install_prefix_opt  "$pkgdir"
+
+    rc=$?
+    update_maxrc
+
+    if (( $rc != 0 )); then errmsg ""; errmsg "ERROR: cmake has failed! rc=$rc"; fi
+
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                               do_make
+#------------------------------------------------------------------------------
+do_make()
+{
+  if [[ -n $make_needed ]]; then
+
+    logmsg ""; logmsg "Building ${pkgname}${arch}.${config} ..."; logmsg ""
+
+    make
+
+    rc=$?
+    update_maxrc
+
+    if (( $rc != 0 )); then errmsg ""; errmsg "ERROR: make has failed! rc=$rc"; fi
+
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                             do_install
+#------------------------------------------------------------------------------
+do_install()
+{
+  if [[ -n $install_needed ]]; then
+
+    logmsg ""; logmsg "Installing ${pkgname}${arch}.${config} ..."; logmsg ""
+
+    $sudo make install
+
+    rc=$?
+    update_maxrc
+
+    if (( $rc != 0 )); then errmsg ""; errmsg "ERROR: make install has failed! rc=$rc"; fi
+
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                             do_uninstall
+#------------------------------------------------------------------------------
+do_uninstall()
+{
+  if [[ -n $uninstall_needed ]]; then
+
+    logmsg ""; logmsg "UNinstalling ${pkgname}${arch}.${config} ..."; logmsg ""
+
+    $sudo make uninstall
+
+    rc=$?
+    update_maxrc
+
+    if (( $rc != 0 )); then errmsg ""; errmsg "ERROR: make uninstall has failed! rc=$rc"; fi
+
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                              setrc1
+#------------------------------------------------------------------------------
+setrc1()
+{
+  rc=1
+  update_maxrc
+}
+
+#------------------------------------------------------------------------------
+#                           update_maxrc
+#------------------------------------------------------------------------------
+update_maxrc()
+{
+  # Note: maxrc remains negative once it's negative.
+
+  if (( $maxrc >= 0 )); then
+    if (( $rc < 0 )); then
+      maxrc=$rc
+    else
+      if (( $rc > 0 )); then
+        if (( $rc > $maxrc )); then
+          maxrc=$rc
+        fi
+      fi
+    fi
+  fi
+}
+
+#------------------------------------------------------------------------------
+#                              quit
+#------------------------------------------------------------------------------
+quit()
+{
+  popd >/dev/null 2>&1
+  exit $maxrc
+}
+
+#-------------------------------------------------------------------------------
+#                              MAIN
+#------------------------------------------------------------------------------
+
+init  $@
+
+#-------------------------------------------------------------------------------
