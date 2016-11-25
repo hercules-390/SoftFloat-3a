@@ -91,18 +91,18 @@ float64_t
         }
 #ifdef IBM_IEEE
         if ( ! expA ) {
-            sigZ = (uiA + uiB) & UINT64_C(0x7FFFFFFFFFFFFFFF);          /* Sum the significands and exclude sign bits       */
-            if (!(sigZ & 0XFFF0000000000000) && sigZ) {                 /* if exp zero and sig non-zero, then subnormal     */
-                softfloat_raw.Incre = false;                             /* Result was not incremented                       */
-                softfloat_raw.Inexact = false;                           /* Result is not inexact                            */
-                softfloat_raw.Sig64 = sigZ << 10;                        /* 32 + 7; save rounded significand for scaling     */
-                softfloat_raw.Sig0 = 0;                                  /* Zero bits 64-128 of rounded result               */
-                softfloat_raw.Exp = -1022;                               /* Save semi-unbiased exponent                      */
-                softfloat_raw.Sign = signZ;                              /* Save result sign                                 */
-                softfloat_raw.Tiny = true;                               /* Indicate a subnormal result                      */
-                softfloat_exceptionFlags |= softfloat_flag_tiny;        /* nonzero result is tiny                           */
+            sigZ = (uiA + uiB) & UINT64_C(0x7FFFFFFFFFFFFFFF);      /* Sum the significands and exclude sign bits   */
+            if (!(sigZ & 0XFFF0000000000000ULL) && sigZ) {          /* if exp zero and sig non-zero, then subnormal */
+                softfloat_raw.Incre = false;                        /* Result was not incremented                   */
+                softfloat_raw.Inexact = false;                      /* Result is not inexact                        */
+                softfloat_raw.Sig64 = sigZ << 10;                   /* 32 + 7; save rounded significand for scaling */
+                softfloat_raw.Sig0 = 0;                             /* Zero bits 64-128 of rounded result           */
+                softfloat_raw.Exp = -1022;                          /* Save semi-unbiased exponent                  */
+                softfloat_raw.Sign = signZ;                         /* Save result sign                             */
+                softfloat_raw.Tiny = true;                          /* Indicate a subnormal result                  */
+                softfloat_exceptionFlags |= softfloat_flag_tiny;    /* nonzero result is tiny                       */
             }
-            uiZ = packToF64UI(signZ, 0, sigZ);                          /* Pack up a zero or a subnormal                    */
+            uiZ = packToF64UI(signZ, 0, sigZ);                      /* Pack up a zero or a subnormal                */
             goto uiZ;
         }
 #else   
