@@ -1253,8 +1253,15 @@
     set "did_vstools=1"
   )
 
-  nmake /nologo
+  :: Do faster cotire unity build if possibe
 
+  set "nmake_target=all_unity"
+  nmake /q %nmake_target% > NUL 2>&1
+  if %errorlevel% EQU 2 set "nmake_target="
+
+  :: Now build the target
+
+  nmake /nologo %nmake_target%
   set "rc=%errorlevel%"
   call :update_maxrc
 

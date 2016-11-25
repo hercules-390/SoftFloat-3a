@@ -388,6 +388,17 @@ isalphanum()
 }
 
 #------------------------------------------------------------------------------
+#                           get_num_cpus
+#------------------------------------------------------------------------------
+get_num_cpus()
+{
+                    CPUS=`getconf _NPROCESSORS_ONLN 2>/dev/null`  # Linux
+  [ -z "$CPUS" ] && CPUS=`getconf NPROCESSORS_ONLN`               # FreeBSD
+  [ -z "$CPUS" ] && CPUS=`ksh93 -c 'getconf NPROCESSORS_ONLN'`    # Solaris
+  [ -z "$CPUS" ] && CPUS=1                                        # Default
+}
+
+#------------------------------------------------------------------------------
 #                           get_cache_value
 #------------------------------------------------------------------------------
 get_cache_value()
@@ -1121,6 +1132,8 @@ is_uninstall_needed()
 #------------------------------------------------------------------------------
 BEGIN()
 {
+  get_num_cpus
+
   push_shopt -s nocasematch
 
   if [[ -n $bldall ]]; then
@@ -1321,7 +1334,15 @@ do_make()
 
     logmsg ""; logmsg "Building ${pkgname}${arch}.${config} ..."; logmsg ""
 
-    make
+    # Do faster cotire unity build if possibe
+
+    make_target="all_unity"
+    make /q $make_target > /dev/null 2>&1
+    if (( $? == 2 )); then
+      make_target=""
+    fi
+
+    make -j $CPUS $make_target
 
     rc=$?
     update_maxrc

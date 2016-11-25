@@ -18,6 +18,7 @@ else()
 
     include( Vdump )
     include( Trace )
+    include( cotire OPTIONAL )
 
 endif()
 
@@ -145,6 +146,10 @@ if( SHARED_LIBRARY )
                            OUTPUT_NAME                ${FULLNAME}
                            PDB_NAME                   ${FULLNAME} )
 
+    if ( COMMAND cotire )
+      cotire( ${FULLNAME} )
+    endif()
+
     install( TARGETS ${FULLNAME}
              PUBLIC_HEADER DESTINATION include
              LIBRARY       DESTINATION lib )
@@ -158,6 +163,10 @@ else()
                            PUBLIC_HEADER              "${PUBLIC_HEADERS}"
                            OUTPUT_NAME                 ${FULLNAME}
                            COMPILE_PDB_NAME            ${FULLNAME} )
+
+    if ( COMMAND cotire )
+      cotire( ${FULLNAME} )
+    endif()
 
     install( TARGETS ${FULLNAME}
              PUBLIC_HEADER DESTINATION include
