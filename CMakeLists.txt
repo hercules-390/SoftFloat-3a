@@ -2,9 +2,17 @@
 #   Global settings
 #
 cmake_minimum_required( VERSION 3.2 )
+
 cmake_policy(SET CMP0048 NEW)
 set( HERCMODS "../hercsource/" )
 
+set(CMAKE_DEBUG_TARGET_PROPERTIES
+  INCLUDE_DIRECTORIES
+  COMPILE_DEFINITIONS
+  POSITION_INDEPENDENT_CODE
+  CONTAINER_SIZE_REQUIRED
+  LIB_VERSION
+) 
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the directory with the CMAKE user modules
@@ -23,6 +31,7 @@ if( TRAVIS )
     message( "@@ Remote build ( Travis ) " )
 else()
     message( "@@ Local  build" )
+
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   check for an in-source build
 #   and make sure the user doesn't play dirty with symlinks
@@ -84,7 +93,11 @@ Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}
 endif()
 set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
 
+message( ${INSTALL_PREFIX} "  **  " ${BUILD_TYPE} )
+
 endif( TRAVIS )
+
+set( SHARED_LIBRARY )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   define the project
@@ -211,14 +224,8 @@ foreach( _s IN LISTS _l )
             source/include/${_s} )
 endforeach()
 
+message( ${public_headers} )
 
- #[[  Remaining header files are not required to use Softfloat from other applications.
-file( GLOB public_headers
-        RELATIVE "${CMAKE_SOURCE_DIR}" "source/include/*.h" )
-list( REMOVE_ITEM public_headers "source/include/softfloat.h")
-list( APPEND public_headers "source/${HERCMODS}softfloat.h" )
-list( SORT public_headers )
- ]]
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the sources
@@ -538,6 +545,14 @@ add_library( SoftFloat STATIC ${SoftFloat_SRCS} )
 set_target_properties(  SoftFloat PROPERTIES
 						OUTPUT_NAME SoftFloat
 						PUBLIC_HEADER "${public_headers}" )
+
+# Because the static library will be included in a shared library,
+# Position-independent code is required for non-Windows builds.  
+if ( WIN32 )
+else ( )
+    set_target_properties( SoftFloat PROPERTIES POSITION_INDEPENDENT_CODE ON )
+endif ( )
+
 install( TARGETS SoftFloat
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
