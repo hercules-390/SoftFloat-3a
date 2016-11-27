@@ -71,13 +71,12 @@ recommended.
 hercules/hyperion/             # Hyperion source (see Note 1.)
         /SoftFloat-3a          # SoftFloat 3a For Hercules source
         /x86/hyperion/         # Hyperion build/install directory
-        /x86/soft              # S3FH install dir
+        /x86/s3fh              # S3FH install dir
                                # ..includes copyright notices
-        /x86/soft/lib          # contains S3FH SoftFloat.lib
-        /x86/soft/include      # contains S3FH public headers
-        /x86/soft.release      # S3FH Release build dir
-        /x86/soft/libdebug     # Needed only for debug builds
-        /x86/soft.debug        # S3FH Debug build dir
+        /x86/s3fh/lib          # contains S3FH s3fhFloat.lib
+        /x86/s3fh/include      # contains S3FH public headers
+        /x86/s3fh.release      # S3FH Release build dir
+        /x86/s3fh.debug        # S3FH Debug build dir
 
 Note 1.  When building Hyperion under Windows, the source directory is 
 also the build directory and may also be the install directory.  
@@ -98,12 +97,11 @@ PREPARE TO BUILD FROM SOURCE - Windows
     mkdir hercules\hyperion
     mkdir hercules\SoftFloat-3a
     mkdir hercules\x86\hyperion
-    mkdir hercules\x86\soft
-    mkdir hercules\x86\soft\lib
-    mkdir hercules\x86\soft\include
-    mkdir hercules\x86\soft.release
-    mkdir hercules\x86\soft.debug
-    mkdir hercules\x86\soft\libdebug
+    mkdir hercules\x86\s3fh
+    mkdir hercules\x86\s3fh.release
+    mkdir hercules\x86\s3fh.debug
+
+The remaining directories are built by CMake.
 
 
 PREPARE TO BUILD FROM SOURCE - UNIX
@@ -116,21 +114,25 @@ PREPARE TO BUILD FROM SOURCE - UNIX
 
     uname -p
     
-3) Build the recommended directory tree.  Substitute the value of 
-   %PROCESSOR_ARCHITECTURE% for "amd64" in the directory names below.  
+3) Build the recommended directory tree.  Substitute the result 
+   returned from uname -p for "amd64" in the directory names below.  
 
     mkdir hercules/hyperion
     mkdir hercules/SoftFloat-3a
     mkdir hercules/amd64/hyperion
-    mkdir hercules/amd64/soft
-    mkdir hercules/amd64/soft/lib
-    mkdir hercules/amd64/soft/include
-    mkdir hercules/amd64/soft.release
-    mkdir hercules/amd64/soft.debug
-    mkdir hercules/amd64/soft/libdebug
+    mkdir hercules/amd64/s3fh
+    mkdir hercules/amd64/s3fh.release
+    mkdir hercules/amd64/s3fh.debug
+
+The remaining directories are built by CMake.  You may omit s3fh if you
+do not plan a debug build.  For day-to-day use, a release build is fine.  
 
 
-PERFORM THE BUILD FROM SOURCE
+PERFORM THE RELEASE BUILD FROM SOURCE
+
+The same commands are used to perform the build in Windows and in UNIX.
+CMake will translate the forward slashes in its command line to the 
+orientation required by the host operating system.   
 
 1) Change to the top level in the directory structure
 
@@ -142,7 +144,8 @@ PERFORM THE BUILD FROM SOURCE
 
 3) Run cmake to create build and installation control files
 
-    cd soft.release
+    cd x86                   #or whatever the install TLD is
+    cd s3fh.release
     cmake ../../SoftFloat-3a
 
 4) Run cmake  to build SoftFloat 3a For Hercules.  This corresponds to 
@@ -162,12 +165,42 @@ PERFORM THE BUILD FROM SOURCE
    you prefer.  There is no equivalent way to do this in Visual Studio
    2015.  
 
-    cmake -P cmake_install.cmake
+    cmake -P cmake_install.cmake 
 
 At this point, SoftFloat 3a For Hercules has been built and you may
 continue by building Hercules.  
 
+
+PERFORM A DEBUG BUILD FROM SOURCE
+
+Repeat steps 3, 4, and 5 as for a release build with the following 
+changes.  A debug build creates the library SoftFloat_D.lib (Windows)
+or libSoftFloat_D.a (non-Windows).  A Hyperion debug build will expect
+the "_D" library.
+
+3. Use directory s3fh.debug instead of s3fh.release
+
+5. Use the following command to install the debug build. 
+
+    cmake -DBUILD_TYPE=Debug -P cmake_install.cmake 
     
+   If your host system is UNIX-based, you may omit -DBUILD_TYPE=Debug.
+   See the Appendix below on the need for -DBUILD_TYPE=Debug.  
+
+
+APPENDIX: DETAILS ON THE NEED FOR -DBUILD_TYPE=Debug
+
+According to the legacy CMake bug tracker, build trees built for Visual
+Studio or OS/X have multiple configurations included in a single tree,
+and the install script needs the BUILD_TYPE passed to it from the
+command line to install the correct configuration.  
+
+See the following post to issue 11950 in that bug tracker.  Note that 
+the bug under discussion is not related to Windows or OS/X.  
+
+  https://public.kitware.com/Bug/view.php?id=11950#c25717
+
+
 APPENDIX: TECHNICAL NOTES ON THE BUILD
 
 The tool chosen to build the package is CMAKE, and the CMakeLists.txt
