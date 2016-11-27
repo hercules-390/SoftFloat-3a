@@ -53,10 +53,19 @@ if( "${SOURCE_DIR}" STREQUAL "${BINARY_DIR}" )
 " )
 endif( )
 
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#
+#   If Visual Studio or OS/X, CMake defaults to four configurations: 
+#   Release, Debug, MinSizeRel, and RelWithDebInfo.  For now, only the
+#   first two are supported.  Remove the other two from consideration.
+#
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE )
+message ( "@@ Configuration Types: " "${CMAKE_CONFIGURATION_TYPES}" )
+
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	install prefix, and build type
-#
-
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if( NOT DEFINED INSTALL_PREFIX )
     get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
@@ -91,9 +100,8 @@ if( NOT BUILD_TYPE MATCHES "Release" AND
 Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}
 " )
 endif()
-set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
 
-message( ${INSTALL_PREFIX} "  **  " ${BUILD_TYPE} )
+set( CMAKE_DEBUG_POSTFIX "_D" )
 
 endif( TRAVIS )
 
@@ -223,8 +231,6 @@ foreach( _s IN LISTS _l )
             public_headers
             source/include/${_s} )
 endforeach()
-
-message( ${public_headers} )
 
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
