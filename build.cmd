@@ -1253,11 +1253,12 @@
     set "did_vstools=1"
   )
 
-  :: Do faster cotire unity build if possibe
+  :: Do faster cotire unity build if possible
 
-  set "nmake_target=all_unity"
+  set "nmake_target="
+
   nmake /q %nmake_target% > NUL 2>&1
-  if %errorlevel% EQU 2 set "nmake_target="
+  if %errorlevel% NEQ 2 set "nmake_target=all_unity"
 
   :: Now build the target
 
