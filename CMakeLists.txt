@@ -101,6 +101,7 @@ Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}
 " )
 endif()
 
+set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
 set( CMAKE_DEBUG_POSTFIX "_D" )
 
 endif( TRAVIS )
