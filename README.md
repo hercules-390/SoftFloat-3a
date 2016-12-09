@@ -89,7 +89,7 @@ If clang/clang++ is not in your $PATH, then you will need to specify its full pa
 
 The SoftFloat project is hosted on GitHub at the following URL:
 
-  * [https://github.com/hercules-390/SoftFloat-3a](https://github.com/hercules-390/SoftFloat-3a)
+  * [https://github.com/Fish-Git/SoftFloat-3a](https://github.com/Fish-Git/SoftFloat-3a)
 
 You can either clone the git repository (recommended) or download the source code .zip file from github.  (click the green "Clone or download" button and select "Download")
 
