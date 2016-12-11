@@ -1,3 +1,12 @@
+
+              BUILDING SOFTFLOAT 3A FOR Hercules
+
+Copyright 2016 by Stephen R. Orso.  This work is licensed under the Creative 
+Commons Attribution-ShareAlike 4.0 International License.  To view a copy of
+ this license, visit  http://creativecommons.org/licenses/by-sa/4.0/ or send 
+ a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+ 
 BUILD INSTRUCTIONS
 
 SoftFloat 3a For Hercules (S3FH) is built from source using the 
@@ -12,8 +21,8 @@ following process:
   installation directory.  (Documented in the Hyperion 
   build instructions)
 
-If you use the recommended directory structure, described below, 
-you can skip step 4.  
+If you use the recommended directory structure described below, 
+there is no need to configure the Hyperion build.  
 
 PREREQUISITE SOFTWARE - UNIX
 
@@ -47,9 +56,9 @@ Note 3.  Posh-git is installed as part of the Github for Windows
          GUI client, available at https://desktop.github.com/.  It
          can also be installed stand-alone from its own git repository,
          at https://github.com/dahlbyk/posh-git.  
-Note 4.  Posh-git is not required if you are only building; you can
-         download the zip file from github.com.  If you are developing,
-         use Posh-git.  
+Note 4.  A command-line git client is not required if you are only 
+         building; you can download the zip file from github.com.  
+         If you are developing, you will need a git client.  
 
 (I believe Posh-git is so named because it uses Windows Power Shell, 
 not because it is particularly rich or luxurious.)
@@ -66,7 +75,7 @@ recommended.
 
 - On Windows, use the value of the %PROCESSOR-ARCHITECTURE% environment
   variable to avoid the need for step 4. above.  
-- On UNIX, use the value returned by uname -p.
+- On UNIX, use the value returned by uname -m.
 
 hercules/hyperion/             # Hyperion source (see Note 1.)
         /SoftFloat-3a          # SoftFloat 3a For Hercules source
@@ -78,7 +87,12 @@ hercules/hyperion/             # Hyperion source (see Note 1.)
         /x86/s3fh.release      # S3FH Release build dir
         /x86/s3fh.debug        # S3FH Debug build dir
 
-Note 1.  When building Hyperion under Windows, the source directory is 
+Note 1.  The S3FH install, release build, and debug build directories
+must be named as shown above.  Changing these names means you will need
+to configure the Hyperion build to deal with non-standard directory
+names.  
+
+Note 2.  When building Hyperion under Windows, the source directory is 
 also the build directory and may also be the install directory.  
 
 
@@ -112,10 +126,10 @@ PREPARE TO BUILD FROM SOURCE - UNIX
    
 2) Determine the processor architecture
 
-    uname -p
+    uname -m
     
 3) Build the recommended directory tree.  Substitute the result 
-   returned from uname -p for "amd64" in the directory names below.  
+   returned from uname -m for "amd64" in the directory names below.  
 
     mkdir hercules/hyperion
     mkdir hercules/SoftFloat-3a
