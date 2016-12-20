@@ -118,6 +118,57 @@ PREPARE TO BUILD FROM SOURCE - Windows
 The remaining directories are built by CMake.
 
 
+INSTALLING CMAKE
+
+SoftFloat 3a For Hercules requires CMake 3.2 or better.  Pre-built 
+binaries are available for Windows, and sources for building on 
+open source host systems are available at:
+
+    https://cmake.org/download/
+
+Some open source systems have 3.2 or better in their repositories.  
+If your open source host system does not have 3.2 or better available, 
+you will have to build CMake from using its bootstrap process.  
+
+Instructions for building CMake from scratch can be found in the 
+README.rst contained in the source download file.  These instructions
+for CMake 3.7.1 are reproduced here for convenience.  Note that the
+README.rst is authoritative for the build process.
+
+   Building CMake from Scratch
+   ---------------------------
+
+   UNIX/Mac OSX/MinGW/MSYS/Cygwin
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   
+
+   You need to have a compiler and a make installed.
+   Run the ``bootstrap`` script you find in the source directory of CMake.
+   You can use the ``--help`` option to see the supported options.
+   You may use the ``--prefix=<install_prefix>`` option to specify a custom
+   installation directory for CMake. You can run the ``bootstrap`` script from
+   within the CMake source directory or any other build directory of your
+   choice. Once this has finished successfully, run ``make`` and
+   ``make install``.  In summary::
+
+    $ ./bootstrap && make && make install
+
+   Windows
+   ^^^^^^^
+
+   You need to download and install a binary release of CMake in order to build
+   CMake.  You can get these releases from the `CMake Download Page`_ .  Then
+   proceed with the instructions below.
+
+   .. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
+
+A documentation page is also available on the cmake.org web site, but it
+is apparently not linked to by any page a rational user would open
+during a search for build instructions.  This author could not find the
+link, anyway, without using the site's search function.  
+
+   https://cmake.org/install/
+
+
 PREPARE TO BUILD FROM SOURCE - UNIX
 
 1) Open terminal or console prompt.  You can perform this procedure
