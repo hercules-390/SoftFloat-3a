@@ -76,7 +76,7 @@ typedef unsigned int uint_fast32_t;
  #ifdef _WIN64
 typedef __int64 intptr_t;
  #else /* _WIN64 */
-typedef _W64 int intptr_t;
+typedef int intptr_t;
  #endif /* _WIN64 */
 #endif /* _INTPTR_T_DEFINED */
 
@@ -85,21 +85,21 @@ typedef _W64 int intptr_t;
  #ifdef _WIN64
 typedef unsigned __int64 uintptr_t;
  #else /* _WIN64 */
-typedef _W64 unsigned int uintptr_t;
+typedef unsigned int uintptr_t;
  #endif /* _WIN64 */
 #endif /* _UINTPTR_T_DEFINED */
 
-typedef _Longlong int64_t;
-typedef _ULonglong uint64_t;
+typedef long long int64_t;
+typedef unsigned long long uint64_t;
 
-typedef _Longlong int_least64_t;
-typedef _ULonglong uint_least64_t;
+typedef long long int_least64_t;
+typedef unsigned long long uint_least64_t;
 
-typedef _Longlong int_fast64_t;
-typedef _ULonglong uint_fast64_t;
+typedef long long int_fast64_t;
+typedef unsigned long long uint_fast64_t;
 
-typedef _Longlong intmax_t;
-typedef _ULonglong uintmax_t;
+typedef long long intmax_t;
+typedef unsigned long long uintmax_t;
 
 		/* LIMIT MACROS */
 #define INT8_MIN	(-0x7f - _C2)
