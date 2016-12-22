@@ -219,7 +219,10 @@ include_directories(    BEFORE
                     )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   SoftFloat Public Headers
+#   SoftFloat Public Headers.
+#
+#   Note that if stdbool.h and/or stdint.h are not part of the host system's 
+#   environment, we will include them as SoftFloat 3a public headers.  
 
 set(    _l
         softfloat_types.h
@@ -232,6 +235,18 @@ foreach( _s IN LISTS _l )
             public_headers
             source/include/${_s} )
 endforeach()
+
+if( NOT HAVE_STDBOOL_H )
+    list(   APPEND
+            public_headers
+            ${CMAKE_BINARY_DIR}/stdbool.h )
+endif() 
+
+if( NOT HAVE_STDINT_H )
+    list(   APPEND
+            public_headers
+            ${CMAKE_BINARY_DIR}/stdint.h )
+endif()
 
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
