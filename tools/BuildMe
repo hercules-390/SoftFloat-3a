@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Configure SoftFloat and the compile it.
+# Your current working directory MUST be the one where this file resides
+# DO NOT source this script.
+
+error () {
+echo "Unable to $*.  Terminating." >&2
+exit 12
+}
+
+todir=../../$(uname -m)/sf3h.release
+echo "Building for release in '$todir'." >&2
+
+cd $todir
+if [ $? -ne 0 ] ; then
+        error "change directory to '$todir'"
+fi
+
+cmake ../../SoftFloat-3a
+if [ $? -ne 0 ] ; then
+        error "configure"
+fi
+
+cmake --build . --clean-first --config Release
+if [ $? -ne 0 ] ; then
+        error "compile"
+fi

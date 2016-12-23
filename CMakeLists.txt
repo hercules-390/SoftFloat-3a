@@ -12,7 +12,7 @@ set(CMAKE_DEBUG_TARGET_PROPERTIES
   POSITION_INDEPENDENT_CODE
   CONTAINER_SIZE_REQUIRED
   LIB_VERSION
-) 
+)
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the directory with the CMAKE user modules
@@ -55,7 +55,7 @@ endif( )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
-#   If Visual Studio or OS/X, CMake defaults to four configurations: 
+#   If Visual Studio or OS/X, CMake defaults to four configurations:
 #   Release, Debug, MinSizeRel, and RelWithDebInfo.  For now, only the
 #   first two are supported.  Remove the other two from consideration.
 #
@@ -221,12 +221,12 @@ include_directories(    BEFORE
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Public Headers.
 #
-#   Note that if stdbool.h and/or stdint.h are not part of the host system's 
-#   environment, we will include them as SoftFloat 3a public headers.  
+#   Note that if stdbool.h and/or stdint.h are not part of the host system's
+#   environment, we will include them as SoftFloat 3a public headers.
 
 set(    _l
         softfloat_types.h
-        softfloat.h    
+        softfloat.h
     )
 list( SORT _l )
 set( public_headers "" )
@@ -240,7 +240,7 @@ if( NOT HAVE_STDBOOL_H )
     list(   APPEND
             public_headers
             ${CMAKE_BINARY_DIR}/stdbool.h )
-endif() 
+endif()
 
 if( NOT HAVE_STDINT_H )
     list(   APPEND
@@ -505,7 +505,7 @@ set(    _l
         s_normSubnormalF128Sig.c
         s_normSubnormalF32Sig.c
         s_normSubnormalF64Sig.c
-#[[     s_roundPackToExtF80.c       ]]        
+#[[     s_roundPackToExtF80.c       ]]
         ${HERCMODS}s_roundPackToF128.c
         ${HERCMODS}s_roundPackToF32.c
         ${HERCMODS}s_roundPackToF64.c
@@ -569,7 +569,7 @@ set_target_properties(  SoftFloat PROPERTIES
 						PUBLIC_HEADER "${public_headers}" )
 
 # Because the static library will be included in a shared library,
-# Position-independent code is required for non-Windows builds.  
+# Position-independent code is required for non-Windows builds.
 if ( WIN32 )
 else ( )
     set_target_properties( SoftFloat PROPERTIES POSITION_INDEPENDENT_CODE ON )
@@ -594,7 +594,7 @@ endif()
 
 install(FILES "COPYING.txt" DESTINATION "." )
 install(FILES "README.txt"  DESTINATION "." )
-install(FILES "README.html" DESTINATION "." )
+install(FILES "README.md"   DESTINATION "." )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the cpack installers definitions

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# This script is the one-stop shopping for MakeDirs, BuildMe, and InstallMe
+# in the utils subdirectory.
+
+# Your current working directory MUST be the one where this file resides
+# DO NOT source this script.
+
+error () {
+echo "Unable to $*.  Terminating." >&2
+exit 12
+}
+
+# Go to where the individual scripts are
+cd tools
+
+MakeDirs && BuildMe && InstallMe
+rv=$?
+if [ $? -ne 0 ] ; then
+        exit $rv
+fi

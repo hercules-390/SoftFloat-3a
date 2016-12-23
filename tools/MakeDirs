@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Generate default build and install directories if the do not exist.
+# Your current working directory MUST be the one where this file resides
+# DO NOT source this script.
+
+dodir () {
+dir="$root/$1"
+if [ ! -d $dir ] ; then
+        mkdir $dir
+        if [ $? -ne 0 ] ; then
+                echo "Cannot create directory '$dir'.  Terminating."
+                exit 12
+        fi
+        echo "Created '$dir'." >&2
+else
+        echo "'$dir' exists." >&2
+
+fi
+}
+
+root=../../$(uname -m)
+
+echo "Creating directories under '$root'." >&2
+
+dodir ""
+dodir sf3h
+dodir sf3h.release
+dodir sf3h.debug
