@@ -1,9 +1,7 @@
-# Berkeley SoftFloat Package Overview
+# Berkeley SoftFloat release 3a as adopted for Hyperion
 
-## Package Overview for Berkeley SoftFloat Release 3a</H1>
-
-John R. Hauser
-2015 October 23
+Author:  John R. Hauser, 2015 October 23.
+Modified by:  Stephen R. Orso, 2016-12-20.
 
 Berkeley SoftFloat is a software implementation of binary floating-point that
 conforms to the IEEE Standard for Floating-Point Arithmetic.
