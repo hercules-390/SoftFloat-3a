@@ -24,6 +24,6 @@ root=../../$(uname -m)
 echo "Creating directories under '$root'." >&2
 
 dodir ""
-dodir sf3h
-dodir sf3h.release
-dodir sf3h.debug
+dodir s3fh
+dodir s3fh.release
+dodir s3fh.debug

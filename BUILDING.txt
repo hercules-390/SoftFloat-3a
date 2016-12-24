@@ -20,7 +20,7 @@ following process:
         . Compile sources into a build directory.
         . Install the build library, public headers, and license files  into
           an installation directory.
-- Configure the Hercules Hyperion build to find SF3H in the
+- Configure the Hercules Hyperion build to find s3fh in the
   installation directory.  (Documented in the Hyperion
   build instructions)
 
@@ -93,7 +93,7 @@ hercules/hyperion/             # Hyperion source (see Note 1.)
         /x86/s3fh.release      # S3FH Release build dir
         /x86/s3fh.debug        # S3FH Debug build dir
 
-Note 1.  The SF3H install, release build, and debug build directories
+Note 1.  The s3fh install, release build, and debug build directories
 must be named as shown above.  Changing these names means you will need
 to configure the Hyperion build to deal with non-standard directory
 names.

@@ -9,7 +9,7 @@ echo "Unable to $*.  Terminating." >&2
 exit 12
 }
 
-todir=../../$(uname -m)/sf3h.release
+todir=../../$(uname -m)/s3fh.release
 echo "Building for release in '$todir'." >&2
 
 cd $todir
