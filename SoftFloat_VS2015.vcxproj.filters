@@ -65,6 +65,15 @@
     <Filter Include="Other Files\build\cmake\includes">
       <UniqueIdentifier>{5f226786-8a8d-40d2-ad5c-3022761bae45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Other Files\build\msvc">
+      <UniqueIdentifier>{80E98C68-29D5-410c-8D09-0EA2D3929B53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other Files\build\msvc\VS2008">
+      <UniqueIdentifier>{2F6E4603-40C9-41db-9C01-DA898CD85044}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other Files\build\msvc\VS2015">
+      <UniqueIdentifier>{B8FEFDAB-D1B4-4c49-B48C-CD9DAC666F04}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Other Files\build\scripts">
       <UniqueIdentifier>{336e2aa7-f7e3-4b49-9b83-fac3ecd70949}</UniqueIdentifier>
     </Filter>
@@ -1240,6 +1249,21 @@
     </None>
     <None Include="cmake\modules\Vdump.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
+    </None>
+    <None Include="SoftFloat_VS2008.sln">
+      <Filter>Other Files\build\msvc\VS2008</Filter>
+    </None>
+    <None Include="SoftFloat_VS2008.vcproj">
+      <Filter>Other Files\build\msvc\VS2008</Filter>
+    </None>
+    <None Include="SoftFloat_VS2015.sln">
+      <Filter>Other Files\build\msvc\VS2015</Filter>
+    </None>
+    <None Include="SoftFloat_VS2015.vcxproj">
+      <Filter>Other Files\build\msvc\VS2015</Filter>
+    </None>
+    <None Include="SoftFloat_VS2015.vcxproj.filters">
+      <Filter>Other Files\build\msvc\VS2015</Filter>
     </None>
     <None Include="build">
       <Filter>Other Files\build\scripts\Linux</Filter>

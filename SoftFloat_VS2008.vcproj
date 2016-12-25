@@ -1800,6 +1800,38 @@
 					</Filter>
 				</Filter>
 				<Filter
+					Name="msvc"
+					>
+					<Filter
+						Name="VS2008"
+						>
+						<File
+							RelativePath=".\SoftFloat_VS2008.sln"
+							>
+						</File>
+						<File
+							RelativePath=".\SoftFloat_VS2008.vcproj"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="VS2015"
+						>
+						<File
+							RelativePath=".\SoftFloat_VS2015.sln"
+							>
+						</File>
+						<File
+							RelativePath=".\SoftFloat_VS2015.vcxproj"
+							>
+						</File>
+						<File
+							RelativePath=".\SoftFloat_VS2015.vcxproj.filters"
+							>
+						</File>
+					</Filter>
+				</Filter>
+				<Filter
 					Name="tools"
 					>
 					<File
