@@ -66,13 +66,13 @@
       <UniqueIdentifier>{5f226786-8a8d-40d2-ad5c-3022761bae45}</UniqueIdentifier>
     </Filter>
     <Filter Include="Other Files\build\msvc">
-      <UniqueIdentifier>{80E98C68-29D5-410c-8D09-0EA2D3929B53}</UniqueIdentifier>
+      <UniqueIdentifier>{78074E93-F77E-483b-A761-0DEA0AEFB364}</UniqueIdentifier>
     </Filter>
     <Filter Include="Other Files\build\msvc\VS2008">
-      <UniqueIdentifier>{2F6E4603-40C9-41db-9C01-DA898CD85044}</UniqueIdentifier>
+      <UniqueIdentifier>{04C0FB3B-C9A3-4ce2-B870-CEF6B8503C71}</UniqueIdentifier>
     </Filter>
     <Filter Include="Other Files\build\msvc\VS2015">
-      <UniqueIdentifier>{B8FEFDAB-D1B4-4c49-B48C-CD9DAC666F04}</UniqueIdentifier>
+      <UniqueIdentifier>{A4F10EA1-37F0-44d8-B4E3-0DF312BFDF98}</UniqueIdentifier>
     </Filter>
     <Filter Include="Other Files\build\scripts">
       <UniqueIdentifier>{336e2aa7-f7e3-4b49-9b83-fac3ecd70949}</UniqueIdentifier>
