@@ -1831,22 +1831,6 @@
 						</File>
 					</Filter>
 				</Filter>
-				<Filter
-					Name="tools"
-					>
-					<File
-						RelativePath=".\tools\normalize_includes.rx"
-						>
-					</File>
-					<File
-						RelativePath=".\tools\path.here"
-						>
-					</File>
-					<File
-						RelativePath=".\tools\rexxutil.cls"
-						>
-					</File>
-				</Filter>
 			</Filter>
 		</Filter>
 	</Files>

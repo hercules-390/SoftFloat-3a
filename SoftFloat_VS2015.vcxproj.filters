@@ -83,9 +83,6 @@
     <Filter Include="Other Files\build\scripts\Windows">
       <UniqueIdentifier>{e1b2f3ee-7e8b-4527-b4bc-6ec94c06b786}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Other Files\build\tools">
-      <UniqueIdentifier>{b56834b3-1c2a-46bd-9b33-6e697597cae2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\extF80_add.c">
@@ -1270,15 +1267,6 @@
     </None>
     <None Include="vstools.cmd">
       <Filter>Other Files\build\scripts\Windows</Filter>
-    </None>
-    <None Include="tools\normalize_includes.rx">
-      <Filter>Other Files\build\tools</Filter>
-    </None>
-    <None Include="tools\path.here">
-      <Filter>Other Files\build\tools</Filter>
-    </None>
-    <None Include="tools\rexxutil.cls">
-      <Filter>Other Files\build\tools</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

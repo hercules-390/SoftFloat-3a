@@ -528,9 +528,6 @@
     <None Include="README.html" />
     <None Include="README.md" />
     <None Include="source\include\softfloat.h.preherc" />
-    <None Include="tools\normalize_includes.rx" />
-    <None Include="tools\path.here" />
-    <None Include="tools\rexxutil.cls" />
     <None Include="vstools.cmd" />
     <None Include="SoftFloat_VS2008.sln" />
     <None Include="SoftFloat_VS2008.vcproj" />
