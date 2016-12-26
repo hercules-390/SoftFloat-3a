@@ -1315,5 +1315,8 @@
     <Text Include="sources.txt">
       <Filter>Other Files\build\cmake\includes</Filter>
     </Text>
+    <Text Include="targetver.txt">
+      <Filter>Other Files\build\cmake\includes</Filter>
+    </Text>
   </ItemGroup>
 </Project>

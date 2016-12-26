@@ -550,6 +550,7 @@
     <Text Include="project.txt" />
     <Text Include="README.txt" />
     <Text Include="sources.txt" />
+    <Text Include="targetver.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
