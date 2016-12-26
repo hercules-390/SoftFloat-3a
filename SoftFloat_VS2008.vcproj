@@ -1773,6 +1773,10 @@
 							RelativePath="sources.txt"
 							>
 						</File>
+						<File
+							RelativePath=".\targetver.txt"
+							>
+						</File>
 					</Filter>
 				</Filter>
 				<Filter
