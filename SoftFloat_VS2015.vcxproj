@@ -118,22 +118,22 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <BuildLog>
-      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).htm</Path>
+      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).txt</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <BuildLog>
-      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).htm</Path>
+      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).txt</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <BuildLog>
-      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).htm</Path>
+      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).txt</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <BuildLog>
-      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).htm</Path>
+      <Path>..\$(ProjectName)\BuildLog-$(Platform)-$(Configuration).txt</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
