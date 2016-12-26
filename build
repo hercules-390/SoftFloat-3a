@@ -1334,7 +1334,7 @@ do_make()
 
     logmsg ""; logmsg "Building ${pkgname}${arch}.${config} ..."; logmsg ""
 
-    # Do faster cotire unity build if possibe
+    # Do faster cotire unity build if possible
 
     make_target="all_unity"
     make /q $make_target > /dev/null 2>&1
