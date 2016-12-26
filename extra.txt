@@ -10,7 +10,7 @@ install( DIRECTORY "doc/"        DESTINATION doc )
 #------------------------------------------------------------------------------
 
 if( WIN32 )
-install( FILES "${CMAKE_BINARY_DIR}/${FULLNAME}.pdb" DESTINATION lib )
+  install( FILES "${CMAKE_BINARY_DIR}/${FULLNAME}.pdb" DESTINATION lib )
 endif()
 
 #------------------------------------------------------------------------------

@@ -26,20 +26,8 @@ endif()
 #   Parse the build directory and set needed variables.
 #------------------------------------------------------------------------------
 
-set( TRAVIS $ENV{TRAVIS} )
-
-if( NOT TRAVIS )
-
-    message( "Local build" )
-
-    include( ParseBinaryDir )
-    ParseBinaryDir()
-
-else( NOT TRAVIS )
-
-    message( "Remote build ( Travis )" )
-
-endif( NOT TRAVIS )
+include( ParseBinaryDir )
+ParseBinaryDir()
 
 
 #------------------------------------------------------------------------------
