@@ -2,17 +2,26 @@
 #   Adjust needed compile flags for this project/package
 #------------------------------------------------------------------------------
 
+include( targetver.txt )      # Define minimum required Windows platform
+
+
+#------------------------------------------------------------------------------
+#  Little-endian / Big-endian
+#------------------------------------------------------------------------------
+
 if( NOT IS_BIG_ENDIAN )
   set( PKG_C_FLAGS "${PKG_C_FLAGS} -D LITTLEENDIAN" )
 endif()
 
+
 #------------------------------------------------------------------------------
-# Add SoftFloat flags
+#  Add SoftFloat flags
 #------------------------------------------------------------------------------
 
 set( PKG_C_FLAGS "${PKG_C_FLAGS} -D HAVE_PLATFORM_H"            )
 set( PKG_C_FLAGS "${PKG_C_FLAGS} -D SOFTFLOAT_FAST_INT64"       )
 set( PKG_C_FLAGS "${PKG_C_FLAGS} -D SOFTFLOAT_FAST_DIV64TO32"   )
+
 
 #------------------------------------------------------------------------------
 #                            PROGRAMMING NOTE
@@ -85,15 +94,17 @@ set( PKG_C_FLAGS "${PKG_C_FLAGS} -D SOFTFLOAT_FAST_DIV64TO32"   )
 ##set( PKG_C_FLAGS "${PKG_C_FLAGS} -D \"INLINE=static __inline\"" )
 ##set( PKG_C_FLAGS "${PKG_C_FLAGS} -D INLINE_LEVEL=5"             )
 
+
 #------------------------------------------------------------------------------
-# Add above package flags
+#  Add above package flags
 #------------------------------------------------------------------------------
 
 set( CMAKE_C_FLAGS_DEBUG          "${CMAKE_C_FLAGS_DEBUG}          ${PKG_C_FLAGS}" )
 set( CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${PKG_C_FLAGS}" )
 
+
 #------------------------------------------------------------------------------
-# Add other needed flags
+#  Add other needed flags
 #------------------------------------------------------------------------------
 
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D DEBUG" )

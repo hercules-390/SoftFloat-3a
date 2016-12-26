@@ -146,7 +146,10 @@ if( SHARED_LIBRARY )
                            OUTPUT_NAME                ${FULLNAME}
                            PDB_NAME                   ${FULLNAME} )
 
+    #  Use cotire if available for faster builds
+
     if ( COMMAND cotire )
+      set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
       cotire( ${FULLNAME} )
     endif()
 
@@ -164,7 +167,10 @@ else()
                            OUTPUT_NAME                 ${FULLNAME}
                            COMPILE_PDB_NAME            ${FULLNAME} )
 
+    #  Use cotire if available for faster builds
+
     if ( COMMAND cotire )
+      set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
       cotire( ${FULLNAME} )
     endif()
 

@@ -17,9 +17,11 @@
   #pragma warning( disable: 4146 )      /* unary minus applied to unsigned, result still unsigned */
   #pragma warning( disable: 4244 )      /* conversion from type1 to type2, possible data loss */
 
-  #define _WIN32_WINNT   0x0601         /* Windows 7 Service Pack 1  */
-  #define WINVER         _WIN32_WINNT   /* Windows 7 Service Pack 1  */
-  #define _WIN32_IE      0x0800         /* Internet Explorer 8.0     */
+  #ifndef   _WIN32_WINNT                /* see cmake's targetver.txt */
+    #define _WIN32_WINNT  0x0601        /* Windows 7 Service Pack 1  */
+    #define WINVER        _WIN32_WINNT  /* Windows 7 Service Pack 1  */
+    #define _WIN32_IE     0x0800        /* Internet Explorer 8.0     */
+  #endif
 
   /* Need <SDKDDKVer.h> header with later versions of Visual Studio. */
 
