@@ -533,6 +533,11 @@
     <None Include="tools\path.here" />
     <None Include="tools\rexxutil.cls" />
     <None Include="vstools.cmd" />
+    <None Include="SoftFloat_VS2008.sln" />
+    <None Include="SoftFloat_VS2008.vcproj" />
+    <None Include="SoftFloat_VS2015.sln" />
+    <None Include="SoftFloat_VS2015.vcxproj" />
+    <None Include="SoftFloat_VS2015.vcxproj.filters" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cflags.txt" />
