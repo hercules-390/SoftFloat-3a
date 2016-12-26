@@ -17,7 +17,7 @@ if [ $? -ne 0 ] ; then
         error "change directory to '$todir'"
 fi
 
-cmake ../../SoftFloat-3a
+cmake ../../SoftFloat-3a "$@"
 if [ $? -ne 0 ] ; then
         error "configure"
 fi

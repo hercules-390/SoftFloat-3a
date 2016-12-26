@@ -14,7 +14,7 @@ exit 12
 # Go to where the individual scripts are
 cd tools
 
-./MakeDirs && ./BuildMe && ./InstallMe
+./MakeDirs && ./BuildMe "$@" && ./InstallMe
 rv=$?
 if [ $? -ne 0 ] ; then
         exit $rv
