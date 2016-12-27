@@ -6,13 +6,6 @@ cmake_minimum_required( VERSION 3.2 )
 cmake_policy(SET CMP0048 NEW)
 set( HERCMODS "../hercsource/" )
 
-set(CMAKE_DEBUG_TARGET_PROPERTIES
-  INCLUDE_DIRECTORIES
-  COMPILE_DEFINITIONS
-  POSITION_INDEPENDENT_CODE
-  CONTAINER_SIZE_REQUIRED
-  LIB_VERSION
-)
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the directory with the CMAKE user modules
