@@ -12,10 +12,22 @@ exit 12
 }
 
 # Go to where the individual scripts are
+
 cd tools
 
-./MakeDirs && ./BuildMe "$@" && ./InstallMe
+# Preserve the return code
+
+./MakeDirs
 rv=$?
-if [ $? -ne 0 ] ; then
+if [ 0 -eq $rv ] ; then
+        ./BuildMe "$@"
+        rv=$?
+        if [ 0 -eq $rv ] ; then
+                ./InstallMe
+                rv=$?
+        fi
+fi
+
+if [ $rv -ne 0 ] ; then
         exit $rv
 fi
