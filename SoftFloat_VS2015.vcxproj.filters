@@ -1217,22 +1217,13 @@
     <None Include="cmake\modules\CheckHeader.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
-    <None Include="cmake\modules\ConfigHandler.cmake">
-      <Filter>Other Files\build\cmake\modules</Filter>
-    </None>
     <None Include="cmake\modules\cotire.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
     <None Include="cmake\modules\GIT_Revision.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
-    <None Include="cmake\modules\HG_Revision.cmake">
-      <Filter>Other Files\build\cmake\modules</Filter>
-    </None>
     <None Include="cmake\modules\ParseBinaryDir.cmake">
-      <Filter>Other Files\build\cmake\modules</Filter>
-    </None>
-    <None Include="cmake\modules\ParseOption.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
     <None Include="cmake\modules\Trace.cmake">
