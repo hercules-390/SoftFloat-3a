@@ -515,7 +515,6 @@
     <None Include="doc\SoftFloat-history.html" />
     <None Include="doc\SoftFloat-source.html" />
     <None Include="doc\SoftFloat.html" />
-    <None Include="package.pc.in" />
     <None Include="platform.h.in" />
     <None Include="platforms\Linux-386-GCC\Makefile" />
     <None Include="platforms\Linux-386-SSE2-GCC\Makefile" />
@@ -539,7 +538,6 @@
     <Text Include="cflags.txt" />
     <Text Include="CMakeLists.txt" />
     <Text Include="COPYING.txt" />
-    <Text Include="cpack.txt" />
     <Text Include="extra.txt" />
     <Text Include="headers.txt" />
     <Text Include="includes.txt" />

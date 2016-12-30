@@ -1,5 +1,0 @@
-Name:         @PACKAGE_NAME@
-Description:  @PACKAGE_DESCRIPTION@
-Version:      @PACKAGE_VERSION@
-Libs:         -L "@INSTALL_PREFIX@/lib"  -l @FULLNAME@
-Cflags:       -I "@INSTALL_PREFIX@/include"  @PKG_C_FLAGS@

@@ -1208,9 +1208,6 @@
     <None Include="cmake_uninstall.cmake.in">
       <Filter>Other Files\build\cmake</Filter>
     </None>
-    <None Include="package.pc.in">
-      <Filter>Other Files\build\cmake</Filter>
-    </None>
     <None Include="platform.h.in">
       <Filter>Other Files\build\cmake</Filter>
     </None>
@@ -1280,9 +1277,6 @@
       <Filter>Other Files\build\cmake</Filter>
     </Text>
     <Text Include="cflags.txt">
-      <Filter>Other Files\build\cmake\includes</Filter>
-    </Text>
-    <Text Include="cpack.txt">
       <Filter>Other Files\build\cmake\includes</Filter>
     </Text>
     <Text Include="extra.txt">

@@ -177,33 +177,6 @@ include( extra.txt )
 
 
 #------------------------------------------------------------------------------
-#   Generate the .pc package configuration file
-#------------------------------------------------------------------------------
-
-if( NOT EXISTS ${CMAKE_SOURCE_DIR}/package.pc.in )
-    message( AUTHOR_WARNING "Will not install package.pc.in" )
-else()
-
-    set( PACKAGE_NAME        "${FULLNAME}" )
-    set( PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION} (${BITNESS}-bit ${CONFIG})" )
-    set( PACKAGE_VERSION     "${PROJECT_VERSION}"  )
-
-    configure_file( ${CMAKE_SOURCE_DIR}/package.pc.in
-                    ${CMAKE_BINARY_DIR}/${FULLNAME}.pc @ONLY )
-
-    install( FILES  ${CMAKE_BINARY_DIR}/${FULLNAME}.pc
-                     DESTINATION lib/pkgconfig )
-endif()
-
-
-#------------------------------------------------------------------------------
-#   The CPack installers
-#------------------------------------------------------------------------------
-
-include( cpack.txt )
-
-
-#------------------------------------------------------------------------------
 #   Create an uninstall target
 #------------------------------------------------------------------------------
 
