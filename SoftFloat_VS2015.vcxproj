@@ -534,7 +534,7 @@
   <ItemGroup>
     <Text Include="cflags.txt" />
     <Text Include="CMakeLists.txt" />
-    <Text Include="COPYING.txt" />
+    <Text Include="LICENSE.txt" />
     <Text Include="extra.txt" />
     <Text Include="headers.txt" />
     <Text Include="includes.txt" />

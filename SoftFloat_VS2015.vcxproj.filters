@@ -1258,7 +1258,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="COPYING.txt">
+    <Text Include="LICENSE.txt">
       <Filter>Other Files\doc</Filter>
     </Text>
     <Text Include="README.txt">

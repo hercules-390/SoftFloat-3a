@@ -1644,7 +1644,7 @@
 				Name="doc"
 				>
 				<File
-					RelativePath="COPYING.txt"
+					RelativePath=".\LICENSE.txt"
 					>
 				</File>
 				<File
