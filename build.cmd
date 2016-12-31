@@ -6,8 +6,8 @@
   setlocal
   pushd .
 
-  set "_versnum=2.0"
-  set "_versdate=November, 2016"
+  set "_versnum=2.1"
+  set "_versdate=December, 2016"
 
   goto :init
 
@@ -149,6 +149,7 @@
 
   set "cmake=cmake.exe"
   set "vstools=%dp0%\vstools.cmd"
+  set "JOM=jom.exe"           && @REM (optional tool)
 
   @REM  Options as listed in help...
 
@@ -188,6 +189,26 @@
     call :errmsg %vstools% not found.
     set "vstools="
   )
+
+  :: PROGRAMMING NOTE: Qt JOM is optional.  We'll use it if we find it,
+  :: but not finding it isn't considered to be a fatal error.  Instead,
+  :: we simply use Microsoft's nmake tool like normal.  JOM is a clone
+  :: of nmake to support the execution of multiple independent commands
+  :: in parallel.  It basically adds the -j command line switch similar
+  :: to GNU make allowing makefile projects using JOM instead of nmake
+  :: to build much faster by using multiple parallel threads instead.
+
+  call :fullpath "%JOM%"  JOM
+  if not defined # (
+    set "JOM="
+    %return%
+  )
+
+  for /f "tokens=1-3" %%a in ('"%JOM%" /VERSION') do (
+    set "JOM_version=%%c"
+  )
+
+  echo Using JOM version %JOM_version%
 
   %return%
 
@@ -1228,7 +1249,11 @@
 
   set "rc="     &&    @REM (allows cmake to find rc.exe)
 
-  cmake -G "NMake Makefiles"  %install_prefix_opt%  "%pkgdir%"
+  if defined JOM (
+    cmake -G "NMake Makefiles JOM"  %install_prefix_opt%  "%pkgdir%"
+  ) else (
+    cmake -G "NMake Makefiles"      %install_prefix_opt%  "%pkgdir%"
+  )
 
   set "rc=%errorlevel%"
   call :update_maxrc
@@ -1255,15 +1280,23 @@
 
   :: Do faster cotire unity or pch build if possible...
 
-  set "nmake_target=all_unity"
+  if defined JOM (
+    set "nmake_target=all_pch"
+  ) else (
+    set "nmake_target=all_unity"
+  )
   nmake /q %nmake_target% > NUL 2>&1
   if %errorlevel% EQU 2 (
     set "nmake_target="
   )
 
-  :: Now build the target
+  :: Now build the target...
 
-  nmake /nologo %nmake_target%
+  if defined JOM (
+    "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo %nmake_target%
+  ) else (
+    nmake                             /nologo %nmake_target%
+  )
   set "rc=%errorlevel%"
   call :update_maxrc
 
@@ -1287,8 +1320,11 @@
     set "did_vstools=1"
   )
 
-  nmake /nologo install
-
+  if defined JOM (
+    "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo install
+  ) else (
+    nmake                             /nologo install
+  )
   set "rc=%errorlevel%"
   call :update_maxrc
 
@@ -1312,8 +1348,11 @@
     set "did_vstools=1"
   )
 
-  nmake /nologo uninstall
-
+  if defined JOM (
+    "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo uninstall
+  ) else (
+    nmake                             /nologo uninstall
+  )
   set "rc=%errorlevel%"
   call :update_maxrc
 
