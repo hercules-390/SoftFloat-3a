@@ -9,7 +9,13 @@ include( targetver.txt )      # Define minimum required Windows platform
 #  Little-endian / Big-endian
 #------------------------------------------------------------------------------
 
-if( NOT IS_BIG_ENDIAN )
+set( PKG_C_FLAGS "${PKG_C_FLAGS} -D LITTLE_ENDIAN=1234" )
+set( PKG_C_FLAGS "${PKG_C_FLAGS} -D BIG_ENDIAN=4321"    )
+
+if( IS_BIG_ENDIAN )
+  set( PKG_C_FLAGS "${PKG_C_FLAGS} -D BYTE_ORDER=BIG_ENDIAN" )
+else()
+  set( PKG_C_FLAGS "${PKG_C_FLAGS} -D BYTE_ORDER=LITTLE_ENDIAN" )
   set( PKG_C_FLAGS "${PKG_C_FLAGS} -D LITTLEENDIAN" )
 endif()
 
