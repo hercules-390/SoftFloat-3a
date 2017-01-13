@@ -8,7 +8,9 @@
 #  Commit count
 #-----------------
 
-execute_process( COMMAND ${GIT_EXECUTABLE} rev-list HEAD --count
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} log --pretty=format:''
+    COMMAND ${GIT_EXECUTABLE} wc -l
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     RESULT_VARIABLE _r
     ERROR_VARIABLE  _e
@@ -17,7 +19,7 @@ execute_process( COMMAND ${GIT_EXECUTABLE} rev-list HEAD --count
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE} rev-list HEAD --count\" failed with rc=${_r}: ${_e}" )
+    message( FATAL_ERROR "Command \"git rev-list HEAD --count | wc -l\" failed with rc=${_r}: ${_e}" )
 endif()
 
 string( STRIP ${_o} GIT_COMMIT_COUNT )
@@ -36,7 +38,7 @@ execute_process( COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE} log -1 --pretty=format:%H\" failed with rc=${_r}: ${_e}" )
+    message( FATAL_ERROR "Command \"git log -1 --pretty=format:%H\" failed with rc=${_r}: ${_e}" )
 endif()
 
 string( SUBSTRING ${_o} 0 7 GIT_HASH7 )
@@ -55,7 +57,7 @@ execute_process( COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE} diff-index --name-only HEAD --\" failed with rc=${_r}: ${_e}" )
+    message( FATAL_ERROR "Command \"git diff-index --name-only HEAD --\" failed with rc=${_r}: ${_e}" )
 endif()
 
 if( "${_o}" STREQUAL "" )
