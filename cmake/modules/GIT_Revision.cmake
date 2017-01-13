@@ -8,7 +8,7 @@
 #  Commit count
 #-----------------
 
-execute_process( COMMAND ${GIT_EXECUTABLE} rev-list --all --count
+execute_process( COMMAND ${GIT_EXECUTABLE} rev-list HEAD --count
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     RESULT_VARIABLE _r
     ERROR_VARIABLE  _e
@@ -17,7 +17,7 @@ execute_process( COMMAND ${GIT_EXECUTABLE} rev-list --all --count
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE} rev-list --all --count\" failed with rc=${_r}: ${_e}" )
+    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE} rev-list HEAD --count\" failed with rc=${_r}: ${_e}" )
 endif()
 
 string( STRIP ${_o} GIT_COMMIT_COUNT )
