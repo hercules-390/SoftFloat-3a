@@ -320,6 +320,8 @@ set( SoftFloat_ADDITIONAL_HERC
 
 set( ${PROJECT_NAME}_SRCS
 
+     softfloat_version.c
+
      ${SoftFloat_PRIMITIVES}
      ${SoftFloat_SPECIALISED}
      ${SoftFloat_OTHERS}

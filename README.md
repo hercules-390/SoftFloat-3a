@@ -1,4 +1,6 @@
-# Berkeley SoftFloat Release 3a: Library Interface
+# SoftFloat
+### Berkeley IEEE Binary Floating-Point Library
+#### version 3.1.0
 
 ## 1. Introduction
 

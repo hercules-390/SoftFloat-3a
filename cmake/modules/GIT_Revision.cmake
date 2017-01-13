@@ -2,8 +2,10 @@
 #                           GIT_Revision.cmake
 #------------------------------------------------------------------------------
 
+# Output values:  GIT_COMMIT_COUNT, GIT_HASH7 and GIT_MODIFIED
+
 #-----------------
-# Commit count
+#  Commit count
 #-----------------
 
 execute_process( COMMAND ${GIT_EXECUTABLE} rev-list --all --count
@@ -14,14 +16,14 @@ execute_process( COMMAND ${GIT_EXECUTABLE} rev-list --all --count
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    set( GIT_WC_COMMITS "invalid" )
-    message( "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
-else()
-    string( STRIP ${_o} GIT_WC_COMMITS )
+    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
 endif()
 
+string( STRIP ${_o} GIT_COMMIT_COUNT )
+trace( GIT_COMMIT_COUNT )
+
 #-----------------
-# Hash
+#     Hash
 #-----------------
 
 execute_process( COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
@@ -32,11 +34,11 @@ execute_process( COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%H
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    set( GIT_WC_HASH "invalid" )
-    message( "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
-else()
-    string( SUBSTRING ${_o} 0  12 GIT_WC_HASH )
+    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
 endif()
+
+string( SUBSTRING ${_o} 0 7 GIT_HASH7 )
+trace( GIT_HASH7 )
 
 #-----------------
 # Pending changes
@@ -50,14 +52,14 @@ execute_process( COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
 if( NOT ${_r} EQUAL 0 )
-    set( GIT_WC_CHANGES "invalid" )
-    message( "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
-else()
-    if( "${_o}" STREQUAL "" )
-        set( GIT_WC_CHANGES "" )
-    else()
-        set( GIT_WC_CHANGES "+" )
-    endif()
+    message( FATAL_ERROR "Command \"${GIT_EXECUTABLE}\" in directory ${path} failed with error:\n${error}" )
 endif()
 
-set( GIT_WC_REVISION "${GIT_WC_COMMITS}-[${GIT_WC_HASH}]${GIT_WC_CHANGES}" )
+if( "${_o}" STREQUAL "" )
+    set( GIT_MODIFIED "" )
+else()
+    set( GIT_MODIFIED "-modified" )
+endif()
+trace( GIT_MODIFIED )
+
+#------------------------------------------------------------------------------

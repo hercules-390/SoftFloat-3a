@@ -477,6 +477,7 @@
     <ClCompile Include="source\ui64_to_f128M.c" />
     <ClCompile Include="source\ui64_to_f32.c" />
     <ClCompile Include="source\ui64_to_f64.c" />
+    <ClCompile Include="softfloat_version.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="platforms\Linux-386-GCC\platform.h" />
@@ -495,6 +496,7 @@
     <ClInclude Include="source\include\primitiveTypes.h" />
     <ClInclude Include="source\include\softfloat.h" />
     <ClInclude Include="source\include\softfloat_types.h" />
+    <ClInclude Include="softfloat_version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
@@ -508,6 +510,7 @@
     <None Include="cmake\modules\ParseBinaryDir.cmake" />
     <None Include="cmake\modules\Trace.cmake" />
     <None Include="cmake\modules\Vdump.cmake" />
+    <None Include="cmake\modules\Version.cmake" />
     <None Include="cmake_uninstall.cmake.in" />
     <None Include="doc\SoftFloat-history.html" />
     <None Include="doc\SoftFloat-source.html" />

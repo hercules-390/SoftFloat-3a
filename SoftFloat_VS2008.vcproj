@@ -110,6 +110,14 @@
 		<Filter
 			Name="Source Files"
 			>
+			<File
+				RelativePath=".\softfloat_version.c"
+				>
+			</File>
+			<File
+				RelativePath=".\softfloat_version.h"
+				>
+			</File>
 			<Filter
 				Name="source"
 				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
@@ -1719,6 +1727,10 @@
 						</File>
 						<File
 							RelativePath="cmake\modules\Vdump.cmake"
+							>
+						</File>
+						<File
+							RelativePath=".\cmake\modules\Version.cmake"
 							>
 						</File>
 					</Filter>

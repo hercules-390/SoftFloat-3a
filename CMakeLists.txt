@@ -38,15 +38,10 @@ include( project.txt )
 
 
 #------------------------------------------------------------------------------
-#   Retrieve Git repository revision information
+#   Define package VERSION strings
 #------------------------------------------------------------------------------
 
-find_package( Git )
-
-if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
-    include( GIT_Revision )
-    message( "Building ${CMAKE_PROJECT_NAME} revision ${GIT_WC_REVISION}" )
-endif()
+include( Version )
 
 
 #------------------------------------------------------------------------------
@@ -124,49 +119,24 @@ trace( CMAKE_C_FLAGS_RELWITHDEBINFO )
 #   Define the package's build and install targets
 #------------------------------------------------------------------------------
 
-if( SHARED_LIBRARY )
+add_library( ${FULLNAME}  STATIC  ${${PROJECT_NAME}_SRCS} )
 
-    add_library( ${FULLNAME}  SHARED  ${${PROJECT_NAME}_SRCS} )
+set_target_properties( ${FULLNAME} PROPERTIES
+                       POSITION_INDEPENDENT_CODE  TRUE
+                       PUBLIC_HEADER              "${PUBLIC_HEADERS}"
+                       OUTPUT_NAME                 ${FULLNAME}
+                       COMPILE_PDB_NAME            ${FULLNAME} )
 
-    set_target_properties( ${FULLNAME} PROPERTIES
-                           POSITION_INDEPENDENT_CODE  TRUE
-                           PUBLIC_HEADER              "${PUBLIC_HEADERS}"
-                           OUTPUT_NAME                ${FULLNAME}
-                           PDB_NAME                   ${FULLNAME} )
+#  Use cotire if available for faster builds
 
-    #  Use cotire if available for faster builds
-
-    if ( COMMAND cotire )
-      set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
-      cotire( ${FULLNAME} )
-    endif()
-
-    install( TARGETS ${FULLNAME}
-             PUBLIC_HEADER DESTINATION include
-             LIBRARY       DESTINATION lib )
-
-else()
-
-    add_library( ${FULLNAME}  STATIC  ${${PROJECT_NAME}_SRCS} )
-
-    set_target_properties( ${FULLNAME} PROPERTIES
-                           POSITION_INDEPENDENT_CODE  TRUE
-                           PUBLIC_HEADER              "${PUBLIC_HEADERS}"
-                           OUTPUT_NAME                 ${FULLNAME}
-                           COMPILE_PDB_NAME            ${FULLNAME} )
-
-    #  Use cotire if available for faster builds
-
-    if ( COMMAND cotire )
-      set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
-      cotire( ${FULLNAME} )
-    endif()
-
-    install( TARGETS ${FULLNAME}
-             PUBLIC_HEADER DESTINATION include
-             ARCHIVE       DESTINATION lib )
-
+if ( COMMAND cotire )
+  set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
+  cotire( ${FULLNAME} )
 endif()
+
+install( TARGETS ${FULLNAME}
+         PUBLIC_HEADER DESTINATION include
+         ARCHIVE       DESTINATION lib )
 
 
 #------------------------------------------------------------------------------

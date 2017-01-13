@@ -2,10 +2,11 @@
 #   Define the project
 #------------------------------------------------------------------------------
 
-project( SoftFloat VERSION 3.1.0 )
+set( EXTPKG_NAME  "SoftFloat"                                   )
+set( EXTPKG_VERS  "3.1.0"                                       )
+set( EXTPKG_DESC  "Berkeley IEEE Binary Floating-Point Library" )
 
-set( PROJECT_DESCRIPTION
-     "Berkeley IEEE Binary Floating-Point Library"
-     CACHE PATH "Project description" FORCE )
+project( ${EXTPKG_NAME} VERSION ${EXTPKG_VERS} )
+set( PROJECT_DESCRIPTION "${EXTPKG_DESC}" CACHE PATH "Project description" FORCE )
 
 #------------------------------------------------------------------------------

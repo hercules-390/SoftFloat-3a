@@ -1105,6 +1105,9 @@
     <ClCompile Include="hercsource\softfloat_state.c">
       <Filter>Source Files\hercsource</Filter>
     </ClCompile>
+    <ClCompile Include="softfloat_version.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\8086\specialize.h">
@@ -1154,6 +1157,9 @@
     </ClInclude>
     <ClInclude Include="platforms\Win64-MinGW-w64\platform.h">
       <Filter>Source Files\platforms\Win64-MinGW-w64</Filter>
+    </ClInclude>
+    <ClInclude Include="softfloat_version.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1230,6 +1236,9 @@
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
     <None Include="cmake\modules\Vdump.cmake">
+      <Filter>Other Files\build\cmake\modules</Filter>
+    </None>
+    <None Include="cmake\modules\Version.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
     <None Include="SoftFloat_VS2008.sln">
