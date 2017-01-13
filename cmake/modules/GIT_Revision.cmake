@@ -10,7 +10,7 @@
 
 execute_process(
     COMMAND ${GIT_EXECUTABLE} log --pretty=format:''
-    COMMAND ${GIT_EXECUTABLE} wc -l
+    COMMAND wc -l
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     RESULT_VARIABLE _r
     ERROR_VARIABLE  _e
