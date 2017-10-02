@@ -25,26 +25,55 @@ if( TRAVIS )
 else()
     message( "@@ Local  build" )
 
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   check for an in-source build
-#   and make sure the user doesn't play dirty with symlinks
-#
-#   You will still have to manually clean up a few files
-#   if You accidentally try an in-source build:
-#   file 'CMakeCache.txt' and directory 'CMakeFiles'
-#
-set( CMAKE_DISABLE_IN_SOURCE_BUILD ON )
-set( CMAKE_DISABLE_SOURCE_CHANGES  ON )
+# Prevent an in-source build.  REALPATH resolves any symlinks.  There is
+# no way to programatically remove CMakeCache.txt nor CMakeFiles/*
+# from within a CMakeLists.txt, so we must just instruct the builder.
+# And if the builder fails to clean up the source directory, the stale
+# CMakeCache.txt file in the source directory will confound the build
+# process until it is removed.  So we will check for it and complain if
+# one is found.
 
 get_filename_component( SOURCE_DIR "${CMAKE_SOURCE_DIR}" REALPATH)
 get_filename_component( BINARY_DIR "${CMAKE_BINARY_DIR}" REALPATH)
 
-if( "${SOURCE_DIR}" STREQUAL "${BINARY_DIR}" )
-    message( FATAL_ERROR "
- in-source builds are not allowed;
- remove file 'CMakeCache.txt' and directory 'CMakeFiles'
-" )
+if( (EXISTS ${SOURCE_DIR}/CMakeCache.txt )
+        OR (EXISTS ${SOURCE_DIR}/CMakeFiles) )
+    if( "{SOURCE_DIR}" STREQUAL ${CMAKE_SOURCE_DIR} )
+        set( message_source_dir "${CMAKE_SOURCE_DIR}" )
+    elseif( )
+        set( message_source_dir "${CMAKE_SOURCE_DIR} = ${SOURCE_DIR}" )
+    endif( )
+    string( CONCAT error_message
+"-------------------------------------------------------------\n"
+"Existing file CMakeCache.txt and directory CMakeFiles/ *MUST*\n"
+"be removed from the source directory:\n\n"
+"    ${CMAKE_SOURCE_DIR}\n\n"
+"SoftFloat-3a For Hercules cannot be built until CMakeCache.txt\n"
+"and CMakeFiles/. are removed from ${CMAKE_SOURCE_DIR}.\n"
+"-------------------------------------------------------------\n"
+    )
+    message( ${error_message} )
+    message( FATAL_ERROR "SoftFloat-3a For Hercules will not be built" )
 endif( )
+
+if( "${SOURCE_DIR}" STREQUAL "${BINARY_DIR}" )
+    string( CONCAT error_message
+"-------------------------------------------------------------\n"
+"In-source builds are not allowed for SoftFloat-3a For Hercules\n\n"
+"   ${CMAKE_SOURCE_DIR} = ${SOURCE_DIR}\n"
+"   ${CMAKE_BINARY_DIR} = ${BINARY_DIR}\n\n"
+"Before continuing, remove the file CMakeCache.txt and the\n"
+"directory CMakeFiles from the source directory.\n"
+"-------------------------------------------------------------"
+    )
+    message( ${error_message} )
+    message( FATAL_ERROR "SoftFloat-3a For Hercules will not be built" )
+endif( )
+
+execute_process( COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_SOURCE_DIRECTORY}/CMakeCache.txt )
+set( CMAKE_DISABLE_IN_SOURCE_BUILD ON )
+set( CMAKE_DISABLE_SOURCE_CHANGES  ON )
+
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
@@ -99,7 +128,7 @@ set( CMAKE_DEBUG_POSTFIX "_D" )
 
 endif( TRAVIS )
 
-set( SHARED_LIBRARY )
+####  set( SHARED_LIBRARY )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   define the project
@@ -117,18 +146,23 @@ if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
 endif()
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#  	headers
+#  	headers.   If any header is missing, softfloat_includes.h will address
+#   the shortfall
 #
 include( CheckIncludeFile )
 include( CheckHeader )
 check_header( stdbool.h )
 check_header( stdint.h )
+check_header( inttypes.h )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	CFLAGS
 #
 if( WIN32 )
-
+    set( CMAKE_C_FLAGS_DEBUG    "/Od"
+        CACHE STRING "" FORCE )
+    set( CMAKE_C_FLAGS_RELEASE  "/O2"
+        CACHE STRING "" FORCE )
 else()
     set( CMAKE_C_FLAGS_DEBUG    "-g -g3 -ggdb3"
         CACHE STRING "" FORCE )
@@ -156,39 +190,14 @@ set( CMAKE_C_FLAGS_RELEASE  "${CMAKE_C_FLAGS_RELEASE} ${CDEFS_RELEASE}" )
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   generate platform.h
 #
-if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME} )
-	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in.${CMAKE_SYSTEM_NAME}
-    	            ${CMAKE_BINARY_DIR}/platform.h )
-elseif( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
+if( EXISTS ${CMAKE_SOURCE_DIR}/platform.h.in )
 	configure_file( ${CMAKE_SOURCE_DIR}/platform.h.in
     	            ${CMAKE_BINARY_DIR}/platform.h )
 else()
 	message( FATAL_ERROR "** Unable to find platform.h.in" )
 endif()
 
-# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   generate stdbool.h
-#
-if( NOT HAVE_STDBOOL_H )
-    if( EXISTS ${CMAKE_SOURCE_DIR}/stdbool.h.in )
-	    configure_file( ${CMAKE_SOURCE_DIR}/stdbool.h.in
-    	                ${CMAKE_BINARY_DIR}/stdbool.h )
-    else()
 
-    endif()
-endif()
-
-# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   generate stdint.h
-#
-if( NOT HAVE_STDINT_H )
-    if( EXISTS ${CMAKE_SOURCE_DIR}/stdint.h.in )
-	    configure_file( ${CMAKE_SOURCE_DIR}/stdint.h.in
-    	                ${CMAKE_BINARY_DIR}/stdint.h )
-    else()
-
-    endif()
-endif()
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat.pc
@@ -214,12 +223,11 @@ include_directories(    BEFORE
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Public Headers.
 #
-#   Note that if stdbool.h and/or stdint.h are not part of the host system's
-#   environment, we will include them as SoftFloat 3a public headers.
 
 set(    _l
-        softfloat_types.h
         softfloat.h
+        softfloat_stdTypes.h
+        softfloat_types.h
     )
 list( SORT _l )
 set( public_headers "" )
@@ -229,17 +237,6 @@ foreach( _s IN LISTS _l )
             source/include/${_s} )
 endforeach()
 
-if( NOT HAVE_STDBOOL_H )
-    list(   APPEND
-            public_headers
-            ${CMAKE_BINARY_DIR}/stdbool.h )
-endif()
-
-if( NOT HAVE_STDINT_H )
-    list(   APPEND
-            public_headers
-            ${CMAKE_BINARY_DIR}/stdint.h )
-endif()
 
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -248,33 +245,15 @@ endif()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Primitives
 set(    _l
-        s_add128.c
         s_add256M.c
-        s_approxRecip32_1.c
         s_approxRecipSqrt32_1.c
-        s_countLeadingZeros32.c
         s_countLeadingZeros64.c
         s_countLeadingZeros8.c
-        s_eq128.c
-        s_le128.c
-        s_lt128.c
-        s_mul128By32.c
         s_mul128To256M.c
-        s_mul64ByShifted32To128.c
         s_mul64To128.c
         s_shiftRightJam128.c
         s_shiftRightJam128Extra.c
         s_shiftRightJam256M.c
-        s_shiftRightJam32.c
-        s_shiftRightJam64.c
-        s_shiftRightJam64Extra.c
-        s_shortShiftLeft128.c
-        s_shortShiftRight128.c
-        s_shortShiftRightJam128.c
-        s_shortShiftRightJam128Extra.c
-        s_shortShiftRightJam64.c
-        s_shortShiftRightJam64Extra.c
-        s_sub128.c
         s_sub256M.c
     )
 list( SORT _l )
@@ -288,21 +267,16 @@ endforeach()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Specialised
 set(    _l
- #[[    extF80M_isSignalingNaN.c   extF80 and "M" variants not required  ]]
- #[[    f128M_isSignalingNaN.c                                           ]]
- #[[    s_commonNaNToExtF80UI.c                                          ]]
         s_commonNaNToF128UI.c
         s_commonNaNToF32UI.c
         s_commonNaNToF64UI.c
- #[[    s_extF80UIToCommonNaN.c                                          ]]
         s_f128UIToCommonNaN.c
         s_f32UIToCommonNaN.c
         s_f64UIToCommonNaN.c
- #[[    s_propagateNaNExtF80UI.c                                         ]]
         ../${HERCMODS}s_propagateNaNF128UI.c
         ../${HERCMODS}s_propagateNaNF32UI.c
         ../${HERCMODS}s_propagateNaNF64UI.c
- #[[    softfloat_raiseFlags.c    Function call replaced by macro        ]]
+        specialize.h
     )
 list( SORT _l )
 set(    SoftFloat_SPECIALISED "" )
@@ -315,190 +289,72 @@ endforeach()
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   SoftFloat Others
 set(    _l
-  #[[   extF80_add.c    ********************** extF80/extMF80 is not used by Hercules
-        extF80_div.c
-        extF80_eq_signaling.c
-        extF80_eq.c
-        extF80_isSignalingNaN.c
-        extF80_le_quiet.c
-        extF80_le.c
-        extF80_lt_quiet.c
-        extF80_lt.c
-        extF80_mul.c
-        extF80_rem.c
-        extF80_roundToInt.c
-        extF80_sqrt.c
-        extF80_sub.c
-        extF80_to_f128.c
-        extF80_to_f32.c
-        extF80_to_f64.c
-        extF80_to_i32_r_minMag.c
-        extF80_to_i32.c
-        extF80_to_i64_r_minMag.c
-        extF80_to_i64.c
-        extF80_to_ui32_r_minMag.c
-        extF80_to_ui32.c
-        extF80_to_ui64_r_minMag.c
-        extF80_to_ui64.c
-        extF80M_add.c
-        extF80M_div.c
-        extF80M_eq_signaling.c
-        extF80M_eq.c
-        extF80M_le_quiet.c
-        extF80M_le.c
-        extF80M_lt_quiet.c
-        extF80M_lt.c
-        extF80M_mul.c
-        extF80M_rem.c
-        extF80M_roundToInt.c
-        extF80M_sqrt.c
-        extF80M_sub.c
-        extF80M_to_f128M.c
-        extF80M_to_f32.c
-        extF80M_to_f64.c
-        extF80M_to_i32_r_minMag.c
-        extF80M_to_i32.c
-        extF80M_to_i64_r_minMag.c
-        extF80M_to_i64.c
-        extF80M_to_ui32_r_minMag.c
-        extF80M_to_ui32.c
-        extF80M_to_ui64_r_minMag.c
-        extF80M_to_ui64.c         ******************************************* ]]
         f128_add.c
         f128_div.c
-        f128_eq_signaling.c
         f128_eq.c
         f128_isSignalingNaN.c
-        f128_le_quiet.c
-        f128_le.c
         f128_lt_quiet.c
-        f128_lt.c
         f128_mul.c
         f128_mulAdd.c
-        f128_rem.c
         ${HERCMODS}f128_roundToInt.c
         f128_sqrt.c
         f128_sub.c
- #[[    f128_to_extF80.c                                    ]]
         f128_to_f32.c
         f128_to_f64.c
-        f128_to_i32_r_minMag.c
         f128_to_i32.c
-        f128_to_i64_r_minMag.c
         f128_to_i64.c
-        f128_to_ui32_r_minMag.c
         f128_to_ui32.c
-        f128_to_ui64_r_minMag.c
         ${HERCMODS}f128_to_ui64.c
-  #[[   f128M_add.c                    Pointer versions of functions are not used by Hercules
-        f128M_div.c
-        f128M_eq_signaling.c
-        f128M_eq.c
-        f128M_le_quiet.c
-        f128M_le.c
-        f128M_lt_quiet.c
-        f128M_lt.c
-        f128M_mul.c
-        f128M_mulAdd.c
-        f128M_rem.c
-        f128M_roundToInt.c
-        f128M_sqrt.c
-        f128M_sub.c
-        f128M_to_extF80M.c
-        f128M_to_f32.c
-        f128M_to_f64.c
-        f128M_to_i32_r_minMag.c
-        f128M_to_i32.c
-        f128M_to_i64_r_minMag.c
-        f128M_to_i64.c
-        f128M_to_ui32_r_minMag.c
-        f128M_to_ui32.c
-        f128M_to_ui64_r_minMag.c
-        f128M_to_ui64.c                 ******************* ]]
         f32_add.c
         f32_div.c
-        f32_eq_signaling.c
         f32_eq.c
         f32_isSignalingNaN.c
-        f32_le_quiet.c
-        f32_le.c
         f32_lt_quiet.c
-        f32_lt.c
         f32_mul.c
         f32_mulAdd.c
-        f32_rem.c
         ${HERCMODS}f32_roundToInt.c
         f32_sqrt.c
         f32_sub.c
- #[[    f32_to_extF80.c    ]]
- #[[    f32_to_extF80M.c   ]]
         f32_to_f128.c
- #[[    f32_to_f128M.c     ]]
         f32_to_f64.c
-        f32_to_i32_r_minMag.c
         f32_to_i32.c
-        f32_to_i64_r_minMag.c
         f32_to_i64.c
-        f32_to_ui32_r_minMag.c
         f32_to_ui32.c
-        f32_to_ui64_r_minMag.c
         ${HERCMODS}f32_to_ui64.c
         f64_add.c
         f64_div.c
-        f64_eq_signaling.c
         f64_eq.c
         f64_isSignalingNaN.c
-        f64_le_quiet.c
-        f64_le.c
         f64_lt_quiet.c
-        f64_lt.c
         f64_mul.c
         f64_mulAdd.c
-        f64_rem.c
         ${HERCMODS}f64_roundToInt.c
         f64_sqrt.c
         f64_sub.c
- #[[    f64_to_extF80.c             ]]
- #[[    f64_to_extF80M.c            ]]
         f64_to_f128.c
- #[[    f64_to_f128M.c              ]]
         f64_to_f32.c
-        f64_to_i32_r_minMag.c
         f64_to_i32.c
-        f64_to_i64_r_minMag.c
         f64_to_i64.c
-        f64_to_ui32_r_minMag.c
         f64_to_ui32.c
-        f64_to_ui64_r_minMag.c
         ${HERCMODS}f64_to_ui64.c
- #[[    i32_to_extF80.c             ]]
- #[[    i32_to_extF80M.c            ]]
         i32_to_f128.c
- #[[    i32_to_f128M.c              ]]
         i32_to_f32.c
         i32_to_f64.c
- #[[    i64_to_extF80.c             ]]
- #[[    i64_to_extF80M.c            ]]
         i64_to_f128.c
- #[[    i64_to_f128M.c              ]]
         i64_to_f32.c
         i64_to_f64.c
- #[[    s_addMagsExtF80.c           ]]
         ${HERCMODS}s_addMagsF128.c
         ${HERCMODS}s_addMagsF32.c
         ${HERCMODS}s_addMagsF64.c
         s_mulAddF128.c
         ${HERCMODS}s_mulAddF32.c
         ${HERCMODS}s_mulAddF64.c
- #[[    s_normRoundPackToExtF80.c   ]]
         s_normRoundPackToF128.c
         s_normRoundPackToF32.c
         s_normRoundPackToF64.c
- #[[    s_normSubnormalExtF80Sig.c  ]]
         s_normSubnormalF128Sig.c
         s_normSubnormalF32Sig.c
         s_normSubnormalF64Sig.c
-#[[     s_roundPackToExtF80.c       ]]
         ${HERCMODS}s_roundPackToF128.c
         ${HERCMODS}s_roundPackToF32.c
         ${HERCMODS}s_roundPackToF64.c
@@ -506,23 +362,24 @@ set(    _l
         ${HERCMODS}s_roundPackToI64.c
         ${HERCMODS}s_roundPackToUI32.c
         ${HERCMODS}s_roundPackToUI64.c
- #[[    s_subMagsExtF80.c           ]]
         s_subMagsF128.c
         s_subMagsF32.c
         s_subMagsF64.c
         ${HERCMODS}softfloat_state.c
- #[[    ui32_to_extF80.c            ]]
- #[[    ui32_to_extF80M.c           ]]
         ui32_to_f128.c
- #[[    ui32_to_f128M.c             ]]
         ui32_to_f32.c
         ui32_to_f64.c
- #[[    ui64_to_extF80.c            ]]
- #[[    ui64_to_extF80M.c           ]]
         ui64_to_f128.c
- #[[    ui64_to_f128M.c             ]]
         ui64_to_f32.c
         ui64_to_f64.c
+        include/internals.h
+        include/primitives.h
+        include/primitiveTypes.h
+        include/softfloat.h
+        include/softfloat_stdTypes.h
+        include/softfloat_types.h
+        ../platform.h.in
+
     )
 list( SORT _l )
 set(    SoftFloat_OTHERS "" )
@@ -572,18 +429,24 @@ install( TARGETS SoftFloat
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
+
+# ------Shared library support is not available at the moment   ----
+# ------When more than one Hercules shared library requires Softfloat,
+# ------it can either be moved to hercu and shared, or created as a
+# ------separate shared library.
+# ------And note that use of a shared library has not been tested.
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   the shared library
-if( SHARED_LIBRARY )
-add_library( SoftFloat_shared SHARED ${SoftFloat_SRCS} )
-set_target_properties(  SoftFloat_shared PROPERTIES
-						OUTPUT_NAME SoftFloat
-                        PUBLIC_HEADER "${public_headers}" )
-
-install( TARGETS SoftFloat_shared
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
-endif()
+#### if( SHARED_LIBRARY )
+#### add_library( SoftFloat_shared SHARED ${SoftFloat_SRCS} )
+#### set_target_properties(  SoftFloat_shared PROPERTIES
+#### 						OUTPUT_NAME SoftFloat
+####                         PUBLIC_HEADER "${public_headers}" )
+####
+#### install( TARGETS SoftFloat_shared
+####         LIBRARY DESTINATION lib
+####         PUBLIC_HEADER DESTINATION include)
+#### endif()
 
 install(FILES "COPYING.txt" DESTINATION "." )
 install(FILES "README.txt"  DESTINATION "." )

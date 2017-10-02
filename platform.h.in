@@ -12,7 +12,19 @@
 */
 #cmakedefine HAVE_STDBOOL_H
 #cmakedefine HAVE_STDINT_H
+#cmakedefine HAVE_INTTYPES_H
+
+#include "softfloat_stdTypes.h"             /* Include c99 standard types       */
+
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
+#if defined(_MSC_VER)                       /* then using MSVC                  */
+__pragma( warning( disable : 4102 ) )       /* Label defined but unreferenced   */
+__pragma( warning( disable : 4146 ) )       /* unary minus on unsigned type     */
+__pragma( warning( disable : 4244 ) )       /* conversion to smaller int type   */
+
+#endif  /* defined(_MSC_VER)    */
+
+
 #endif /* #ifndef IN_PLATFORM_H */

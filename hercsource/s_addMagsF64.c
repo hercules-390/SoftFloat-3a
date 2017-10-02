@@ -46,15 +46,7 @@ exponents are both zero and the result significand is not zero.  This
 can occur when adding a tiny to zero or another tiny.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
 #include "platform.h" 
-#endif
-#if !defined(false) 
-#include <stdbool.h> 
-#endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
-#endif
 #include "internals.h"
 
 #if  1  /* includes define for IBM_IEEE  */
