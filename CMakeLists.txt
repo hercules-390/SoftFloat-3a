@@ -220,9 +220,21 @@ include_directories(    BEFORE
                     ${CMAKE_SOURCE_DIR}/source/include
                     )
 
+
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   SoftFloat Public Headers.
-#
+#   SoftFloat Public Headers.  While the list of public headers is
+#   assembled, the headers are copied to an include directory in the
+#   build tree.  This allows the build tree export target to be self-
+#   contained in the build tree, with no references to the source tree.
+#   This is particularly useful if the source tree is on a network drive
+#   that is not accessable when the downstream build imports the build
+#   tree target exported by this script.
+
+if( EXISTS ${CMAKE_BINARY_DIR}/include )       # Remove any leftover cruft.
+    execute_process( COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/include )
+endif( )
+
+execute_process( COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include )
 
 set(    _l
         softfloat.h
@@ -235,6 +247,7 @@ foreach( _s IN LISTS _l )
     list(   APPEND
             public_headers
             source/include/${_s} )
+    execute_process( COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/source/include/${_s}  ${CMAKE_BINARY_DIR}/include )
 endforeach()
 
 
@@ -412,22 +425,55 @@ set(    SoftFloat_SRCS
         ${SoftFloat_HERCMODS} )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   the static library
+#   Define the target for the static library.
+
 add_library( SoftFloat STATIC ${SoftFloat_SRCS} )
 set_target_properties(  SoftFloat PROPERTIES
 						OUTPUT_NAME SoftFloat
 						PUBLIC_HEADER "${public_headers}" )
 
+
+# Define the location of the public headers that need to be part of the
+# exported targets (build tree and install) for this target.  The
+# generator expression $<BUILD_INTERFACE:...> has the expected value
+# at build time and is the null string at install time, and vice versa
+# for $<INSTALL_INTERFACE:..>.  Without target_include_directories(),
+# the public header directory will never appear in the exported targets.
+
+target_include_directories(SoftFloat PUBLIC
+                        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                        $<INSTALL_INTERFACE:include> )
+
+
 # Because the static library will be included in a shared library,
 # Position-independent code is required for non-Windows builds.
-if ( WIN32 )
-else ( )
+if ( NOT WIN32 )
     set_target_properties( SoftFloat PROPERTIES POSITION_INDEPENDENT_CODE ON )
 endif ( )
 
+
+# Install the target.  Include this target in the export of the install
+# targets.
+
 install( TARGETS SoftFloat
+        EXPORT s3fh
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
+
+# Create the export of the target.  This export can be imported by a user
+# of SoftFloat-3a for Hercules (S3FH), such as Hercules, to simplify the
+# CMake coding needed to include S3FH.  The install export would be used
+# whet a S3FH developer uses S3FH_DIR to point to the S3FH install
+# install directory containing the modified code.
+
+install( EXPORT s3fh DESTINATION . )
+
+# Create an export target of the build tree.  This allows the build tree
+# to be used as an import target without requiring an install.  The
+# build tree target is used by Hercules when SoftFloat-3a For Hercules
+# is built as an external package by Hercules.
+
+export( EXPORT s3fh FILE s3fh.cmake  )
 
 
 # ------Shared library support is not available at the moment   ----
