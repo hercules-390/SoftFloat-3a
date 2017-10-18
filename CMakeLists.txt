@@ -158,17 +158,11 @@ check_header( inttypes.h )
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	CFLAGS
 #
-if( WIN32 )
-    set( CMAKE_C_FLAGS_DEBUG    "/Od"
-        CACHE STRING "" FORCE )
-    set( CMAKE_C_FLAGS_RELEASE  "/O2"
-        CACHE STRING "" FORCE )
-else()
+if( NOT WIN32 )
     set( CMAKE_C_FLAGS_DEBUG    "-g -g3 -ggdb3"
         CACHE STRING "" FORCE )
     set( CMAKE_C_FLAGS_RELEASE  "-g -O2"
         CACHE STRING "" FORCE )
-
 endif()
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -230,6 +224,10 @@ include_directories(    BEFORE
 #   that is not accessable when the downstream build imports the build
 #   tree target exported by this script.
 
+#   configure_file( COPYONLY ) is used to copy the headers because it
+#   creates a dependency on the source public header; changing the
+#   source will cause the file to be copied again.
+
 if( EXISTS ${CMAKE_BINARY_DIR}/include )       # Remove any leftover cruft.
     execute_process( COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/include )
 endif( )
@@ -247,7 +245,7 @@ foreach( _s IN LISTS _l )
     list(   APPEND
             public_headers
             source/include/${_s} )
-    execute_process( COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/source/include/${_s}  ${CMAKE_BINARY_DIR}/include )
+    configure_file( ${CMAKE_SOURCE_DIR}/source/include/${_s}  ${CMAKE_BINARY_DIR}/include  COPYONLY )
 endforeach()
 
 
@@ -466,14 +464,14 @@ install( TARGETS SoftFloat
 # whet a S3FH developer uses S3FH_DIR to point to the S3FH install
 # install directory containing the modified code.
 
-install( EXPORT s3fh DESTINATION . )
+install( EXPORT s3fh DESTINATION s3fh-targets )
 
 # Create an export target of the build tree.  This allows the build tree
 # to be used as an import target without requiring an install.  The
 # build tree target is used by Hercules when SoftFloat-3a For Hercules
 # is built as an external package by Hercules.
 
-export( EXPORT s3fh FILE s3fh.cmake  )
+export( EXPORT s3fh FILE s3fh-targets/s3fh.cmake  )
 
 
 # ------Shared library support is not available at the moment   ----
