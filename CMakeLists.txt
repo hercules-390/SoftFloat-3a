@@ -4,7 +4,11 @@
 cmake_minimum_required( VERSION 3.2 )
 
 cmake_policy(SET CMP0048 NEW)
-set( HERCMODS "../hercsource/" )
+
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   define the project
+#
+project( SoftFloat VERSION 3.1.0 LANGUAGES C )
 
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -18,6 +22,22 @@ else()
 Cmake modules directory not found '${CMAKE_SOURCE_DIR}/cmake/modules'
 " )
 endif()
+
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#  	revision information
+#
+find_package( Git )
+if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
+
+	include( GIT_Revision )
+	message( "@@ Building ${PROJECT_NAME} revision ${GIT_WC_REVISION}" )
+endif()
+
+
+set( HERCMODS "../hercsource/" )
+
+
+
 
 set( TRAVIS $ENV{TRAVIS} )
 if( TRAVIS )
@@ -75,16 +95,6 @@ set( CMAKE_DISABLE_IN_SOURCE_BUILD ON )
 set( CMAKE_DISABLE_SOURCE_CHANGES  ON )
 
 
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#
-#   If Visual Studio or OS/X, CMake defaults to four configurations:
-#   Release, Debug, MinSizeRel, and RelWithDebInfo.  For now, only the
-#   first two are supported.  Remove the other two from consideration.
-#
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE )
-message ( "@@ Configuration Types: " "${CMAKE_CONFIGURATION_TYPES}" )
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	install prefix, and build type
@@ -102,48 +112,64 @@ Unable to determine INSTALL_PREFIX from  ${CMAKE_BINARY_DIR}
 endif()
 set( CMAKE_INSTALL_PREFIX  "${INSTALL_PREFIX}" CACHE PATH "" FORCE )
 
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if( NOT DEFINED BUILD_TYPE )
-    get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
-    get_filename_component( BINARY_DIR ${CMAKE_BINARY_DIR} NAME )
-	string( REGEX MATCH "([^.]*\$)" BUILD_TYPE ${BINARY_DIR} )
-	if(	BINARY_DIR STREQUAL BUILD_TYPE )
-		message( FATAL_ERROR "
-Unable to determine CMAKE_BUILD_TYPE from  ${CMAKE_BINARY_DIR}
-" )
-	endif()
-endif()
 
-include( CapitalizeWord )
-Capitalize_Word( ${BUILD_TYPE} BUILD_TYPE )
-if( NOT BUILD_TYPE MATCHES "Release" AND
-    NOT BUILD_TYPE MATCHES "Debug" )
-	message( FATAL_ERROR "
-Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}
-" )
-endif()
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#
+#   Multi-configuration CMake generators (Visual Studio and OS/X)
+#   default to four configurations: Release, Debug, MinSizeRel, and
+#   RelWithDebInfo.  For now, only the first two are supported.  Remove
+#   the other two from consideration.  The configuration to be built is
+#   specified at build time, not configure time.
+#
+#   If building for a single-configuration generator (Makefiles or
+#   Ninja), determine the configuration from a) BUILD_TYPE or, if that
+#   variable is not defined, the characters following the '.' in the
+#   build directory name.  Fail the build if no valid configuration type
+#   can be found.
+#
+#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
+if( "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "" )
+    # Generator in use creates build scripts for exactly one configuration.
+    # Determine whether this is a release or debug build.
+    if( NOT DEFINED BUILD_TYPE )
+        get_filename_component( BINARY_HLQ ${CMAKE_BINARY_DIR} DIRECTORY )
+        get_filename_component( BINARY_DIR ${CMAKE_BINARY_DIR} NAME )
+        string( REGEX MATCH "([^.]*\$)" BUILD_TYPE ${BINARY_DIR} )
+        if(	BINARY_DIR STREQUAL BUILD_TYPE )
+            message( FATAL_ERROR "Unable to determine CMAKE_BUILD_TYPE from  ${CMAKE_BINARY_DIR}" )
+        endif()
+    endif()
+    include( CapitalizeWord )
+    Capitalize_Word( ${BUILD_TYPE} BUILD_TYPE )
+    if( NOT BUILD_TYPE MATCHES "Release" AND
+        NOT BUILD_TYPE MATCHES "Debug" )
+        message( FATAL_ERROR "Invalid Release/Debug BUILD_TYPE ${BUILD_TYPE}" )
+    endif()
+    set( CMAKE_BUILD_TYPE "${BUILD_TYPE}" )
+    message( "@@ Single configuration generator; configuring for ${CMAKE_BUILD_TYPE}" )
+
+else( )
+    # For generators that support multiple configurations with build-time
+    # configuration selection (Visual Studio or mac OS Xcode), CMake
+    # defaults to four configurations: Release, Debug, MinSizeRel, and
+    # RelWithDebInfo.  For now, only the first two are needed.  Remove the
+    # other two.
+    list( REMOVE_ITEM CMAKE_CONFIGURATION_TYPES
+                MinSizeRel
+                RelWithDebInfo
+                )
+    message ( "@@ Available configuration Types: ${CMAKE_CONFIGURATION_TYPES}"  )
+endif( )
+
+
+### set( CMAKE_BUILD_TYPE  "${BUILD_TYPE}" CACHE PATH "" FORCE )
 set( CMAKE_DEBUG_POSTFIX "_D" )
 
 endif( TRAVIS )
 
 ####  set( SHARED_LIBRARY )
 
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   define the project
-#
-project( SoftFloat VERSION 3.1.0 )
-
-#   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#  	revision information
-#
-find_package( Git )
-if( GIT_FOUND AND EXISTS ${CMAKE_SOURCE_DIR}/.git )
-
-	include( GIT_Revision )
-	message( "@@ Building ${PROJECT_NAME} revision ${GIT_WC_REVISION}" )
-endif()
 
 #   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  	headers.   If any header is missing, softfloat_includes.h will address
