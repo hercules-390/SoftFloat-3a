@@ -3,8 +3,8 @@
   #  If this bash script works then it was written by Fish.
   #  If it doesn't then I don't know who the heck wrote it.
 
-  _versnum="2.0"
-  _versdate="November, 2016"
+  _versnum="2.1"
+  _versdate="February, 2018"
 
 #------------------------------------------------------------------------------
 #                                   BUILD
@@ -440,12 +440,11 @@ isopt()
 
   #  Examines first character of passed value to determine
   #  whether it's the next option or not. If it starts with
-  #  a '/' or '-' then it's the next option. Else it's not.
+  #  a '-' then it's the next option. Else it's not.
 
   isopt="$1"
 
   if [[ -n $isopt ]]            && \
-     [[ ${isopt:0:1} != "/" ]]  && \
      [[ ${isopt:0:1} != "-" ]]; then
     isopt=""
   fi
@@ -458,7 +457,7 @@ parseopt()
 {
   #  This function expects the next two command line arguments
   #  $1 and $2 to be passed to it.  $1 is expected to be a true
-  #  option (its first character should start with a / or -).
+  #  option (its first character should start with a '-' dash).
   #
   #  Both arguments are then examined and the results are placed
   #  into the following variables:
@@ -497,7 +496,6 @@ parse_args()
   push_shopt -s nocasematch
 
   if [[ $1 == "?"      ]]; then help; fi
-  if [[ $1 == "/?"     ]]; then help; fi
   if [[ $1 == "-?"     ]]; then help; fi
   if [[ $1 == "-h"     ]]; then help; fi
   if [[ $1 == "--help" ]]; then help; fi
