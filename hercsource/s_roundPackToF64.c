@@ -97,8 +97,8 @@ float64_t
     softfloat_raw.Sig0  = 0;                             /* Zero bits 64-128 of rounded result       */
     softfloat_raw.Exp   = exp - 1022;                    /* Save unbiased exponent                   */
     softfloat_raw.Sign  = sign;                          /* Save result sign                         */
-    softfloat_raw.Inexact = roundBits;                   /* Save inexact status of raw result        */
-    isTiny = false;                                         /* Assume not a subnormal result for the moment.            */
+    softfloat_raw.Inexact = roundBits != 0;              /* Save inexact status of raw result        */
+    isTiny = false;                                      /* Assume not a subnormal result for the moment.            */
 #endif /* IBM_IEEE */
 
     if ( 0x7FD <= (uint16_t) exp ) {

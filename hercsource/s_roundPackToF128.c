@@ -116,9 +116,9 @@ float128_t
     softfloat_raw.Sig0  = savesig2.v0 | sigExtra >> 50;    /* 64 - 14, include upper 14 bits of Extra in rawsig0 */
     softfloat_raw.Sign  = sign;                      /* Save sign                                                */
     softfloat_raw.Incre = saveincre;                 /* save rounding incremented status                         */
-    softfloat_raw.Inexact = sigExtra;                /* Save inexact status of raw result                        */
+    softfloat_raw.Inexact = sigExtra != 0;           /* Save inexact status of raw result                        */
     softfloat_raw.Tiny = false;                      /* assume not a tiny result                                 */
-    isTiny = false;                                 /* Assume not a subnormal result for the moment.            */
+    isTiny = false;                                  /* Assume not a subnormal result for the moment.            */
 
     /* ************************************************************************************ */
     /* At this point, savesig has the rounded result, and sigSign, sigExp, sig64, sig0,     */
