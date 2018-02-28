@@ -66,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  define _SF_STDBOOL
 #  define false   0
 #  define true    1
-#  define bool int
+#  define bool unsigned char
 #endif /* #if defined(HAVE_STDBOOL_H) */
 
 
@@ -131,6 +131,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif  /* defined(HAVE_STDINT_H  */
 
-#define int32_t int32_t
+/* #define int32_t int32_t  */
 
 #endif /* if !defined(_SF_STDTYPES)  */
