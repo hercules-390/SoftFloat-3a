@@ -5,6 +5,7 @@
 
   setlocal
   set "TRACE=if defined DEBUG echo"
+  set "return=goto :EOF"
   goto :BEGIN
 
 ::-----------------------------------------------------------------------------
@@ -45,7 +46,7 @@
   echo.
   echo     VERSION
   echo.
-  echo         1.0     (June 13, 2016)
+  echo         2.0     (March 2, 2018)
 
   endlocal && exit /b 1
 
@@ -60,6 +61,10 @@
   if /i "%~1" == "-?"      goto :HELP
   if /i "%~1" == "--help"  goto :HELP
 
+  ::-------------------------------
+  :: Determine target environment
+  ::-------------------------------
+
   if not "%~1" == "32" (
     if not "%~1" == "64" (
       goto :HELP
@@ -70,79 +75,172 @@
     set "vstarget=x86"
   )
 
-  set "VSVERSIONS=140 120 110 100 90 80"
-  set "VSTOOLSDIR="
+  echo Target architecture is %vstarget%
 
-:VSTOOLSDIR_loop
+  ::-------------------------------
+  :: Determine host environment
+  ::-------------------------------
 
-  for /f "tokens=1*" %%a in ("%VSVERSIONS%") do (
-    call :try_VSTOOLSDIR "%%a"
-    if defined VSTOOLSDIR goto :got_VSTOOLSDIR
-    if "%%b" == "" goto :VSTOOLSDIR_error
-    set "VSVERSIONS=%%b"
-    goto :VSTOOLSDIR_loop
+  if   /i "%PROCESSOR_ARCHITEW6432%" == "x86"   set "vshost=x86"
+  if   /i "%PROCESSOR_ARCHITEW6432%" == "AMD64" set "vshost=amd64"
+
+  if not defined vshost (
+    if /i "%PROCESSOR_ARCHITECTURE%" == "x86"   set "vshost=x86"
+    if /i "%PROCESSOR_ARCHITECTURE%" == "AMD64" set "vshost=amd64"
   )
 
-:try_VSTOOLSDIR
+  echo Host architecture is %vshost%
 
-  set "nnn=%~1"
-  setlocal enabledelayedexpansion
-  if not "!VS%nnn%COMNTOOLS!" == "" (
-    if exist "!VS%nnn%COMNTOOLS!..\..\VC\vcvarsall.bat"  (
-      set "VSTOOLSDIR=!VS%nnn%COMNTOOLS!"
-    )
-  )
-  endlocal && set "VSTOOLSDIR=%VSTOOLSDIR%"
-  goto :EOF
+  ::-------------------------------
+  :: Determine which Visual Studio
+  ::-------------------------------
 
-:got_VSTOOLSDIR
+  call :which_vstudio
+  if %rc% NEQ 0 goto :vstools_error
 
-  if /i "%PROCESSOR_ARCHITECTURE%" == "x86"   set "vshost=x86"
-  if /i "%PROCESSOR_ARCHITECTURE%" == "AMD64" set "vshost=amd64"
+  ::--------------------------------------------------------
+  ::           Set the build environment....
+  ::
+  :: Note that we must set the build enviroment outside
+  :: the scope of our setlocal/endlocal to ensure that
+  :: whatever build environment gets set ends up being
+  :: passed back to the caller. Our goal is after all
+  :: is to set environment variables for the caller!
+  ::--------------------------------------------------------
 
-  ::  Since Microsoft doesn't have an X64 build of their compiler,
-  ::  if targeting x86 we must use their x86 compiler under WOW64.
-  ::  This is called cross compiling.
+  endlocal                          ^
+    && set "vstarget=%vstarget%"    ^
+    && set "vshost=%vshost%"        ^
+    && set "VCVARSDIR=%VCVARSDIR%"  ^
+    && set "vsver=%vsver%"          ^
+    && set "vs2017=%vs2017%"
 
-  if /i "%vstarget%" == "x86" set "vshost=x86"
-  if /i not "%vshost%" == "%vstarget%" goto :cross_compile
+  ::--------------------------------------------------------
+  ::           IMPORTANT PROGRAMMING NOTE!
+  ::
+  :: ALL variables the below ":set_build_env" call needs
+  :: MUST be re-"set" on the above "endlocal" statement!
+  ::--------------------------------------------------------
 
-  ::  Host architecture matches target architecture
+  call :set_build_env
 
-  set "vshost="
-
-  if not exist "%VSTOOLSDIR%..\..\VC\bin\vcvars32.bat" (
-    goto :targ_arch_error
-  )
-
-  goto :set_VSTOOLS
-
-:cross_compile
-
-  ::  Targeting x86 but running under x64! (WOW64)
-
-  set "vshost=x86_" && REM (even though our ACTUAL host arch is x64!)
-
-  if not exist "%VSTOOLSDIR%..\..\VC\bin\%vshost%%vstarget%\vcvars%vshost%%vstarget%.bat" (
-    goto :targ_arch_error
-  )
-
-:set_VSTOOLS
-
-  endlocal && set "VSTOOLSDIR=%VSTOOLSDIR%" && set "vshost=%vshost%" && set "vstarget=%vstarget%"
-  call "%VSTOOLSDIR%..\..\VC\vcvarsall.bat"  %vshost%%vstarget%
   exit /b 0
 
-:VSTOOLSDIR_error
+:vstools_error
 
   echo %~nx0: ERROR: No supported version of Visual Studio is installed
   endlocal
   exit /b 1
 
-:targ_arch_error
 
-  echo %~nx0: ERROR: Build support for target architecture %vstarget% is not installed
-  endlocal
-  exit /b 1
+::-----------------------------------------------------------------------------
+::                         set_build_env
+::-----------------------------------------------------------------------------
+:set_build_env
+
+  if %vsver% LSS %vs2017% (
+    goto :vs2015_or_earlier
+  )
+
+  ::-----------------------------------
+  ::   Visual Studio 2017 or LATER
+  ::-----------------------------------
+
+  pushd .
+  echo.
+
+  if /i not "%vshost%" == "%vstarget%" (
+
+    @REM  Cross compiling...
+
+    call "%VCVARSDIR%\vcvars%vshost%_%vstarget%.bat"
+    @if defined TRACEON (@echo on) else (@echo off)
+
+  ) else (
+
+    if /i "%vstarget%" == "x86"   call "%VCVARSDIR%\vcvars32.bat"
+    @if defined TRACEON (@echo on) else (@echo off)
+
+    if /i "%vstarget%" == "amd64" call "%VCVARSDIR%\vcvars64.bat"
+    @if defined TRACEON (@echo on) else (@echo off)
+  )
+
+  echo.
+  popd
+
+  %return%
+
+:vs2015_or_earlier
+
+  ::-----------------------------------
+  ::   Visual Studio 2015 or EARLIER
+  ::-----------------------------------
+
+  if /i "%vshost%" == "%vstarget%" (
+
+    set "vcvarsall_argument=%vstarget%"
+
+  ) else (
+
+    @REM Cross compile: use 32-bit compiler to build 64-bit application
+    set "vcvarsall_argument=x86_amd64"
+  )
+
+  call "%VCVARSDIR%\vcvarsall.bat"  %vcvarsall_argument%
+  @if defined TRACEON (@echo on) else (@echo off)
+
+  %return%
+
+
+::-----------------------------------------------------------------------------
+::                            which_vstudio
+::-----------------------------------------------------------------------------
+:which_vstudio
+
+  set "rc=0"
+  set "VCVARSDIR="
+
+  set "vs2017=150"
+  set "vs2015=140"
+  set "vs2013=120"
+  set "vs2012=110"
+  set "vs2010=100"
+  set "vs2008=90"
+  set "vs2005=80"
+
+  set "VSVERSIONS=%vs2017% %vs2015% %vs2013% %vs2012% %vs2010% %vs2008% %vs2005%"
+
+:vstudio_try_loop
+
+  for /f "tokens=1*" %%a in ("%VSVERSIONS%") do (
+    call :try_vstudio_sub "%%a"
+    if defined VCVARSDIR %return%
+    if "%%b" == "" goto :vstudio_error
+    set "VSVERSIONS=%%b"
+    goto :vstudio_try_loop
+  )
+
+:vstudio_error
+
+  echo %~nx0: ERROR: No supported version of Visual Studio is installed
+  set "rc=1"
+  %return%
+
+:try_vstudio_sub
+
+  set "vsver=%~1"
+
+  setlocal enabledelayedexpansion
+
+  if not "!VS%vsver%COMNTOOLS!" == "" (
+    if %vsver% GEQ %vs2017% (
+      set "VCVARSDIR=!VS%vsver%COMNTOOLS!..\..\VC\Auxiliary\Build"
+    ) else (
+      set "VCVARSDIR=!VS%vsver%COMNTOOLS!..\..\VC"
+    )
+  )
+
+  endlocal && set "VCVARSDIR=%VCVARSDIR%"
+  %return%
 
 ::-----------------------------------------------------------------------------

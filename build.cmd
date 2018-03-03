@@ -1218,7 +1218,7 @@
     echo Build %result% on %date% at %time: =0%
     echo.
 
-  endlocal
+  endlocal && set "rc=%rc%" && set "maxrc=%maxrc%"
   %return%
 
 ::-----------------------------------------------------------------------------
@@ -1230,10 +1230,7 @@
 
   echo.&& echo Configuring %pkgname%%arch%.%config% ...&& echo.
 
-  if not defined did_vstools (
-    call "%vstools%" "%arch%"
-    set "did_vstools=1"
-  )
+  call :do_vstools "%arch%"
 
   if defined instdir (
     set "install_prefix_opt=-D INSTALL_PREFIX="%instdir%""
@@ -1273,10 +1270,7 @@
 
   echo.&& echo Building %pkgname%%arch%.%config% ...&& echo.
 
-  if not defined did_vstools (
-    call "%vstools%" "%arch%"
-    set "did_vstools=1"
-  )
+  call :do_vstools "%arch%"
 
   :: Do faster cotire unity or pch build if possible...
 
@@ -1315,10 +1309,7 @@
 
   echo.&& echo Installing %pkgname%%arch%.%config% ...&& echo.
 
-  if not defined did_vstools (
-    call "%vstools%" "%arch%"
-    set "did_vstools=1"
-  )
+  call :do_vstools "%arch%"
 
   if defined JOM (
     "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo install
@@ -1343,10 +1334,7 @@
 
   echo.&& echo UNinstalling %pkgname%%arch%.%config% ...&& echo.
 
-  if not defined did_vstools (
-    call "%vstools%" "%arch%"
-    set "did_vstools=1"
-  )
+  call :do_vstools "%arch%"
 
   if defined JOM (
     "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo uninstall
@@ -1361,6 +1349,21 @@
   )
 
   %return%
+
+
+::-----------------------------------------------------------------------------
+::                            do_vstools
+::-----------------------------------------------------------------------------
+:do_vstools
+
+  if defined did_vstools %return%
+  set "arch=%~1"
+  call "%vstools%" "%arch%"
+  set "rc=%errorlevel%"
+  call :update_maxrc
+  set "did_vstools=1"
+  %return%
+
 
 ::-----------------------------------------------------------------------------
 ::                              errmsg
