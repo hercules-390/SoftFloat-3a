@@ -264,7 +264,17 @@ fullpath()
   # Upon return $fullpath will contain full path or empty string if not found.
   # If optional argument 2 is passed then that variable also set to $fullpath.
 
-  fullpath="$(readlink -e "$1")"
+  fullpath="$(readlink -e "$1" 2>/dev/null)"
+
+  # PROGRAMMING NOTE: "fullpath" can fail on MacOS because it doesn't support
+  # the '-e' option. The following 'if' statement is the temporary workaround.
+
+  if [[ -z $fullpath ]] && [[ -a $1 ]]; then
+    # MacOS: "\"readlink -e $1\" resulted in a null string but the file exists.
+    fullpath="$1"
+  fi
+
+  # Assign the results to the requested return variable, if asked to.
 
   if [[ -n $fullpath ]] && [[ -n $2 ]]; then
     eval $2="\$fullpath"
