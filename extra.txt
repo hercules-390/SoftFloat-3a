@@ -2,10 +2,10 @@
 #   Define additional files to be installed
 #------------------------------------------------------------------------------
 
-install( FILES     "LICENSE.txt" DESTINATION  .  )
-install( FILES     "README.txt"  DESTINATION  .  )
-install( FILES     "README.html" DESTINATION  .  )
-install( DIRECTORY "doc/"        DESTINATION doc )
+install( FILES     "softfloat.LICENSE.txt" DESTINATION  .  )
+install( FILES     "softfloat.README.txt"  DESTINATION  .  )
+install( FILES     "softfloat.README.html" DESTINATION  .  )
+install( DIRECTORY "doc/"                  DESTINATION doc )
 
 #------------------------------------------------------------------------------
 

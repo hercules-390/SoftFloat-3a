@@ -524,7 +524,7 @@
     <None Include="platforms\Win32-MinGW\Makefile" />
     <None Include="platforms\Win32-SSE2-MinGW\Makefile" />
     <None Include="platforms\Win64-MinGW-w64\Makefile" />
-    <None Include="README.html" />
+    <None Include="softfloat.README.html" />
     <None Include="README.md" />
     <None Include="source\include\softfloat.h.preherc" />
     <None Include="vstools.cmd" />
@@ -540,12 +540,12 @@
   <ItemGroup>
     <Text Include="cflags.txt" />
     <Text Include="CMakeLists.txt" />
-    <Text Include="LICENSE.txt" />
+    <Text Include="softfloat.LICENSE.txt" />
     <Text Include="extra.txt" />
     <Text Include="headers.txt" />
     <Text Include="includes.txt" />
     <Text Include="project.txt" />
-    <Text Include="README.txt" />
+    <Text Include="softfloat.README.txt" />
     <Text Include="sources.txt" />
     <Text Include="targetver.txt" />
   </ItemGroup>

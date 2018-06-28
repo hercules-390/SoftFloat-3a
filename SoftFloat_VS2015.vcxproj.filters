@@ -1199,7 +1199,7 @@
     <None Include="README.md">
       <Filter>Other Files</Filter>
     </None>
-    <None Include="README.html">
+    <None Include="softfloat.README.html">
       <Filter>Other Files\doc</Filter>
     </None>
     <None Include="doc\SoftFloat-history.html">
@@ -1279,10 +1279,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="LICENSE.txt">
+    <Text Include="softfloat.LICENSE.txt">
       <Filter>Other Files\doc</Filter>
     </Text>
-    <Text Include="README.txt">
+    <Text Include="softfloat.README.txt">
       <Filter>Other Files\doc</Filter>
     </Text>
     <Text Include="CMakeLists.txt">

@@ -1652,15 +1652,15 @@
 				Name="doc"
 				>
 				<File
-					RelativePath=".\LICENSE.txt"
+					RelativePath=".\softfloat.LICENSE.txt"
 					>
 				</File>
 				<File
-					RelativePath="README.html"
+					RelativePath="softfloat.README.html"
 					>
 				</File>
 				<File
-					RelativePath="README.txt"
+					RelativePath="softfloat.README.txt"
 					>
 				</File>
 				<File
