@@ -18,7 +18,6 @@ else()
 
     include( Vdump )
     include( Trace )
-    include( cotire OPTIONAL )
 
 endif()
 
@@ -126,13 +125,6 @@ set_target_properties( ${FULLNAME} PROPERTIES
                        PUBLIC_HEADER              "${PUBLIC_HEADERS}"
                        OUTPUT_NAME                 ${FULLNAME}
                        COMPILE_PDB_NAME            ${FULLNAME} )
-
-#  Use cotire if available for faster builds
-
-if ( COMMAND cotire )
-  set_target_properties( ${FULLNAME}  PROPERTIES  COTIRE_CXX_PREFIX_HEADER_INIT  "platform.h" )
-  cotire( ${FULLNAME} )
-endif()
 
 install( TARGETS ${FULLNAME}
          PUBLIC_HEADER DESTINATION include

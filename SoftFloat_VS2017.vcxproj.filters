@@ -1226,9 +1226,6 @@
     <None Include="cmake\modules\CheckHeader.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>
-    <None Include="cmake\modules\cotire.cmake">
-      <Filter>Other Files\build\cmake\modules</Filter>
-    </None>
     <None Include="cmake\modules\GIT_Revision.cmake">
       <Filter>Other Files\build\cmake\modules</Filter>
     </None>

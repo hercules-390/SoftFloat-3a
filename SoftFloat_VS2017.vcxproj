@@ -505,7 +505,6 @@
     <None Include="BUILDING" />
     <None Include="cmake\modules\CapitalizeWord.cmake" />
     <None Include="cmake\modules\CheckHeader.cmake" />
-    <None Include="cmake\modules\cotire.cmake" />
     <None Include="cmake\modules\GIT_Revision.cmake" />
     <None Include="cmake\modules\ParseBinaryDir.cmake" />
     <None Include="cmake\modules\Trace.cmake" />

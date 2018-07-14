@@ -1342,15 +1342,7 @@ do_make()
 
     logmsg ""; logmsg "Building ${pkgname}${arch}.${config} ..."; logmsg ""
 
-    # Do faster cotire unity or pch build if possible...
-
-    make_target="all_unity"
-    make /q $make_target > /dev/null 2>&1
-    if (( $? == 2 )); then
-      make_target=""
-    fi
-
-    make -j $CPUS $make_target
+    make -j $CPUS all
 
     rc=$?
     update_maxrc

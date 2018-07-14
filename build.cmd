@@ -1272,24 +1272,12 @@
 
   call :do_vstools "%arch%"
 
-  :: Do faster cotire unity or pch build if possible...
-
-  if defined JOM (
-    set "nmake_target=all_pch"
-  ) else (
-    set "nmake_target=all_unity"
-  )
-  nmake /q %nmake_target% > NUL 2>&1
-  if %errorlevel% EQU 2 (
-    set "nmake_target="
-  )
-
   :: Now build the target...
 
   if defined JOM (
-    "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo %nmake_target%
+    "%JOM%" -j %NUMBER_OF_PROCESSORS% /nologo all
   ) else (
-    nmake                             /nologo %nmake_target%
+    nmake                             /nologo all
   )
   set "rc=%errorlevel%"
   call :update_maxrc

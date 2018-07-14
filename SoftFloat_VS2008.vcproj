@@ -1710,10 +1710,6 @@
 							>
 						</File>
 						<File
-							RelativePath=".\cmake\modules\cotire.cmake"
-							>
-						</File>
-						<File
 							RelativePath="cmake\modules\GIT_Revision.cmake"
 							>
 						</File>
