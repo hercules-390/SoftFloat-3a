@@ -91,7 +91,7 @@ If clang/clang++ is not in your $PATH, then you will need to specify its full pa
 
 The SoftFloat project is hosted on GitHub at the following URL:
 
-  * [https://github.com/Fish-Git/SoftFloat-3a](https://github.com/Fish-Git/SoftFloat-3a)
+  * [https://github.com/sdl-hercules-390/SoftFloat](https://github.com/sdl-hercules-390/SoftFloat)
 
 You can either clone the git repository (recommended) or download the source code .zip file from github.  (click the green "Clone or download" button and select "Download")
 
@@ -167,7 +167,7 @@ To use the automated build method all you need to do is first create a WORK dire
 Then, from within that WORK directory, simply invoke the package's **build** script:
 
 ```
-  ..\SoftFloat-3a\build --pkgname . --all --install ..\hyperion\SoftFloat
+  ..\SoftFloat-repo\build --pkgname . --all --install ..\hyperion\SoftFloat
 ```
 
 This will build the package (within your WORK directory) and automatically install the results into the given hercules external package subdirectory. Then simply build hercules like normal.
