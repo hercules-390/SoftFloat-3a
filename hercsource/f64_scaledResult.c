@@ -48,18 +48,18 @@ This function is also used to return a scaled result on trappable IEEE
 Overflow or Underflow exceptions when converting from longer to shorter
 floating point, as required by SA22-7832-10.
 
-If the scaled result is to large to fit in the target precision, an SNaN
+If the scaled result is too large to fit in the target precision, an SNaN
 is generated with payload 0x0DEAD.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"

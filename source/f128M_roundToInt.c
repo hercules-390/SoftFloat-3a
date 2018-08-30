@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2017 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -101,15 +101,15 @@ void
         zWPtr[indexWord( 4, 1 )] = 0;
         zWPtr[indexWord( 4, 0 )] = 0;
         sigExtra = aWPtr[indexWord( 4, 2 )];
-        if ( ! sigExtra ) {
+        if ( !sigExtra ) {
             sigExtra = aWPtr[indexWord( 4, 1 )] | aWPtr[indexWord( 4, 0 )];
         }
-        if ( ! sigExtra && ! (ui96 & 0x7FFFFFFF) ) goto ui96;
+        if ( !sigExtra && !(ui96 & 0x7FFFFFFF) ) goto ui96;
         if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
         sign = signF128UI96( ui96 );
         switch ( roundingMode ) {
          case softfloat_round_near_even:
-            if ( ! fracF128UI96( ui96 ) && ! sigExtra ) break;
+            if ( !fracF128UI96( ui96 ) && !sigExtra ) break;
          case softfloat_round_near_maxMag:
             if ( exp == 0x3FFE ) goto mag1;
             break;
@@ -117,8 +117,12 @@ void
             if ( sign ) goto mag1;
             break;
          case softfloat_round_max:
-            if ( ! sign ) goto mag1;
+            if ( !sign ) goto mag1;
             break;
+#ifdef SOFTFLOAT_ROUND_ODD
+         case softfloat_round_odd:
+            goto mag1;
+#endif
         }
         ui96 = packToF128UI96( sign, 0, 0 );
         goto ui96;
@@ -167,31 +171,40 @@ void
         carry = (wordZ < wordA);
         bit <<= 1;
         extrasMask = bit - 1;
+        if ( exact && (extra || (wordA & extrasMask)) ) {
+            softfloat_exceptionFlags |= softfloat_flag_inexact;
+        }
         if (
             (roundingMode == softfloat_round_near_even)
-                && ! extra && ! (wordZ & extrasMask)
+                && !extra && !(wordZ & extrasMask)
         ) {
-            if ( ! bit ) {
+            if ( !bit ) {
                 zWPtr[index] = wordZ;
                 index += wordIncr;
                 wordZ = aWPtr[index] + carry;
-                carry &= ! wordZ;
+                carry &= !wordZ;
                 zWPtr[index] = wordZ & ~1;
                 goto propagateCarry;
             }
             wordZ &= ~bit;
         }
     } else {
-        extrasMask = bit - 1;
         wordZ = wordA;
         carry = 0;
-        if (
-               (roundingMode != softfloat_round_minMag)
-            && (signF128UI96( ui96 ) ^ (roundingMode == softfloat_round_max))
-        ) {
-            if ( extra || (wordA & extrasMask) ) {
+        extrasMask = bit - 1;
+        if ( extra || (wordA & extrasMask) ) {
+            if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
+            if (
+                roundingMode
+                    == (signF128UI96( ui96 ) ? softfloat_round_min
+                            : softfloat_round_max)
+            ) {
                 wordZ += bit;
                 carry = (wordZ < wordA);
+#ifdef SOFTFLOAT_ROUND_ODD
+            } else if ( roundingMode == softfloat_round_odd ) {
+                wordZ |= bit;
+#endif
             }
         }
     }
@@ -202,12 +215,7 @@ void
         index += wordIncr;
         wordZ = aWPtr[index] + carry;
         zWPtr[index] = wordZ;
-        carry &= ! wordZ;
-    }
-    /*------------------------------------------------------------------------
-    *------------------------------------------------------------------------*/
-    if ( exact && (softfloat_compare128M( aWPtr, zWPtr ) != 0) ) {
-        softfloat_exceptionFlags |= softfloat_flag_inexact;
+        carry &= !wordZ;
     }
     return;
     /*------------------------------------------------------------------------

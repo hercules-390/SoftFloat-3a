@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All Rights Reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -41,21 +41,25 @@ Stephen R. Orso.  Said modifications identified by compilation conditioned
 on preprocessor variable IBM_IEEE.
 All such modifications placed in the public domain by Stephen R. Orso
 Modifications:
- 1) Added fields to the global state to store a rounded result with unbounded 
-    unbiased exponent to enable return of a scaled rounded result. 
+ 1) Added fields to the global state to store a rounded result with unbounded
+    unbiased exponent to enable return of a scaled rounded result.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
 #include "softfloat.h"
 
-#ifdef IBM_IEEE
+#ifndef THREAD_LOCAL
+#define THREAD_LOCAL
+#endif
+
+#if defined( IBM_IEEE )
 /*----------------------------------------------------------------------------
 | Raw unbiased unbounded exponent and raw rounded significand, used for return
 | of scaled results following a trappable overflow or underflow.  Because
@@ -84,12 +88,12 @@ Modifications:
 | status of the original result.  For non-trap results, the original result
 | is replaced by a non-finite value and Inexact and Incre are not returned.
 | When the scaled result is return, these booleans are used to update
-| the softfloat_exceptionFlags.  
+| the softfloat_exceptionFlags.
 |
 | softfloat_rawTiny is used by the scaled result routines to ensure a
 | renormalization of the scaled tiny result.  This avoids using the
 | softfloat_exceptionFlags value that reports tiny because that flag is part
-| of the external interface of Softfloat, not part of the internal state.  
+| of the external interface of Softfloat, not part of the internal state.
 |
 | The routines fxxx_returnScaledResult() uses these values to generate
 | scaled results.
@@ -102,10 +106,10 @@ uint_fast8_t softfloat_detectTininess = init_detectTininess;
 SF_THREAD_LOCAL uint_fast8_t softfloat_exceptionFlags;
 
 #else
-uint_fast8_t softfloat_roundingMode = softfloat_round_near_even;
-uint_fast8_t softfloat_detectTininess = init_detectTininess;
-uint_fast8_t softfloat_exceptionFlags = 0;
+THREAD_LOCAL uint_fast8_t softfloat_roundingMode = softfloat_round_near_even;
+THREAD_LOCAL uint_fast8_t softfloat_detectTininess = init_detectTininess;
+THREAD_LOCAL uint_fast8_t softfloat_exceptionFlags = 0;
 #endif /* IBM_IEEE  */
 
-uint_fast8_t extF80_roundingPrecision = 80;
+THREAD_LOCAL uint_fast8_t extF80_roundingPrecision = 80;
 

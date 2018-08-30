@@ -2,7 +2,7 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
 Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
 All rights reserved.
@@ -46,14 +46,14 @@ Modifications:
     on page 19-13 for the description for the Add instruction.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -69,7 +69,7 @@ Modifications:
 | exception is raised.
 *----------------------------------------------------------------------------*/
 
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
 /*----------------------------------------------------------------------------
 | Note: Above comment is incorrect whether compiled for the IBM_IEEE case
 | or the default case.  Under no circumstances are the payloads combined.
@@ -85,13 +85,13 @@ struct uint128
      uint_fast64_t uiB0
  )
 {
-#ifdef IBM_IEEE         /* IBM NaN propagation rules defined (consistently) in many tables      */
-                        /* in SA22-7832-10; see for example Table 19-13 on page 19-16.          */
-                        /* In short:                                                            */
-                        /*    If A is SNaN, return QNaN(A)                                      */
-                        /*    If B is SNaN, return QNaN(B)                                      */
-                        /*    If A is QNaN, return A                                            */
-                        /*    If B is QNaN, return B                                            */
+#if defined( IBM_IEEE ) /* IBM NaN propagation rules defined (consistently) in many tables  */
+                        /* in SA22-7832-10; see for example Table 19-13 on page 19-16.      */
+                        /* In short:                                                        */
+                        /*    If A is SNaN, return QNaN(A)                                  */
+                        /*    If B is SNaN, return QNaN(B)                                  */
+                        /*    If A is QNaN, return A                                        */
+                        /*    If B is QNaN, return B                                        */
 
     bool isSigNaNA;
     bool isSigNaNB;
@@ -132,7 +132,7 @@ struct uint128
     uiZ.v64 |= UINT64_C( 0x0000800000000000 );
     return uiZ;
 
-#endif
+#endif /* IBM_IEEE */
 
 }
 

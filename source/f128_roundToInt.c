@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2017 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -54,8 +54,9 @@ float128_t
     uint_fast64_t uiA64, uiA0;
     int_fast32_t exp;
     struct uint128 uiZ;
-    uint_fast64_t lastBitMask, roundBitsMask;
+    uint_fast64_t lastBitMask0, roundBitsMask;
     bool roundNearEven;
+    uint_fast64_t lastBitMask64;
     union ui128_f128 uZ;
 
     /*------------------------------------------------------------------------
@@ -78,8 +79,8 @@ float128_t
         }
         /*--------------------------------------------------------------------
         *--------------------------------------------------------------------*/
-        lastBitMask = (uint_fast64_t) 2<<(0x406E - exp);
-        roundBitsMask = lastBitMask - 1;
+        lastBitMask0 = (uint_fast64_t) 2<<(0x406E - exp);
+        roundBitsMask = lastBitMask0 - 1;
         uiZ.v64 = uiA64;
         uiZ.v0  = uiA0;
         roundNearEven = (roundingMode == softfloat_round_near_even);
@@ -95,32 +96,31 @@ float128_t
                     }
                 }
             } else {
-                uiZ = softfloat_add128( uiZ.v64, uiZ.v0, 0, lastBitMask>>1 );
-                if ( roundNearEven && ! (uiZ.v0 & roundBitsMask) ) {
-                    uiZ.v0 &= ~lastBitMask;
+                uiZ = softfloat_add128( uiZ.v64, uiZ.v0, 0, lastBitMask0>>1 );
+                if ( roundNearEven && !(uiZ.v0 & roundBitsMask) ) {
+                    uiZ.v0 &= ~lastBitMask0;
                 }
             }
-        } else if ( roundingMode != softfloat_round_minMag ) {
-            if (
-                signF128UI64( uiZ.v64 ) ^ (roundingMode == softfloat_round_max)
-            ) {
-                uiZ = softfloat_add128( uiZ.v64, uiZ.v0, 0, roundBitsMask );
-            }
+        } else if (
+            roundingMode
+                == (signF128UI64( uiZ.v64 ) ? softfloat_round_min
+                        : softfloat_round_max)
+        ) {
+            uiZ = softfloat_add128( uiZ.v64, uiZ.v0, 0, roundBitsMask );
         }
         uiZ.v0 &= ~roundBitsMask;
+        lastBitMask64 = !lastBitMask0;
     } else {
         /*--------------------------------------------------------------------
         *--------------------------------------------------------------------*/
         if ( exp < 0x3FFF ) {
-            if ( ! ((uiA64 & UINT64_C( 0x7FFFFFFFFFFFFFFF )) | uiA0) ) {
-                return a;
-            }
+            if ( !((uiA64 & UINT64_C( 0x7FFFFFFFFFFFFFFF )) | uiA0) ) return a;
             if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
             uiZ.v64 = uiA64 & packToF128UI64( 1, 0, 0 );
             uiZ.v0  = 0;
             switch ( roundingMode ) {
              case softfloat_round_near_even:
-                if ( ! (fracF128UI64( uiA64 ) | uiA0) ) break;
+                if ( !(fracF128UI64( uiA64 ) | uiA0) ) break;
              case softfloat_round_near_maxMag:
                 if ( exp == 0x3FFE ) uiZ.v64 |= packToF128UI64( 0, 0x3FFF, 0 );
                 break;
@@ -128,8 +128,13 @@ float128_t
                 if ( uiZ.v64 ) uiZ.v64 = packToF128UI64( 1, 0x3FFF, 0 );
                 break;
              case softfloat_round_max:
-                if ( ! uiZ.v64 ) uiZ.v64 = packToF128UI64( 0, 0x3FFF, 0 );
+                if ( !uiZ.v64 ) uiZ.v64 = packToF128UI64( 0, 0x3FFF, 0 );
                 break;
+#ifdef SOFTFLOAT_ROUND_ODD
+             case softfloat_round_odd:
+                uiZ.v64 |= packToF128UI64( 0, 0x3FFF, 0 );
+                break;
+#endif
             }
             goto uiZ;
         }
@@ -137,26 +142,33 @@ float128_t
         *--------------------------------------------------------------------*/
         uiZ.v64 = uiA64;
         uiZ.v0  = 0;
-        lastBitMask = (uint_fast64_t) 1<<(0x402F - exp);
-        roundBitsMask = lastBitMask - 1;
+        lastBitMask64 = (uint_fast64_t) 1<<(0x402F - exp);
+        roundBitsMask = lastBitMask64 - 1;
         if ( roundingMode == softfloat_round_near_maxMag ) {
-            uiZ.v64 += lastBitMask>>1;
+            uiZ.v64 += lastBitMask64>>1;
         } else if ( roundingMode == softfloat_round_near_even ) {
-            uiZ.v64 += lastBitMask>>1;
-            if ( ! ((uiZ.v64 & roundBitsMask) | uiA0) ) {
-                uiZ.v64 &= ~lastBitMask;
+            uiZ.v64 += lastBitMask64>>1;
+            if ( !((uiZ.v64 & roundBitsMask) | uiA0) ) {
+                uiZ.v64 &= ~lastBitMask64;
             }
-        } else if ( roundingMode != softfloat_round_minMag ) {
-            if (
-                signF128UI64( uiZ.v64 ) ^ (roundingMode == softfloat_round_max)
-            ) {
-                uiZ.v64 = (uiZ.v64 | (uiA0 != 0)) + roundBitsMask;
-            }
+        } else if (
+            roundingMode
+                == (signF128UI64( uiZ.v64 ) ? softfloat_round_min
+                        : softfloat_round_max)
+        ) {
+            uiZ.v64 = (uiZ.v64 | (uiA0 != 0)) + roundBitsMask;
         }
         uiZ.v64 &= ~roundBitsMask;
+        lastBitMask0 = 0;
     }
-    if ( exact && ((uiZ.v64 != uiA64) || (uiZ.v0 != uiA0)) ) {
-        softfloat_exceptionFlags |= softfloat_flag_inexact;
+    if ( (uiZ.v64 != uiA64) || (uiZ.v0 != uiA0) ) {
+#ifdef SOFTFLOAT_ROUND_ODD
+        if ( roundingMode == softfloat_round_odd ) {
+            uiZ.v64 |= lastBitMask64;
+            uiZ.v0  |= lastBitMask0;
+        }
+#endif
+        if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
  uiZ:
     uZ.ui = uiZ;

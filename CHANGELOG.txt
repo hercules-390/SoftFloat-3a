@@ -1,0 +1,39 @@
+Summary of changes to SoftFloat
+
+August, 2018: Package updated to SoftFloat-3e; Hercules modifications
+        updated by Stephen Orso.
+
+    Summary of material changes between SoftFloat-3a and -3e
+
+    General changes:
+    - Support added to specify value returned on over/underflow
+      result or NaN input when converting to (un)signed integer,
+      either 32-bit or 64-bit.
+
+    Changes to specific functions:
+    f32_scaledResult.c - corrected long-standing error that caused
+        large subnormal values to be treated as normal.
+    s_roundPackToI32.c renamed to s_roundToI32.c
+    s_roundPackToI64.c renamed to s_roundToI64.c
+    s_roundPackToUI32.c renamed to s_roundToUI32.c
+    s_roundPackToUI64.c renamed to s_roundToUI64.c
+    s_subMagsF32: re-written with a fast-path added for subtraction
+        of values having the same binary exponent.
+    s_subMagsF64: re-written with a fast-path added for subtraction
+        of values having the same binary exponent.
+
+    Summary of changes to Hercules modifications
+
+    source/8086-SSE/specialize.h
+    s_addMagsF128.c
+    s_addMagsF32.c
+    s_addMagsF64.c
+    s_roundPackToF32 - Accomodate code reordering in SoftFloat-3e.
+    s_roundPackToF64 - Accomodate code reordering in SoftFloat-3e..
+    s_roundPackToUI32.c - Increased rounding bits from 7 to 12
+    s_subMagsF32.c
+    s_subMagsF64.c
+
+    Hercules modifications no longer needed for SoftFloat-3e.
+    - f64_to_ui64
+

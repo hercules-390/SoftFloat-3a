@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -46,14 +46,14 @@ exponents are both zero and the result significand is not zero.  This
 can occur when adding a tiny to zero or another tiny.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 
@@ -76,46 +76,54 @@ float64_t
     uint_fast64_t sigZ;
     union ui64_f64 uZ;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     expA = expF64UI( uiA );
     sigA = fracF64UI( uiA );
     expB = expF64UI( uiB );
     sigB = fracF64UI( uiB );
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     expDiff = expA - expB;
-    sigA <<= 9;
-    sigB <<= 9;
     if ( ! expDiff ) {
+        /*--------------------------------------------------------------------
+        *--------------------------------------------------------------------*/
+        if ( ! expA ) {
+            uiZ = uiA + sigB;
+#if defined( IBM_IEEE )
+            /* If exp zero and sig non-zero, then still tiny.  If       */
+            /* ...addition overflowed into exponent, which is OK, then  */
+            /* ...no longer a tiny.                                     */
+                                                /* Result still tiny?   */
+            if (!(uiZ & 0X7FF0000000000000ULL) && (uiZ & 0X000FFFFFFFFFFFFFULL) )
+            {       /* ..yes, save value for scaled result, set flags   */
+                    /* Indicate subnormal result                        */
+                softfloat_exceptionFlags |= softfloat_flag_tiny;
+                softfloat_raw.Tiny = true;      /* Indicate a subnormal result              */
+                softfloat_raw.Incre = false;    /* Result was not incremented               */
+                softfloat_raw.Inexact = false;  /* Result is not inexact                    */
+                softfloat_raw.Sign = signZ;     /* Save result sign                         */
+                softfloat_raw.Exp = -1022;      /* Save semi-unbiased exponent              */
+                softfloat_raw.Sig64 = uiZ << 10; /* save rounded significand for scaling    */
+                                                /* ...Unwanted sign bit shifts out          */
+                softfloat_raw.Sig0 = 0;         /* Zero bits 64-128 of rounded result       */
+            }
+#endif /* IBM_IEEE */
+            goto uiZ;
+        }
         if ( expA == 0x7FF ) {
             if ( sigA | sigB ) goto propagateNaN;
             uiZ = uiA;
             goto uiZ;
         }
-#ifdef IBM_IEEE
-        if ( ! expA ) {
-            sigZ = (uiA + uiB) & UINT64_C(0x7FFFFFFFFFFFFFFF);      /* Sum the significands and exclude sign bits   */
-            if (!(sigZ & 0XFFF0000000000000ULL) && sigZ) {          /* if exp zero and sig non-zero, then subnormal */
-                softfloat_raw.Incre = false;                        /* Result was not incremented                   */
-                softfloat_raw.Inexact = false;                      /* Result is not inexact                        */
-                softfloat_raw.Sig64 = sigZ << 10;                   /* 32 + 7; save rounded significand for scaling */
-                softfloat_raw.Sig0 = 0;                             /* Zero bits 64-128 of rounded result           */
-                softfloat_raw.Exp = -1022;                          /* Save semi-unbiased exponent                  */
-                softfloat_raw.Sign = signZ;                         /* Save result sign                             */
-                softfloat_raw.Tiny = true;                          /* Indicate a subnormal result                  */
-                softfloat_exceptionFlags |= softfloat_flag_tiny;    /* nonzero result is tiny                       */
-            }
-            uiZ = packToF64UI(signZ, 0, sigZ);                      /* Pack up a zero or a subnormal                */
-            goto uiZ;
-        }
-#else   
-        if ( ! expA ) {
-            uiZ =
-                packToF64UI(
-                    signZ, 0, (uiA + uiB) & UINT64_C( 0x7FFFFFFFFFFFFFFF ) );
-            goto uiZ;
-        }
-#endif /* IBM_IEEE */
         expZ = expA;
-        sigZ = UINT64_C( 0x4000000000000000 ) + sigA + sigB;
+        sigZ = UINT64_C( 0x0020000000000000 ) + sigA + sigB;
+        sigZ <<= 9;
     } else {
+        /*--------------------------------------------------------------------
+        *--------------------------------------------------------------------*/
+        sigA <<= 9;
+        sigB <<= 9;
         if ( expDiff < 0 ) {
             if ( expB == 0x7FF ) {
                 if ( sigB ) goto propagateNaN;
@@ -123,7 +131,11 @@ float64_t
                 goto uiZ;
             }
             expZ = expB;
-            sigA += expA ? UINT64_C( 0x2000000000000000 ) : sigA;
+            if ( expA ) {
+                sigA += UINT64_C( 0x2000000000000000 );
+            } else {
+                sigA <<= 1;
+            }
             sigA = softfloat_shiftRightJam64( sigA, -expDiff );
         } else {
             if ( expA == 0x7FF ) {
@@ -132,7 +144,11 @@ float64_t
                 goto uiZ;
             }
             expZ = expA;
-            sigB += expB ? UINT64_C( 0x2000000000000000 ) : sigB;
+            if ( expB ) {
+                sigB += UINT64_C( 0x2000000000000000 );
+            } else {
+                sigB <<= 1;
+            }
             sigB = softfloat_shiftRightJam64( sigB, expDiff );
         }
         sigZ = UINT64_C( 0x2000000000000000 ) + sigA + sigB;
@@ -142,6 +158,8 @@ float64_t
         }
     }
     return softfloat_roundPackToF64( signZ, expZ, sigZ );
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
  propagateNaN:
     uiZ = softfloat_propagateNaNF64UI( uiA, uiB );
  uiZ:

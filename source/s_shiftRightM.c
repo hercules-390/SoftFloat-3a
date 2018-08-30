@@ -2,9 +2,9 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
 California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 
 #ifndef softfloat_shiftRightM
@@ -50,44 +50,44 @@ void
  softfloat_shiftRightM(
      uint_fast8_t size_words,
      const uint32_t *aPtr,
-     uint32_t count,
+     uint32_t dist,
      uint32_t *zPtr
  )
 {
-    uint32_t wordCount;
-    uint_fast8_t innerCount;
+    uint32_t wordDist;
+    uint_fast8_t innerDist;
     uint32_t *destPtr;
     uint_fast8_t i;
 
-    wordCount = count>>5;
-    if ( wordCount < size_words ) {
-        aPtr += indexMultiwordHiBut( size_words, wordCount );
-        innerCount = count & 31;
-        if ( innerCount ) {
+    wordDist = dist>>5;
+    if ( wordDist < size_words ) {
+        aPtr += indexMultiwordHiBut( size_words, wordDist );
+        innerDist = dist & 31;
+        if ( innerDist ) {
             softfloat_shortShiftRightM(
-                size_words - wordCount,
+                size_words - wordDist,
                 aPtr,
-                innerCount,
-                zPtr + indexMultiwordLoBut( size_words, wordCount )
+                innerDist,
+                zPtr + indexMultiwordLoBut( size_words, wordDist )
             );
-            if ( ! wordCount ) return;
+            if ( ! wordDist ) return;
         } else {
-            aPtr += indexWordLo( size_words - wordCount );
+            aPtr += indexWordLo( size_words - wordDist );
             destPtr = zPtr + indexWordLo( size_words );
-            for ( i = size_words - wordCount; i; --i ) {
+            for ( i = size_words - wordDist; i; --i ) {
                 *destPtr = *aPtr;
                 aPtr += wordIncr;
                 destPtr += wordIncr;
             }
         }
-        zPtr += indexMultiwordHi( size_words, wordCount );
+        zPtr += indexMultiwordHi( size_words, wordDist );
     } else {
-        wordCount = size_words;
+        wordDist = size_words;
     }
     do {
         *zPtr++ = 0;
-        --wordCount;
-    } while ( wordCount );
+        --wordDist;
+    } while ( wordDist );
 
 }
 

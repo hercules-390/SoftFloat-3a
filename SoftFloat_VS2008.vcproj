@@ -111,11 +111,11 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath=".\softfloat_version.c"
+				RelativePath="softfloat_version.c"
 				>
 			</File>
 			<File
-				RelativePath=".\softfloat_version.h"
+				RelativePath="softfloat_version.h"
 				>
 			</File>
 			<Filter
@@ -181,6 +181,10 @@
 				</File>
 				<File
 					RelativePath="source\extF80_to_f128.c"
+					>
+				</File>
+				<File
+					RelativePath="source\extF80_to_f16.c"
 					>
 				</File>
 				<File
@@ -277,6 +281,10 @@
 				</File>
 				<File
 					RelativePath="source\extF80M_to_f128M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\extF80M_to_f16.c"
 					>
 				</File>
 				<File
@@ -384,6 +392,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\f128_to_f16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\f128_to_f32.c"
 					>
 				</File>
@@ -484,6 +496,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\f128M_to_f16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\f128M_to_f32.c"
 					>
 				</File>
@@ -521,6 +537,122 @@
 				</File>
 				<File
 					RelativePath="source\f128M_to_ui64_r_minMag.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_add.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_div.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_eq.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_eq_signaling.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_isSignalingNaN.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_le.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_le_quiet.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_lt.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_lt_quiet.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_mul.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_mulAdd.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_rem.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_roundToInt.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_sqrt.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_sub.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_extF80.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_extF80M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_f128.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_f128M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_f32.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_f64.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_i32.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_i32_r_minMag.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_i64.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_i64_r_minMag.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_ui32.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_ui32_r_minMag.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_ui64.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f16_to_ui64_r_minMag.c"
 					>
 				</File>
 				<File
@@ -597,6 +729,10 @@
 				</File>
 				<File
 					RelativePath="source\f32_to_f128M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\f32_to_f16.c"
 					>
 				</File>
 				<File
@@ -712,6 +848,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\f64_to_f16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\f64_to_f32.c"
 					>
 				</File>
@@ -764,6 +904,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\i32_to_f16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\i32_to_f32.c"
 					>
 				</File>
@@ -785,6 +929,10 @@
 				</File>
 				<File
 					RelativePath="source\i64_to_f128M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\i64_to_f16.c"
 					>
 				</File>
 				<File
@@ -832,6 +980,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_addMagsF16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_addMagsF32.c"
 					>
 				</File>
@@ -844,7 +996,15 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_approxRecip_1Ks.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_approxRecipSqrt32_1.c"
+					>
+				</File>
+				<File
+					RelativePath="source\s_approxRecipSqrt_1Ks.c"
 					>
 				</File>
 				<File
@@ -857,6 +1017,10 @@
 				</File>
 				<File
 					RelativePath="source\s_compareNonnormExtF80M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\s_countLeadingZeros16.c"
 					>
 				</File>
 				<File
@@ -928,6 +1092,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_mulAddF16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_mulAddF32.c"
 					>
 				</File>
@@ -960,6 +1128,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_normRoundPackToF16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_normRoundPackToF32.c"
 					>
 				</File>
@@ -980,6 +1152,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_normSubnormalF16Sig.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_normSubnormalF32Sig.c"
 					>
 				</File>
@@ -992,19 +1168,19 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_roundMToI64.c"
+					>
+				</File>
+				<File
+					RelativePath="source\s_roundMToUI64.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_roundPackMToExtF80M.c"
 					>
 				</File>
 				<File
 					RelativePath="source\s_roundPackMToF128M.c"
-					>
-				</File>
-				<File
-					RelativePath="source\s_roundPackMToI64.c"
-					>
-				</File>
-				<File
-					RelativePath="source\s_roundPackMToUI64.c"
 					>
 				</File>
 				<File
@@ -1016,6 +1192,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_roundPackToF16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_roundPackToF32.c"
 					>
 				</File>
@@ -1024,19 +1204,19 @@
 					>
 				</File>
 				<File
-					RelativePath="source\s_roundPackToI32.c"
+					RelativePath="source\s_roundToI32.c"
 					>
 				</File>
 				<File
-					RelativePath="source\s_roundPackToI64.c"
+					RelativePath="source\s_roundToI64.c"
 					>
 				</File>
 				<File
-					RelativePath="source\s_roundPackToUI32.c"
+					RelativePath="source\s_roundToUI32.c"
 					>
 				</File>
 				<File
-					RelativePath="source\s_roundPackToUI64.c"
+					RelativePath="source\s_roundToUI64.c"
 					>
 				</File>
 				<File
@@ -1148,6 +1328,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\s_subMagsF16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\s_subMagsF32.c"
 					>
 				</File>
@@ -1184,6 +1368,10 @@
 					>
 				</File>
 				<File
+					RelativePath="source\ui32_to_f16.c"
+					>
+				</File>
+				<File
 					RelativePath="source\ui32_to_f32.c"
 					>
 				</File>
@@ -1205,6 +1393,10 @@
 				</File>
 				<File
 					RelativePath="source\ui64_to_f128M.c"
+					>
+				</File>
+				<File
+					RelativePath="source\ui64_to_f16.c"
 					>
 				</File>
 				<File
@@ -1243,6 +1435,10 @@
 						>
 					</File>
 					<File
+						RelativePath="source\8086\s_commonNaNToF16UI.c"
+						>
+					</File>
+					<File
 						RelativePath="source\8086\s_commonNaNToF32UI.c"
 						>
 					</File>
@@ -1267,6 +1463,10 @@
 						>
 					</File>
 					<File
+						RelativePath="source\8086\s_f16UIToCommonNaN.c"
+						>
+					</File>
+					<File
 						RelativePath="source\8086\s_f32UIToCommonNaN.c"
 						>
 					</File>
@@ -1288,6 +1488,10 @@
 					</File>
 					<File
 						RelativePath="source\8086\s_propagateNaNF128UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\8086\s_propagateNaNF16UI.c"
 						>
 					</File>
 					<File
@@ -1335,6 +1539,10 @@
 						>
 					</File>
 					<File
+						RelativePath="source\8086-SSE\s_commonNaNToF16UI.c"
+						>
+					</File>
+					<File
 						RelativePath="source\8086-SSE\s_commonNaNToF32UI.c"
 						>
 					</File>
@@ -1356,6 +1564,10 @@
 					</File>
 					<File
 						RelativePath="source\8086-SSE\s_f128UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\8086-SSE\s_f16UIToCommonNaN.c"
 						>
 					</File>
 					<File
@@ -1383,15 +1595,15 @@
 						>
 					</File>
 					<File
+						RelativePath="source\8086-SSE\s_propagateNaNF16UI.c"
+						>
+					</File>
+					<File
 						RelativePath="source\8086-SSE\s_propagateNaNF32UI.c"
 						>
 					</File>
 					<File
 						RelativePath="source\8086-SSE\s_propagateNaNF64UI.c"
-						>
-					</File>
-					<File
-						RelativePath="source\8086-SSE\softfloat-specialize.h"
 						>
 					</File>
 					<File
@@ -1411,6 +1623,10 @@
 						>
 					</File>
 					<File
+						RelativePath="source\include\opts-GCC.h"
+						>
+					</File>
+					<File
 						RelativePath="source\include\primitives.h"
 						>
 					</File>
@@ -1423,11 +1639,215 @@
 						>
 					</File>
 					<File
-						RelativePath="source\include\softfloat.h.preherc"
+						RelativePath="source\include\softfloat_types.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="ARM-VFPv2"
+					>
+					<File
+						RelativePath="source\ARM-VFPv2\extF80M_isSignalingNaN.c"
 						>
 					</File>
 					<File
-						RelativePath="source\include\softfloat_types.h"
+						RelativePath="source\ARM-VFPv2\f128M_isSignalingNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToExtF80M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToExtF80UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToF128M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToF128UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToF16UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToF32UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_commonNaNToF64UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_extF80MToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_extF80UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_f128MToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_f128UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_f16UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_f32UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_f64UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNExtF80M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNExtF80UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNF128M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNF128UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNF16UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNF32UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\s_propagateNaNF64UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\softfloat_raiseFlags.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2\specialize.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="ARM-VFPv2-defaultNaN"
+					>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\extF80M_isSignalingNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\f128M_isSignalingNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToExtF80M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToExtF80UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToF128M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToF128UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToF16UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToF32UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_commonNaNToF64UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_extF80MToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_extF80UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_f128MToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_f128UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_f16UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_f32UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_f64UIToCommonNaN.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNExtF80M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNExtF80UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNF128M.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNF128UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNF16UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNF32UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\s_propagateNaNF64UI.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\softfloat_raiseFlags.c"
+						>
+					</File>
+					<File
+						RelativePath="source\ARM-VFPv2-defaultNaN\specialize.h"
 						>
 					</File>
 				</Filter>
@@ -1444,10 +1864,6 @@
 					>
 				</File>
 				<File
-					RelativePath="hercsource\f128_to_ui64.c"
-					>
-				</File>
-				<File
 					RelativePath="hercsource\f32_roundToInt.c"
 					>
 				</File>
@@ -1456,19 +1872,11 @@
 					>
 				</File>
 				<File
-					RelativePath="hercsource\f32_to_ui64.c"
-					>
-				</File>
-				<File
 					RelativePath="hercsource\f64_roundToInt.c"
 					>
 				</File>
 				<File
 					RelativePath="hercsource\f64_scaledResult.c"
-					>
-				</File>
-				<File
-					RelativePath="hercsource\f64_to_ui64.c"
 					>
 				</File>
 				<File
@@ -1516,19 +1924,27 @@
 					>
 				</File>
 				<File
-					RelativePath="hercsource\s_roundPackToI32.c"
+					RelativePath="hercsource\s_roundToI32.c"
 					>
 				</File>
 				<File
-					RelativePath="hercsource\s_roundPackToI64.c"
+					RelativePath="hercsource\s_roundToI64.c"
 					>
 				</File>
 				<File
-					RelativePath="hercsource\s_roundPackToUI32.c"
+					RelativePath="hercsource\s_roundToUI32.c"
 					>
 				</File>
 				<File
-					RelativePath="hercsource\s_roundPackToUI64.c"
+					RelativePath="hercsource\s_roundToUI64.c"
+					>
+				</File>
+				<File
+					RelativePath="hercsource\s_subMagsF32.c"
+					>
+				</File>
+				<File
+					RelativePath="hercsource\s_subMagsF64.c"
 					>
 				</File>
 				<File
@@ -1543,11 +1959,11 @@
 					Name="Linux-386-GCC"
 					>
 					<File
-						RelativePath=".\platforms\Linux-386-GCC\Makefile"
+						RelativePath="platforms\Linux-386-GCC\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Linux-386-GCC\platform.h"
+						RelativePath="platforms\Linux-386-GCC\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1555,11 +1971,11 @@
 					Name="Linux-386-SSE2-GCC"
 					>
 					<File
-						RelativePath=".\platforms\Linux-386-SSE2-GCC\Makefile"
+						RelativePath="platforms\Linux-386-SSE2-GCC\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Linux-386-SSE2-GCC\platform.h"
+						RelativePath="platforms\Linux-386-SSE2-GCC\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1567,11 +1983,11 @@
 					Name="Linux-x86_64-GCC"
 					>
 					<File
-						RelativePath=".\platforms\Linux-x86_64-GCC\Makefile"
+						RelativePath="platforms\Linux-x86_64-GCC\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Linux-x86_64-GCC\platform.h"
+						RelativePath="platforms\Linux-x86_64-GCC\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1579,11 +1995,11 @@
 					Name="template-FAST_INT64"
 					>
 					<File
-						RelativePath=".\platforms\template-FAST_INT64\Makefile"
+						RelativePath="platforms\template-FAST_INT64\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\template-FAST_INT64\platform.h"
+						RelativePath="platforms\template-FAST_INT64\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1591,11 +2007,11 @@
 					Name="template-not-FAST_INT64"
 					>
 					<File
-						RelativePath=".\platforms\template-not-FAST_INT64\Makefile"
+						RelativePath="platforms\template-not-FAST_INT64\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\template-not-FAST_INT64\platform.h"
+						RelativePath="platforms\template-not-FAST_INT64\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1603,11 +2019,11 @@
 					Name="Win32-MinGW"
 					>
 					<File
-						RelativePath=".\platforms\Win32-MinGW\Makefile"
+						RelativePath="platforms\Win32-MinGW\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Win32-MinGW\platform.h"
+						RelativePath="platforms\Win32-MinGW\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1615,11 +2031,11 @@
 					Name="Win32-SSE2-MinGW"
 					>
 					<File
-						RelativePath=".\platforms\Win32-SSE2-MinGW\Makefile"
+						RelativePath="platforms\Win32-SSE2-MinGW\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Win32-SSE2-MinGW\platform.h"
+						RelativePath="platforms\Win32-SSE2-MinGW\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1627,11 +2043,23 @@
 					Name="Win64-MinGW-w64"
 					>
 					<File
-						RelativePath=".\platforms\Win64-MinGW-w64\Makefile"
+						RelativePath="platforms\Win64-MinGW-w64\Makefile"
 						>
 					</File>
 					<File
-						RelativePath=".\platforms\Win64-MinGW-w64\platform.h"
+						RelativePath="platforms\Win64-MinGW-w64\platform.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Linux-ARM-VFPv2-GCC"
+					>
+					<File
+						RelativePath="platforms\Linux-ARM-VFPv2-GCC\Makefile"
+						>
+					</File>
+					<File
+						RelativePath="platforms\Linux-ARM-VFPv2-GCC\platform.h"
 						>
 					</File>
 				</Filter>
@@ -1645,24 +2073,12 @@
 				>
 			</File>
 			<File
-				RelativePath=".\README.md"
+				RelativePath="README.md"
 				>
 			</File>
 			<Filter
 				Name="doc"
 				>
-				<File
-					RelativePath=".\softfloat.LICENSE.txt"
-					>
-				</File>
-				<File
-					RelativePath="softfloat.README.html"
-					>
-				</File>
-				<File
-					RelativePath="softfloat.README.txt"
-					>
-				</File>
 				<File
 					RelativePath="doc\SoftFloat-history.html"
 					>
@@ -1673,6 +2089,18 @@
 				</File>
 				<File
 					RelativePath="doc\SoftFloat.html"
+					>
+				</File>
+				<File
+					RelativePath="softfloat.LICENSE.txt"
+					>
+				</File>
+				<File
+					RelativePath="softfloat.README.html"
+					>
+				</File>
+				<File
+					RelativePath="softfloat.README.txt"
 					>
 				</File>
 			</Filter>
@@ -1726,7 +2154,7 @@
 							>
 						</File>
 						<File
-							RelativePath=".\cmake\modules\Version.cmake"
+							RelativePath="cmake\modules\Version.cmake"
 							>
 						</File>
 					</Filter>
@@ -1758,7 +2186,7 @@
 							>
 						</File>
 						<File
-							RelativePath=".\targetver.txt"
+							RelativePath="targetver.txt"
 							>
 						</File>
 					</Filter>
@@ -1794,11 +2222,11 @@
 						Name="VS2008"
 						>
 						<File
-							RelativePath=".\SoftFloat_VS2008.sln"
+							RelativePath="SoftFloat_VS2008.sln"
 							>
 						</File>
 						<File
-							RelativePath=".\SoftFloat_VS2008.vcproj"
+							RelativePath="SoftFloat_VS2008.vcproj"
 							>
 						</File>
 					</Filter>
@@ -1806,15 +2234,15 @@
 						Name="VS2015"
 						>
 						<File
-							RelativePath=".\SoftFloat_VS2015.sln"
+							RelativePath="SoftFloat_VS2015.sln"
 							>
 						</File>
 						<File
-							RelativePath=".\SoftFloat_VS2015.vcxproj"
+							RelativePath="SoftFloat_VS2015.vcxproj"
 							>
 						</File>
 						<File
-							RelativePath=".\SoftFloat_VS2015.vcxproj.filters"
+							RelativePath="SoftFloat_VS2015.vcxproj.filters"
 							>
 						</File>
 					</Filter>
@@ -1822,15 +2250,15 @@
 						Name="VS2017"
 						>
 						<File
-							RelativePath=".\SoftFloat_VS2017.sln"
+							RelativePath="SoftFloat_VS2017.sln"
 							>
 						</File>
 						<File
-							RelativePath=".\SoftFloat_VS2017.vcxproj"
+							RelativePath="SoftFloat_VS2017.vcxproj"
 							>
 						</File>
 						<File
-							RelativePath=".\SoftFloat_VS2017.vcxproj.filters"
+							RelativePath="SoftFloat_VS2017.vcxproj.filters"
 							>
 						</File>
 					</Filter>

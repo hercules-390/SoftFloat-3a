@@ -2,9 +2,9 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of
+Copyright 2011, 2012, 2013, 2014, 2015, 2017 The Regents of the University of
 California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,22 +43,22 @@ All such modifications placed in the public domain by Stephen R. Orso.
 Modifications:
  1) Saved rounded result with unbounded unbiased exponent to enable
     return of a scaled rounded result, required by many instructions.
- 2) Added rounding mode softfloat_round_stickybit, which corresponds to 
+ 2) Added rounding mode softfloat_round_stickybit, which corresponds to
     IBM Round For Shorter precision (RFS).
  3) Added reporting of softfloat_flag_tiny when the result is tiny, even
     if the result is tiny and exact.
- 4) Added reporting of softfloat_flag_incremented when the significand was 
+ 4) Added reporting of softfloat_flag_incremented when the significand was
     increased in magnitude by rounding.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "softfloat.h"
@@ -73,11 +73,13 @@ float32_t
     uint_fast32_t uiZ;
     union ui32_f32 uZ;
 
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
     uint_fast32_t savesig;              /* Savearea for rounded pre-underflow significand   */
     bool saveincre;                     /* Save flag for whether result was incremented     */
 #endif /* IBM_IEEE */
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     roundingMode = softfloat_roundingMode;
     roundNearEven = (roundingMode == softfloat_round_near_even);
     roundIncrement = 0x40;
@@ -90,7 +92,7 @@ float32_t
     }
     roundBits = sig & 0x7F;
 
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
     savesig = (sig + roundIncrement)>>7;
     /* Sticky bit rounding: if pre-rounding result is exact, no rounding.  Leave result unchanged.      */
     /* If the result is inexact (roundBits non-zero), the low-order bit of the result must be odd.      */
@@ -108,40 +110,44 @@ float32_t
     isTiny = false;                                         /* Assume not a subnormal result for the moment.            */
 #endif /* IBM_IEEE */
 
-    if ( 0xFD <= (uint16_t) exp ) {
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    if ( 0xFD <= (unsigned int) exp ) {
         if ( exp < 0 ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             isTiny =
-                   (softfloat_detectTininess
-                        == softfloat_tininess_beforeRounding)
-                || (exp < -1)
-                || (sig + roundIncrement < 0x80000000);
+                (softfloat_detectTininess == softfloat_tininess_beforeRounding)
+                    || (exp < -1) || (sig + roundIncrement < 0x80000000);
             sig = softfloat_shiftRightJam32( sig, -exp );
             exp = 0;
             roundBits = sig & 0x7F;
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
             softfloat_exceptionFlags |= softfloat_flag_tiny;
 #endif /* IBM_IEEE  */
             if ( isTiny && roundBits ) {
                 softfloat_raiseFlags( softfloat_flag_underflow );
             }
         } else if ( (0xFD < exp) || (0x80000000 <= sig + roundIncrement) ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             softfloat_raiseFlags(
                 softfloat_flag_overflow | softfloat_flag_inexact );
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
             if ((softfloat_roundingMode & softfloat_round_near_even)    /* Force return of infinity if Near Even    */
                                                                         /* or rounding in direction of result sign  */
-                || sign ? softfloat_roundingMode & softfloat_round_min : softfloat_roundingMode & softfloat_round_max) 
+                || sign ? softfloat_roundingMode & softfloat_round_min : softfloat_roundingMode & softfloat_round_max)
                 roundIncrement = 1;                                     /* force return of infinity                 */
 #endif /* IBM_IEEE */
             uiZ = packToF32UI( sign, 0xFF, 0 ) - ! roundIncrement;
             goto uiZ;
         }
     }
-    if ( roundBits ) softfloat_exceptionFlags |= softfloat_flag_inexact;
-
-#ifdef IBM_IEEE
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+#if defined( IBM_IEEE )
     /*  NB:  isTiny is always true on underflow because IBM IEEE requires detect tininess before rounding       */
-    softfloat_raw.Tiny = isTiny;                         /* preserve Tiny flag for return of scaled results      */
+    softfloat_raw.Tiny = isTiny;                        /* preserve Tiny flag for return of scaled results      */
     if (isTiny) {                                       /* if tiny, we must round the shifted subnormal         */
         savesig = (sig + roundIncrement) >> 7;          /* apply rounding factor                                */
         savesig |= (uint_fast32_t)(roundBits && (roundingMode == softfloat_round_stickybit)); /* ensure odd if needed */
@@ -150,12 +156,26 @@ float32_t
     }
     uiZ = packToF32UI(sign, savesig ? exp : 0, savesig);
     softfloat_exceptionFlags |= saveincre ? softfloat_flag_incremented : 0;  /* indicate if significand was incremented */
+    if ( roundBits )
+        softfloat_exceptionFlags |= softfloat_flag_inexact;
 #else
     sig = (sig + roundIncrement)>>7;
-    sig &= ~(uint_fast32_t) (! (roundBits ^ 0x40) & roundNearEven);
-    uiZ = packToF32UI( sign, sig ? exp : 0, sig );
+    if ( roundBits ) {
+        softfloat_exceptionFlags |= softfloat_flag_inexact;
+#ifdef SOFTFLOAT_ROUND_ODD
+        if ( roundingMode == softfloat_round_odd ) {
+            sig |= 1;
+            goto packReturn;
+        }
 #endif
-
+    }
+    sig &= ~(uint_fast32_t) (! (roundBits ^ 0x40) & roundNearEven);
+    if ( ! sig ) exp = 0;
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+ packReturn:
+    uiZ = packToF32UI( sign, exp, sig );
+#endif  /* IBM_IEEE  */
  uiZ:
     uZ.ui = uiZ;
     return uZ.f;

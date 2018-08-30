@@ -2,9 +2,9 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
 California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "primitiveTypes.h"
 
@@ -48,25 +48,25 @@ void
  softfloat_shortShiftRightJamM(
      uint_fast8_t size_words,
      const uint32_t *aPtr,
-     uint_fast8_t count,
+     uint_fast8_t dist,
      uint32_t *zPtr
  )
 {
-    uint_fast8_t negCount;
+    uint_fast8_t uNegDist;
     unsigned int index, lastIndex;
     uint32_t partWordZ, wordA;
 
-    negCount = -count;
+    uNegDist = -dist;
     index = indexWordLo( size_words );
     lastIndex = indexWordHi( size_words );
     wordA = aPtr[index];
-    partWordZ = wordA>>count;
-    if ( partWordZ<<count != wordA ) partWordZ |= 1;
+    partWordZ = wordA>>dist;
+    if ( partWordZ<<dist != wordA ) partWordZ |= 1;
     while ( index != lastIndex ) {
         wordA = aPtr[index + wordIncr];
-        zPtr[index] = wordA<<(negCount & 31) | partWordZ;
+        zPtr[index] = wordA<<(uNegDist & 31) | partWordZ;
         index += wordIncr;
-        partWordZ = wordA>>count;
+        partWordZ = wordA>>dist;
     }
     zPtr[index] = partWordZ;
 

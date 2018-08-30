@@ -1349,7 +1349,65 @@
   call "%vstools%" "%arch%"
   set "rc=%errorlevel%"
   call :update_maxrc
+  call :dump_env
   set "did_vstools=1"
+  %return%
+
+
+::-----------------------------------------------------------------------------
+::                              dump_env
+::-----------------------------------------------------------------------------
+:dump_env
+
+  echo.
+  echo --------------------------- ENVIRONMENT POOL ---------------------------
+  echo.
+  set
+
+  ::  Format the PATH, LIB and INCLUDE variables for easier reading
+
+  echo.
+  echo -------------------------- PATH, LIB, INCLUDE --------------------------
+  call :fxxx PATH
+  call :fxxx LIB
+  call :fxxx INCLUDE
+  echo.
+  echo ------------------------------------------------------------------------
+  echo.
+
+  %return%
+
+
+::-----------------------------------------------------------------------------
+::                                fxxx
+::-----------------------------------------------------------------------------
+:fxxx
+
+  @REM  Parses semi-colon delimited variable (e.g. PATH, LIB, INCLUDE, etc.)
+
+  setlocal enabledelayedexpansion
+
+  set @=%~1
+
+  echo.
+  echo %@%=
+  echo.
+
+  @REM  Delayed expansion used here!
+  set _=!%@%!
+
+:fxxx_loop
+
+  for /f "delims=; tokens=1*" %%a in ("%_%") do (
+    echo   %%a
+    if "%%b" == "" %break%
+    set _=%%b
+    goto :fxxx_loop
+  )
+
+:break
+
+  endlocal
   %return%
 
 

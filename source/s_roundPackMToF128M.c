@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2017 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "softfloat.h"
@@ -58,6 +58,8 @@ void
         INIT_UINTM4( 0x0001FFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF );
     uint32_t ui, uj;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     roundingMode = softfloat_roundingMode;
     roundNearEven = (roundingMode == softfloat_round_near_even);
     sigExtra = extSigPtr[indexWordLo( 5 )];
@@ -68,8 +70,12 @@ void
                  == (sign ? softfloat_round_min : softfloat_round_max))
                 && sigExtra;
     }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( 0x7FFD <= (uint32_t) exp ) {
         if ( exp < 0 ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             isTiny =
                    (softfloat_detectTininess
                         == softfloat_tininess_beforeRounding)
@@ -101,6 +107,8 @@ void
                             extSigPtr + indexMultiwordHi( 5, 4 ), maxSig )
                             == 0))
         ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             softfloat_raiseFlags(
                 softfloat_flag_overflow | softfloat_flag_inexact );
             if (
@@ -122,8 +130,18 @@ void
             return;
         }
     }
-    if ( sigExtra ) softfloat_exceptionFlags |= softfloat_flag_inexact;
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     uj = extSigPtr[indexWord( 5, 1 )];
+    if ( sigExtra ) {
+        softfloat_exceptionFlags |= softfloat_flag_inexact;
+#ifdef SOFTFLOAT_ROUND_ODD
+        if ( roundingMode == softfloat_round_odd ) {
+            uj |= 1;
+            goto noIncrementPackReturn;
+        }
+#endif
+    }
     if ( doIncrement ) {
         ++uj;
         if ( uj ) {
@@ -148,6 +166,7 @@ void
             }
         }
     } else {
+ noIncrementPackReturn:
         zWPtr[indexWord( 4, 0 )] = uj;
         ui = extSigPtr[indexWord( 5, 2 )];
         zWPtr[indexWord( 4, 1 )] = ui;

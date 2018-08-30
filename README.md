@@ -1,10 +1,10 @@
 # SoftFloat
 ### Berkeley IEEE Binary Floating-Point Library
-#### version 3.1.0
+#### version 3.5.0
 
 ## 1. Introduction
 
-Berkeley SoftFloat is a software implementation of binary floating-point that conforms to the IEEE Standard for Floating-Point Arithmetic. The current release supports four binary formats: 32-bit single-precision, 64-bit double-precision, 80-bit double-extended-precision, and 128-bit quadruple-precision. The following functions are supported for each format:
+Berkeley SoftFloat is a software implementation of binary floating-point that conforms to the IEEE Standard for Floating-Point Arithmetic. The current release supports five binary formats: 16-bit half-precision, 32-bit single-precision, 64-bit double-precision, 80-bit double-extended- precision, and 128-bit quadruple-precision. The following functions are supported for each format:
 
 * addition, subtraction, multiplication, division, and square root;
 * fused multiply-add as defined by the IEEE Standard, except for 80-bit double-extended-precision;
@@ -15,11 +15,16 @@ Berkeley SoftFloat is a software implementation of binary floating-point that co
 * conversions to/from 32-bit and 64-bit integers, signed and unsigned.
 
 All operations required by the original 1985 version of the IEEE Floating-Point Standard are implemented, except for conversions to and from decimal.
+
 This document gives information about the types defined and the routines implemented by SoftFloat. It does not attempt to define or explain the IEEE Floating-Point Standard. Information about the standard is available elsewhere.
 
-The current version of SoftFloat is Release 3a. The only difference between this version and the previous Release 3 is the replacement of the license text supplied by the University of California.
+The current version of SoftFloat is Release 3e. This release modifies the behavior of the rarely used odd rounding mode (round to odd, also known as jamming), and also adds some new specialization and optimization examples for those compiling SoftFloat.
 
-The functional interface of SoftFloat Release 3 and afterward differs in many details from that of earlier releases. For specifics of these differences, see section 9 below, _Changes from SoftFloat Release 2._
+The previous Release 3d fixed bugs that were found in the square root functions for the 64-bit, 80-bit, and 128-bit floating-point formats. (Thanks to Alexei Sibidanov at the University of Victoria for reporting an incorrect result.) The bugs affected all prior Release-3 versions of SoftFloat through 3c. The flaw in the 64-bit floating-point square root function was of very minor impact, causing a 1-ulp error (1 unit in the last place) a few times out of a billion. The bugs in the 80-bit and 128-bit square root functions were more serious. Although incorrect results again occurred only a few times out of a billion, when they did occur a large portion of the less-significant bits could be wrong.
+
+Among earlier releases, 3b was notable for adding support for the 16-bit half-precision format. For more about the evolution of SoftFloat releases, see SoftFloat-history.html.
+
+The functional interface of SoftFloat Release 3 and later differs in many details from the releases that came before. For specifics of these differences, see section 9 of [SoftFloat.html](http://www.jhauser.us/arithmetic/SoftFloat-3/doc/SoftFloat.html), _Changes from SoftFloat Release 2._
 
 ## 2. Limitations
 
@@ -27,11 +32,11 @@ SoftFloat assumes the computer has an addressable byte size of 8 or 16 bits. (Ne
 
 SoftFloat is written in C and is designed to work with other C code. The C compiler used must conform at a minimum to the 1989 ANSI standard for the C language (same as the 1990 ISO standard) and must in addition support basic arithmetic on 64-bit integers. Earlier releases of SoftFloat included implementations of 32-bit single-precision and 64-bit double-precision floating-point that did not require 64-bit integers, but this option is not supported starting with Release 3. Since 1999, ISO standards for C have mandated compiler support for 64-bit integers. A compiler conforming to the 1999 C Standard or later is recommended but not strictly required.
 
-Most operations not required by the original 1985 version of the IEEE Floating-Point Standard but added in the 2008 version are not yet supported in SoftFloat Release 3a.
+Most operations not required by the original 1985 version of the IEEE Floating-Point Standard but added in the 2008 version are not yet supported in SoftFloat Release 3e.
 
 ## 3. Acknowledgments
 
-The SoftFloat package was written by me, **John R. Hauser**. Release 3 of SoftFloat was a completely new implementation supplanting earlier releases. The project to create Release 3 (and now 3a) was done in the employ of the University of California, Berkeley, within the Department of Electrical Engineering and Computer Sciences, first for the Parallel Computing Laboratory (Par Lab) and then for the ASPIRE Lab. The work was officially overseen by Prof. Krste Asanovic, with funding provided by these sources:
+The SoftFloat package was written by me, **John R. Hauser**. Release 3 of SoftFloat was a completely new implementation supplanting earlier releases. The project to create Release 3 (now through 3e) was done in the employ of the University of California, Berkeley, within the Department of Electrical Engineering and Computer Sciences, first for the Parallel Computing Laboratory (Par Lab) and then for the ASPIRE Lab. The work was officially overseen by Prof. Krste Asanovic, with funding provided by these sources:
 
   <dl>
   <dt>Par Lab:<dd>Microsoft (Award #024263), Intel (Award #024894), and U.C. Discovery (Award #DIG07-10227), with additional support from Par Lab affiliates Nokia, NVIDIA, Oracle, and Samsung.
@@ -40,9 +45,9 @@ The SoftFloat package was written by me, **John R. Hauser**. Release 3 of SoftFl
 
 ## 4. LICENSE
 
-The following applies to the whole of SoftFloat Release 3a as well as to each source file individually.
+The following applies to the whole of SoftFloat Release 3e as well as to each source file individually.
 
-Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of California. All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 The Regents of the University of California. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

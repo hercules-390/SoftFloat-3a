@@ -2,7 +2,7 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
 Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
 All rights reserved.
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 
@@ -87,11 +87,11 @@ float128_t
         }
         sigZ = softfloat_add128( sigA.v64, sigA.v0, sigB.v64, sigB.v0 );
         if ( ! expA ) {
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
             softfloat_raw.Incre = 0;                                 /* Result was not incremented                       */
             softfloat_raw.Inexact = 0;                               /* Result is not inexact                            */
             softfloat_raw.Sign = signZ;                              /* Save result sign                                 */
-            if (!(sigZ.v64 & 0xFFFF000000000000ULL) && (sigZ.v64 || sigZ.v0)) {
+            if (!(sigZ.v64 & 0x7FFF000000000000ULL) && (sigZ.v64 || sigZ.v0)) {
                 softfloat_exceptionFlags |= softfloat_flag_tiny;    /* nonzero result is tiny      */
                 uiZ = softfloat_shortShiftLeft128(sigZ.v64, sigZ.v0, 14);
                 softfloat_raw.Exp = -16382;                          /* Save semi-unbiased exponent                      */

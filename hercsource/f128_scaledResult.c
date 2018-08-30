@@ -1,7 +1,7 @@
 
 /*============================================================================
 
-This C source file f64_scaledResult.c is written by Stephen R. Orso.
+This C source file f128_scaledResult.c is written by Stephen R. Orso.
 
 Copyright 2016 by Stephen R Orso.  All rights reserved.
 
@@ -48,18 +48,18 @@ This function is also used to return a scaled result on trappable IEEE
 Overflow or Underflow exceptions when converting from longer to shorter
 floating point, as required by SA22-7832-10.
 
-If the scaled result is to large to fit in the target precision, an SNaN
+If the scaled result is too large to fit in the target precision, an SNaN
 is generated with payload 0x0DEAD.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -101,7 +101,7 @@ float128_t  f128_scaledResult(int_fast16_t scale)
         }
         else
         {
-            uZ.ui.v64 = packToF128UI64(softfloat_raw.Sign, exp, uA.v64); 
+            uZ.ui.v64 = packToF128UI64(softfloat_raw.Sign, exp, uA.v64);
             uZ.ui.v0 = uA.v0;
         }
     }

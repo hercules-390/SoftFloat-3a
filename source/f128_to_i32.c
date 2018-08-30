@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017 The Regents of the
+University of California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
+#include "specialize.h"
 #include "softfloat.h"
 
 int_fast32_t f128_to_i32( float128_t a, uint_fast8_t roundingMode, bool exact )
@@ -53,8 +54,10 @@ int_fast32_t f128_to_i32( float128_t a, uint_fast8_t roundingMode, bool exact )
     bool sign;
     int_fast32_t exp;
     uint_fast64_t sig64, sig0;
-    int_fast32_t shiftCount;
+    int_fast32_t shiftDist;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     uA.f = a;
     uiA64 = uA.ui.v64;
     uiA0  = uA.ui.v0;
@@ -62,14 +65,27 @@ int_fast32_t f128_to_i32( float128_t a, uint_fast8_t roundingMode, bool exact )
     exp   = expF128UI64( uiA64 );
     sig64 = fracF128UI64( uiA64 );
     sig0  = uiA0;
-    if ( (exp == 0x7FFF) && (sig64 | sig0) ) sign = 0;
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+#if (i32_fromNaN != i32_fromPosOverflow) || (i32_fromNaN != i32_fromNegOverflow)
+    if ( (exp == 0x7FFF) && (sig64 | sig0) ) {
+#if (i32_fromNaN == i32_fromPosOverflow)
+        sign = 0;
+#elif (i32_fromNaN == i32_fromNegOverflow)
+        sign = 1;
+#else
+        softfloat_raiseFlags( softfloat_flag_invalid );
+        return i32_fromNaN;
+#endif
+    }
+#endif
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( exp ) sig64 |= UINT64_C( 0x0001000000000000 );
     sig64 |= (sig0 != 0);
-    shiftCount = 0x4028 - exp;
-    if ( 0 < shiftCount ) {
-        sig64 = softfloat_shiftRightJam64( sig64, shiftCount );
-    }
-    return softfloat_roundPackToI32( sign, sig64, roundingMode, exact );
+    shiftDist = 0x4023 - exp;
+    if ( 0 < shiftDist ) sig64 = softfloat_shiftRightJam64( sig64, shiftDist );
+    return softfloat_roundToI32( sign, sig64, roundingMode, exact );
 
 }
 

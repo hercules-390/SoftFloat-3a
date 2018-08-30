@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017 The Regents of the
+University of California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
+#include "specialize.h"
 #include "softfloat.h"
 
 #ifdef SOFTFLOAT_FAST_INT64
@@ -63,39 +64,42 @@ int_fast64_t
 {
     const uint32_t *aWPtr;
     uint32_t uiA96;
-    int32_t exp;
     bool sign;
+    int32_t exp;
     uint32_t sig96;
-    int32_t shiftCount;
+    int32_t shiftDist;
     uint32_t sig[4];
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     aWPtr = (const uint32_t *) aPtr;
     uiA96 = aWPtr[indexWordHi( 4 )];
-    exp = expF128UI96( uiA96 );
     sign  = signF128UI96( uiA96 );
+    exp   = expF128UI96( uiA96 );
     sig96 = fracF128UI96( uiA96 );
-    shiftCount = 0x404F - exp;
-    if ( shiftCount < 17 ) {
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    shiftDist = 0x404F - exp;
+    if ( shiftDist < 17 ) {
         softfloat_raiseFlags( softfloat_flag_invalid );
         return
-            ! sign
-                || ((exp == 0x7FFF)
-                        && (sig96
-                                || (  aWPtr[indexWord( 4, 2 )]
-                                    | aWPtr[indexWord( 4, 1 )]
-                                    | aWPtr[indexWord( 4, 0 )]
-                                   )))
-                ? INT64_C( 0x7FFFFFFFFFFFFFFF )
-                : -INT64_C( 0x7FFFFFFFFFFFFFFF ) - 1;
+            (exp == 0x7FFF)
+                && (sig96
+                        || (aWPtr[indexWord( 4, 2 )] | aWPtr[indexWord( 4, 1 )]
+                                | aWPtr[indexWord( 4, 0 )]))
+                ? i64_fromNaN
+                : sign ? i64_fromNegOverflow : i64_fromPosOverflow;
     }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( exp ) sig96 |= 0x00010000;
     sig[indexWord( 4, 3 )] = sig96;
     sig[indexWord( 4, 2 )] = aWPtr[indexWord( 4, 2 )];
     sig[indexWord( 4, 1 )] = aWPtr[indexWord( 4, 1 )];
     sig[indexWord( 4, 0 )] = aWPtr[indexWord( 4, 0 )];
-    softfloat_shiftRightJam128M( sig, shiftCount, sig );
+    softfloat_shiftRightJam128M( sig, shiftDist, sig );
     return
-        softfloat_roundPackMToI64(
+        softfloat_roundMToI64(
             sign, sig + indexMultiwordLo( 4, 3 ), roundingMode, exact );
 
 }

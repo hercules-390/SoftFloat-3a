@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -56,7 +56,6 @@ float128_t f128_rem( float128_t a, float128_t b )
     struct uint128 sigA;
     union ui128_f128 uB;
     uint_fast64_t uiB64, uiB0;
-    bool signB;
     int_fast32_t expB;
     struct uint128 sigB;
     struct exp32_sig128 normExpSig;
@@ -81,7 +80,6 @@ float128_t f128_rem( float128_t a, float128_t b )
     uB.f = b;
     uiB64 = uB.ui.v64;
     uiB0  = uB.ui.v0;
-    signB = signF128UI64( uiB64 );
     expB  = expF128UI64( uiB64 );
     sigB.v64 = fracF128UI64( uiB64 );
     sigB.v0  = uiB0;

@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
+#include "specialize.h"
 #include "softfloat.h"
 
 int_fast32_t f32_to_i32_r_minMag( float32_t a, bool exact )
@@ -52,32 +53,40 @@ int_fast32_t f32_to_i32_r_minMag( float32_t a, bool exact )
     uint_fast32_t uiA;
     int_fast16_t exp;
     uint_fast32_t sig;
-    int_fast16_t shiftCount;
+    int_fast16_t shiftDist;
     bool sign;
     int_fast32_t absZ;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     uA.f = a;
     uiA = uA.ui;
     exp = expF32UI( uiA );
     sig = fracF32UI( uiA );
-    shiftCount = 0x9E - exp;
-    if ( 32 <= shiftCount ) {
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    shiftDist = 0x9E - exp;
+    if ( 32 <= shiftDist ) {
         if ( exact && (exp | sig) ) {
             softfloat_exceptionFlags |= softfloat_flag_inexact;
         }
         return 0;
     }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     sign = signF32UI( uiA );
-    if ( shiftCount <= 0 ) {
-        if ( uiA != packToF32UI( 1, 0x9E, 0 ) ) {
-            softfloat_raiseFlags( softfloat_flag_invalid );
-            if ( ! sign || ((exp == 0xFF) && sig) ) return 0x7FFFFFFF;
-        }
-        return -0x7FFFFFFF - 1;
+    if ( shiftDist <= 0 ) {
+        if ( uiA == packToF32UI( 1, 0x9E, 0 ) ) return -0x7FFFFFFF - 1;
+        softfloat_raiseFlags( softfloat_flag_invalid );
+        return
+            (exp == 0xFF) && sig ? i32_fromNaN
+                : sign ? i32_fromNegOverflow : i32_fromPosOverflow;
     }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     sig = (sig | 0x00800000)<<8;
-    absZ = sig>>shiftCount;
-    if ( exact && ((uint_fast32_t) absZ<<shiftCount != sig) ) {
+    absZ = sig>>shiftDist;
+    if ( exact && ((uint_fast32_t) absZ<<shiftDist != sig) ) {
         softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
     return sign ? -absZ : absZ;

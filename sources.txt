@@ -11,10 +11,31 @@
 #------------------------------------------------------------------------------
 
 #  PROGRAMMING NOTE: not all of the source files distributed with SoftFloat
-#  are used by Hercules. The extF80/extMF80 files and those associated with
-#  the pointer versions of certain softfloat functions for example, are not
-#  used by Hercules. Other files contain functions which have been replaced
+#  are used by Hercules. The extF80/extMF80 and f16 files and those associated
+#  with the pointer versions of certain softfloat functions for example, are
+#  not used by Hercules. Other files contain functions which have been replaced
 #  with macros, etc.
+
+#------------------------------------------------------------------------------
+
+#                            PROGRAMMING NOTE
+#
+#  ALL of the SoftFloat source files should be placed into one of the below
+#  categories. The source files containing any functions that Hercules needs
+#  to override should be put into the 'UNUSED' category, and a corresponding
+#  identically named source file with the required Hercules modifications
+#  should be placed in the 'HERC' category. This ensures that softfloat will
+#  always call our modified version of those functions and not the original
+#  function. (None of the 'UNUSED' category files are compiled)  This also
+#  ensures that THE ORIGINAL SOFTFLOAT FILES ARE NEVER MODIFIED.  Instead,
+#  all modified versions of any softfloat files exist in the 'hercsource'
+#  directory. The original UNMODIFIED files remain in the 'source' directory.
+#
+#  In other words, every file in any of the 'HERC' categories should have a
+#  corresponding entry in one of the 'UNUSED' categories. The only exceptions
+#  to this rule are the three f32_scaledResult.c, f64_scaledResult.c and
+#  f128_scaledResult.c files in the 'ADDITIONAL_HERC' category, since they
+#  are NOT softfloat files per se, but are rather pure 100% Hercules code.
 
 #------------------------------------------------------------------------------
 
@@ -23,6 +44,7 @@ set( SoftFloat_PRIMITIVES
      source/s_add128.c
      source/s_add256M.c
      source/s_approxRecip32_1.c
+     source/s_approxRecipSqrt_1Ks.c
      source/s_approxRecipSqrt32_1.c
      source/s_countLeadingZeros32.c
      source/s_countLeadingZeros64.c
@@ -50,8 +72,37 @@ set( SoftFloat_PRIMITIVES
      source/s_sub256M.c
 )
 
-set( SoftFloat_PRIMITIVES_UNUSED "" )
-set( SoftFloat_PRIMITIVES_HERC   "" )
+set( SoftFloat_PRIMITIVES_UNUSED
+
+     source/s_addCarryM.c
+     source/s_addComplCarryM.c
+     source/s_addExtF80M.c
+     source/s_addF128M.c
+     source/s_addM.c
+     source/s_approxRecip_1Ks.c
+     source/s_compare128M.c
+     source/s_compare96M.c
+     source/s_compareNonnormExtF80M.c
+     source/s_countLeadingZeros16.c
+     source/s_invalidExtF80M.c
+     source/s_invalidF128M.c
+     source/s_isNaNF128M.c
+     source/s_mul128MTo256M.c
+     source/s_mul64To128M.c
+     source/s_shiftLeftM.c
+     source/s_shiftNormSigF128M.c
+     source/s_shiftRightJamM.c
+     source/s_shiftRightM.c
+     source/s_shortShiftLeft64To96M.c
+     source/s_shortShiftLeftM.c
+     source/s_shortShiftRightExtendM.c
+     source/s_shortShiftRightJamM.c
+     source/s_shortShiftRightM.c
+     source/s_sub1XM.c
+     source/s_subM.c
+)
+
+set( SoftFloat_PRIMITIVES_HERC "" )
 
 #------------------------------------------------------------------------------
 
@@ -69,10 +120,94 @@ set( SoftFloat_SPECIALISED_UNUSED
 
      source/8086-SSE/extF80M_isSignalingNaN.c
      source/8086-SSE/f128M_isSignalingNaN.c
+     source/8086-SSE/s_commonNaNToExtF80M.c
      source/8086-SSE/s_commonNaNToExtF80UI.c
+     source/8086-SSE/s_commonNaNToF128M.c
+     source/8086-SSE/s_commonNaNToF16UI.c
+     source/8086-SSE/s_extF80MToCommonNaN.c
      source/8086-SSE/s_extF80UIToCommonNaN.c
+     source/8086-SSE/s_f128MToCommonNaN.c
+     source/8086-SSE/s_f16UIToCommonNaN.c
+     source/8086-SSE/s_propagateNaNExtF80M.c
      source/8086-SSE/s_propagateNaNExtF80UI.c
+     source/8086-SSE/s_propagateNaNF128M.c
+     source/8086-SSE/s_propagateNaNF128UI.c
+     source/8086-SSE/s_propagateNaNF16UI.c
+     source/8086-SSE/s_propagateNaNF32UI.c
+     source/8086-SSE/s_propagateNaNF64UI.c
      source/8086-SSE/softfloat_raiseFlags.c
+     source/8086/extF80M_isSignalingNaN.c
+     source/8086/f128M_isSignalingNaN.c
+     source/8086/s_commonNaNToExtF80M.c
+     source/8086/s_commonNaNToExtF80UI.c
+     source/8086/s_commonNaNToF128M.c
+     source/8086/s_commonNaNToF128UI.c
+     source/8086/s_commonNaNToF16UI.c
+     source/8086/s_commonNaNToF32UI.c
+     source/8086/s_commonNaNToF64UI.c
+     source/8086/s_extF80MToCommonNaN.c
+     source/8086/s_extF80UIToCommonNaN.c
+     source/8086/s_f128MToCommonNaN.c
+     source/8086/s_f128UIToCommonNaN.c
+     source/8086/s_f16UIToCommonNaN.c
+     source/8086/s_f32UIToCommonNaN.c
+     source/8086/s_f64UIToCommonNaN.c
+     source/8086/s_propagateNaNExtF80M.c
+     source/8086/s_propagateNaNExtF80UI.c
+     source/8086/s_propagateNaNF128M.c
+     source/8086/s_propagateNaNF128UI.c
+     source/8086/s_propagateNaNF16UI.c
+     source/8086/s_propagateNaNF32UI.c
+     source/8086/s_propagateNaNF64UI.c
+     source/8086/softfloat_raiseFlags.c
+     source/ARM-VFPv2-defaultNaN/extF80M_isSignalingNaN.c
+     source/ARM-VFPv2-defaultNaN/f128M_isSignalingNaN.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToExtF80M.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToExtF80UI.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToF128M.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToF128UI.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToF16UI.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToF32UI.c
+     source/ARM-VFPv2-defaultNaN/s_commonNaNToF64UI.c
+     source/ARM-VFPv2-defaultNaN/s_extF80MToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_extF80UIToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_f128MToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_f128UIToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_f16UIToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_f32UIToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_f64UIToCommonNaN.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNExtF80M.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNExtF80UI.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNF128M.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNF128UI.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNF16UI.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNF32UI.c
+     source/ARM-VFPv2-defaultNaN/s_propagateNaNF64UI.c
+     source/ARM-VFPv2-defaultNaN/softfloat_raiseFlags.c
+     source/ARM-VFPv2/extF80M_isSignalingNaN.c
+     source/ARM-VFPv2/f128M_isSignalingNaN.c
+     source/ARM-VFPv2/s_commonNaNToExtF80M.c
+     source/ARM-VFPv2/s_commonNaNToExtF80UI.c
+     source/ARM-VFPv2/s_commonNaNToF128M.c
+     source/ARM-VFPv2/s_commonNaNToF128UI.c
+     source/ARM-VFPv2/s_commonNaNToF16UI.c
+     source/ARM-VFPv2/s_commonNaNToF32UI.c
+     source/ARM-VFPv2/s_commonNaNToF64UI.c
+     source/ARM-VFPv2/s_extF80MToCommonNaN.c
+     source/ARM-VFPv2/s_extF80UIToCommonNaN.c
+     source/ARM-VFPv2/s_f128MToCommonNaN.c
+     source/ARM-VFPv2/s_f128UIToCommonNaN.c
+     source/ARM-VFPv2/s_f16UIToCommonNaN.c
+     source/ARM-VFPv2/s_f32UIToCommonNaN.c
+     source/ARM-VFPv2/s_f64UIToCommonNaN.c
+     source/ARM-VFPv2/s_propagateNaNExtF80M.c
+     source/ARM-VFPv2/s_propagateNaNExtF80UI.c
+     source/ARM-VFPv2/s_propagateNaNF128M.c
+     source/ARM-VFPv2/s_propagateNaNF128UI.c
+     source/ARM-VFPv2/s_propagateNaNF16UI.c
+     source/ARM-VFPv2/s_propagateNaNF32UI.c
+     source/ARM-VFPv2/s_propagateNaNF64UI.c
+     source/ARM-VFPv2/softfloat_raiseFlags.c
 )
 
 set( SoftFloat_SPECIALISED_HERC
@@ -88,13 +223,13 @@ set( SoftFloat_OTHERS
 
      source/f128_add.c
      source/f128_div.c
-     source/f128_eq_signaling.c
      source/f128_eq.c
+     source/f128_eq_signaling.c
      source/f128_isSignalingNaN.c
-     source/f128_le_quiet.c
      source/f128_le.c
-     source/f128_lt_quiet.c
+     source/f128_le_quiet.c
      source/f128_lt.c
+     source/f128_lt_quiet.c
      source/f128_mul.c
      source/f128_mulAdd.c
      source/f128_rem.c
@@ -102,22 +237,23 @@ set( SoftFloat_OTHERS
      source/f128_sub.c
      source/f128_to_f32.c
      source/f128_to_f64.c
-     source/f128_to_i32_r_minMag.c
      source/f128_to_i32.c
-     source/f128_to_i64_r_minMag.c
+     source/f128_to_i32_r_minMag.c
      source/f128_to_i64.c
-     source/f128_to_ui32_r_minMag.c
+     source/f128_to_i64_r_minMag.c
      source/f128_to_ui32.c
+     source/f128_to_ui32_r_minMag.c
+     source/f128_to_ui64.c
      source/f128_to_ui64_r_minMag.c
      source/f32_add.c
      source/f32_div.c
-     source/f32_eq_signaling.c
      source/f32_eq.c
+     source/f32_eq_signaling.c
      source/f32_isSignalingNaN.c
-     source/f32_le_quiet.c
      source/f32_le.c
-     source/f32_lt_quiet.c
+     source/f32_le_quiet.c
      source/f32_lt.c
+     source/f32_lt_quiet.c
      source/f32_mul.c
      source/f32_mulAdd.c
      source/f32_rem.c
@@ -125,22 +261,23 @@ set( SoftFloat_OTHERS
      source/f32_sub.c
      source/f32_to_f128.c
      source/f32_to_f64.c
-     source/f32_to_i32_r_minMag.c
      source/f32_to_i32.c
-     source/f32_to_i64_r_minMag.c
+     source/f32_to_i32_r_minMag.c
      source/f32_to_i64.c
-     source/f32_to_ui32_r_minMag.c
+     source/f32_to_i64_r_minMag.c
      source/f32_to_ui32.c
+     source/f32_to_ui32_r_minMag.c
+     source/f32_to_ui64.c
      source/f32_to_ui64_r_minMag.c
      source/f64_add.c
      source/f64_div.c
-     source/f64_eq_signaling.c
      source/f64_eq.c
+     source/f64_eq_signaling.c
      source/f64_isSignalingNaN.c
-     source/f64_le_quiet.c
      source/f64_le.c
-     source/f64_lt_quiet.c
+     source/f64_le_quiet.c
      source/f64_lt.c
+     source/f64_lt_quiet.c
      source/f64_mul.c
      source/f64_mulAdd.c
      source/f64_rem.c
@@ -148,12 +285,13 @@ set( SoftFloat_OTHERS
      source/f64_sub.c
      source/f64_to_f128.c
      source/f64_to_f32.c
-     source/f64_to_i32_r_minMag.c
      source/f64_to_i32.c
-     source/f64_to_i64_r_minMag.c
+     source/f64_to_i32_r_minMag.c
      source/f64_to_i64.c
-     source/f64_to_ui32_r_minMag.c
+     source/f64_to_i64_r_minMag.c
      source/f64_to_ui32.c
+     source/f64_to_ui32_r_minMag.c
+     source/f64_to_ui64.c
      source/f64_to_ui64_r_minMag.c
      source/i32_to_f128.c
      source/i32_to_f32.c
@@ -169,8 +307,6 @@ set( SoftFloat_OTHERS
      source/s_normSubnormalF32Sig.c
      source/s_normSubnormalF64Sig.c
      source/s_subMagsF128.c
-     source/s_subMagsF32.c
-     source/s_subMagsF64.c
      source/ui32_to_f128.c
      source/ui32_to_f32.c
      source/ui32_to_f64.c
@@ -183,79 +319,66 @@ set( SoftFloat_OTHERS_UNUSED
 
      source/extF80_add.c
      source/extF80_div.c
-     source/extF80_eq_signaling.c
      source/extF80_eq.c
+     source/extF80_eq_signaling.c
      source/extF80_isSignalingNaN.c
-     source/extF80_le_quiet.c
      source/extF80_le.c
-     source/extF80_lt_quiet.c
+     source/extF80_le_quiet.c
      source/extF80_lt.c
+     source/extF80_lt_quiet.c
      source/extF80_mul.c
      source/extF80_rem.c
      source/extF80_roundToInt.c
      source/extF80_sqrt.c
      source/extF80_sub.c
      source/extF80_to_f128.c
+     source/extF80_to_f16.c
      source/extF80_to_f32.c
      source/extF80_to_f64.c
-     source/extF80_to_i32_r_minMag.c
      source/extF80_to_i32.c
-     source/extF80_to_i64_r_minMag.c
+     source/extF80_to_i32_r_minMag.c
      source/extF80_to_i64.c
-     source/extF80_to_ui32_r_minMag.c
+     source/extF80_to_i64_r_minMag.c
      source/extF80_to_ui32.c
-     source/extF80_to_ui64_r_minMag.c
+     source/extF80_to_ui32_r_minMag.c
      source/extF80_to_ui64.c
+     source/extF80_to_ui64_r_minMag.c
      source/extF80M_add.c
      source/extF80M_div.c
-     source/extF80M_eq_signaling.c
      source/extF80M_eq.c
-     source/extF80M_le_quiet.c
+     source/extF80M_eq_signaling.c
      source/extF80M_le.c
-     source/extF80M_lt_quiet.c
+     source/extF80M_le_quiet.c
      source/extF80M_lt.c
+     source/extF80M_lt_quiet.c
      source/extF80M_mul.c
      source/extF80M_rem.c
      source/extF80M_roundToInt.c
      source/extF80M_sqrt.c
      source/extF80M_sub.c
      source/extF80M_to_f128M.c
+     source/extF80M_to_f16.c
      source/extF80M_to_f32.c
      source/extF80M_to_f64.c
-     source/extF80M_to_i32_r_minMag.c
      source/extF80M_to_i32.c
-     source/extF80M_to_i64_r_minMag.c
+     source/extF80M_to_i32_r_minMag.c
      source/extF80M_to_i64.c
-     source/extF80M_to_ui32_r_minMag.c
+     source/extF80M_to_i64_r_minMag.c
      source/extF80M_to_ui32.c
-     source/extF80M_to_ui64_r_minMag.c
+     source/extF80M_to_ui32_r_minMag.c
      source/extF80M_to_ui64.c
+     source/extF80M_to_ui64_r_minMag.c
+     source/f128_roundToInt.c
      source/f128_to_extF80.c
-     source/f32_to_extF80.c
-     source/f32_to_extF80M.c
-     source/f64_to_extF80.c
-     source/f64_to_extF80M.c
-     source/i32_to_extF80.c
-     source/i32_to_extF80M.c
-     source/i64_to_extF80.c
-     source/i64_to_extF80M.c
-     source/s_addMagsExtF80.c
-     source/s_normRoundPackToExtF80.c
-     source/s_normSubnormalExtF80Sig.c
-     source/s_roundPackToExtF80.c
-     source/s_subMagsExtF80.c
-     source/ui32_to_extF80.c
-     source/ui32_to_extF80M.c
-     source/ui64_to_extF80.c
-     source/ui64_to_extF80M.c
+     source/f128_to_f16.c
      source/f128M_add.c
      source/f128M_div.c
-     source/f128M_eq_signaling.c
      source/f128M_eq.c
-     source/f128M_le_quiet.c
+     source/f128M_eq_signaling.c
      source/f128M_le.c
-     source/f128M_lt_quiet.c
+     source/f128M_le_quiet.c
      source/f128M_lt.c
+     source/f128M_lt_quiet.c
      source/f128M_mul.c
      source/f128M_mulAdd.c
      source/f128M_rem.c
@@ -263,32 +386,118 @@ set( SoftFloat_OTHERS_UNUSED
      source/f128M_sqrt.c
      source/f128M_sub.c
      source/f128M_to_extF80M.c
+     source/f128M_to_f16.c
      source/f128M_to_f32.c
      source/f128M_to_f64.c
-     source/f128M_to_i32_r_minMag.c
      source/f128M_to_i32.c
-     source/f128M_to_i64_r_minMag.c
+     source/f128M_to_i32_r_minMag.c
      source/f128M_to_i64.c
-     source/f128M_to_ui32_r_minMag.c
+     source/f128M_to_i64_r_minMag.c
      source/f128M_to_ui32.c
-     source/f128M_to_ui64_r_minMag.c
+     source/f128M_to_ui32_r_minMag.c
      source/f128M_to_ui64.c
+     source/f128M_to_ui64_r_minMag.c
+     source/f16_add.c
+     source/f16_div.c
+     source/f16_eq.c
+     source/f16_eq_signaling.c
+     source/f16_isSignalingNaN.c
+     source/f16_le.c
+     source/f16_le_quiet.c
+     source/f16_lt.c
+     source/f16_lt_quiet.c
+     source/f16_mul.c
+     source/f16_mulAdd.c
+     source/f16_rem.c
+     source/f16_roundToInt.c
+     source/f16_sqrt.c
+     source/f16_sub.c
+     source/f16_to_extF80.c
+     source/f16_to_extF80M.c
+     source/f16_to_f128.c
+     source/f16_to_f128M.c
+     source/f16_to_f32.c
+     source/f16_to_f64.c
+     source/f16_to_i32.c
+     source/f16_to_i32_r_minMag.c
+     source/f16_to_i64.c
+     source/f16_to_i64_r_minMag.c
+     source/f16_to_ui32.c
+     source/f16_to_ui32_r_minMag.c
+     source/f16_to_ui64.c
+     source/f16_to_ui64_r_minMag.c
+     source/f32_roundToInt.c
+     source/f32_to_extF80.c
+     source/f32_to_extF80M.c
      source/f32_to_f128M.c
+     source/f32_to_f16.c
+     source/f64_roundToInt.c
+     source/f64_to_extF80.c
+     source/f64_to_extF80M.c
      source/f64_to_f128M.c
+     source/f64_to_f16.c
+     source/i32_to_extF80.c
+     source/i32_to_extF80M.c
      source/i32_to_f128M.c
+     source/i32_to_f16.c
+     source/i64_to_extF80.c
+     source/i64_to_extF80M.c
      source/i64_to_f128M.c
+     source/i64_to_f16.c
+     source/s_addMagsExtF80.c
+     source/s_addMagsF128.c
+     source/s_addMagsF16.c
+     source/s_addMagsF32.c
+     source/s_addMagsF64.c
+     source/s_mulAddF128M.c
+     source/s_mulAddF16.c
+     source/s_mulAddF32.c
+     source/s_mulAddF64.c
+     source/s_negXM.c
+     source/s_normExtF80SigM.c
+     source/s_normRoundPackMToExtF80M.c
+     source/s_normRoundPackMToF128M.c
+     source/s_normRoundPackToExtF80.c
+     source/s_normRoundPackToF16.c
+     source/s_normSubnormalExtF80Sig.c
+     source/s_normSubnormalF128SigM.c
+     source/s_normSubnormalF16Sig.c
+     source/s_remStepMBy32.c
+     source/s_roundMToI64.c
+     source/s_roundMToUI64.c
+     source/s_roundPackMToExtF80M.c
+     source/s_roundPackMToF128M.c
+     source/s_roundPackToExtF80.c
+     source/s_roundPackToF128.c
+     source/s_roundPackToF16.c
+     source/s_roundPackToF32.c
+     source/s_roundPackToF64.c
+     source/s_roundToI32.c
+     source/s_roundToI64.c
+     source/s_roundToUI32.c
+     source/s_roundToUI64.c
+     source/s_subMagsExtF80.c
+     source/s_subMagsF16.c
+     source/s_subMagsF32.c
+     source/s_subMagsF64.c
+     source/s_tryPropagateNaNExtF80M.c
+     source/s_tryPropagateNaNF128M.c
+     source/softfloat_state.c
+     source/ui32_to_extF80.c
+     source/ui32_to_extF80M.c
      source/ui32_to_f128M.c
+     source/ui32_to_f16.c
+     source/ui64_to_extF80.c
+     source/ui64_to_extF80M.c
      source/ui64_to_f128M.c
+     source/ui64_to_f16.c
 )
 
 set( SoftFloat_OTHERS_HERC
 
      hercsource/f128_roundToInt.c
-     hercsource/f128_to_ui64.c
      hercsource/f32_roundToInt.c
-     hercsource/f32_to_ui64.c
      hercsource/f64_roundToInt.c
-     hercsource/f64_to_ui64.c
      hercsource/s_addMagsF128.c
      hercsource/s_addMagsF32.c
      hercsource/s_addMagsF64.c
@@ -297,10 +506,12 @@ set( SoftFloat_OTHERS_HERC
      hercsource/s_roundPackToF128.c
      hercsource/s_roundPackToF32.c
      hercsource/s_roundPackToF64.c
-     hercsource/s_roundPackToI32.c
-     hercsource/s_roundPackToI64.c
-     hercsource/s_roundPackToUI32.c
-     hercsource/s_roundPackToUI64.c
+     hercsource/s_roundToI32.c
+     hercsource/s_roundToI64.c
+     hercsource/s_roundToUI32.c
+     hercsource/s_roundToUI64.c
+     hercsource/s_subMagsF32.c
+     hercsource/s_subMagsF64.c
      hercsource/softfloat_state.c
 )
 

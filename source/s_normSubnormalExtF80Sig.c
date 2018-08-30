@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,22 +34,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 
 struct exp32_sig64 softfloat_normSubnormalExtF80Sig( uint_fast64_t sig )
 {
-    int_fast8_t shiftCount;
+    int_fast8_t shiftDist;
     struct exp32_sig64 z;
 
-    shiftCount = softfloat_countLeadingZeros64( sig );
-    z.exp = -shiftCount;
-    z.sig = sig<<shiftCount;
+    shiftDist = softfloat_countLeadingZeros64( sig );
+    z.exp = -shiftDist;
+    z.sig = sig<<shiftDist;
     return z;
 
 }

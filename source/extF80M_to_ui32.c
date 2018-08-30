@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017 The Regents of the
+University of California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
+#include "specialize.h"
 #include "softfloat.h"
 
 #ifdef SOFTFLOAT_FAST_INT64
@@ -68,7 +69,7 @@ uint_fast32_t
     bool sign;
     int32_t exp;
     uint64_t sig;
-    int32_t shiftCount;
+    int32_t shiftDist;
 
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
@@ -79,23 +80,26 @@ uint_fast32_t
     sig = aSPtr->signif;
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
-    shiftCount = 0x4037 - exp;
-    if ( shiftCount <= 0 ) {
+    shiftDist = 0x4032 - exp;
+    if ( shiftDist <= 0 ) {
         if ( sig>>32 ) goto invalid;
-        if ( -32 < shiftCount ) {
-            sig <<= -shiftCount;
+        if ( -32 < shiftDist ) {
+            sig <<= -shiftDist;
         } else {
             if ( (uint32_t) sig ) goto invalid;
         }
     } else {
-        sig = softfloat_shiftRightJam64( sig, shiftCount );
+        sig = softfloat_shiftRightJam64( sig, shiftDist );
     }
-    return softfloat_roundPackToUI32( sign, sig, roundingMode, exact );
+    return softfloat_roundToUI32( sign, sig, roundingMode, exact );
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
  invalid:
     softfloat_raiseFlags( softfloat_flag_invalid );
-    return 0xFFFFFFFF;
+    return
+        (exp == 0x7FFF) && (sig & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
+            ? ui32_fromNaN
+            : sign ? ui32_fromNegOverflow : ui32_fromPosOverflow;
 
 }
 

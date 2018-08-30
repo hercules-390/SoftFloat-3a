@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017 The Regents of the
+University of California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -58,7 +58,6 @@ extFloat80_t extF80_rem( extFloat80_t a, extFloat80_t b )
     union { struct extFloat80M s; extFloat80_t f; } uB;
     uint_fast16_t uiB64;
     uint_fast64_t uiB0;
-    bool signB;
     int_fast32_t expB;
     uint_fast64_t sigB;
     struct exp32_sig64 normExpSig;
@@ -84,7 +83,6 @@ extFloat80_t extF80_rem( extFloat80_t a, extFloat80_t b )
     uB.f = b;
     uiB64 = uB.s.signExp;
     uiB0  = uB.s.signif;
-    signB = signExtF80UI64( uiB64 );
     expB  = expExtF80UI64( uiB64 );
     sigB  = uiB0;
     /*------------------------------------------------------------------------
@@ -200,7 +198,7 @@ extFloat80_t extF80_rem( extFloat80_t a, extFloat80_t b )
     }
     return
         softfloat_normRoundPackToExtF80(
-            signRem, expB + 32, rem.v64, rem.v0, 80 );
+            signRem, rem.v64 | rem.v0 ? expB + 32 : 0, rem.v64, rem.v0, 80 );
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
  propagateNaN:

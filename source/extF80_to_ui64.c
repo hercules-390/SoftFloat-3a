@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017 The Regents of the
+University of California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
+#include "specialize.h"
 #include "softfloat.h"
 
 uint_fast64_t
@@ -51,29 +52,39 @@ uint_fast64_t
 {
     union { struct extFloat80M s; extFloat80_t f; } uA;
     uint_fast16_t uiA64;
-    int_fast32_t exp, shiftCount;
     bool sign;
-    uint_fast64_t sig, sigExtra;
+    int_fast32_t exp;
+    uint_fast64_t sig;
+    int_fast32_t shiftDist;
+    uint_fast64_t sigExtra;
     struct uint64_extra sig64Extra;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     uA.f = a;
     uiA64 = uA.s.signExp;
-    exp = expExtF80UI64( uiA64 );
-    shiftCount = 0x403E - exp;
-    if ( shiftCount < 0 ) {
-        softfloat_raiseFlags( softfloat_flag_invalid );
-        return UINT64_C( 0xFFFFFFFFFFFFFFFF );
-    }
     sign = signExtF80UI64( uiA64 );
+    exp  = expExtF80UI64( uiA64 );
     sig = uA.s.signif;
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    shiftDist = 0x403E - exp;
+    if ( shiftDist < 0 ) {
+        softfloat_raiseFlags( softfloat_flag_invalid );
+        return
+            (exp == 0x7FFF) && (sig & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
+                ? ui64_fromNaN
+                : sign ? ui64_fromNegOverflow : ui64_fromPosOverflow;
+    }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     sigExtra = 0;
-    if ( shiftCount ) {
-        sig64Extra = softfloat_shiftRightJam64Extra( sig, 0, shiftCount );
+    if ( shiftDist ) {
+        sig64Extra = softfloat_shiftRightJam64Extra( sig, 0, shiftDist );
         sig = sig64Extra.v;
         sigExtra = sig64Extra.extra;
     }
-    return
-        softfloat_roundPackToUI64( sign, sig, sigExtra, roundingMode, exact );
+    return softfloat_roundToUI64( sign, sig, sigExtra, roundingMode, exact );
 
 }
 

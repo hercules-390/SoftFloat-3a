@@ -2,9 +2,9 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of
+Copyright 2011, 2012, 2013, 2014, 2015, 2017 The Regents of the University of
 California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,14 +52,14 @@ Modifications:
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "softfloat.h"
@@ -80,12 +80,14 @@ float128_t
     struct uint128 sig128;
     union ui128_f128 uZ;
 
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
     struct uint128_extra savesig;                   /* Savearea for rounded pre-underflow significand           */
     struct uint128 savesig2;                        /* Savearea for diagnostics                                 */
     bool saveincre;                                 /* Savearea for incremented status of rounded significand   */
 #endif /* IBM_IEEE */
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     roundingMode = softfloat_roundingMode;
     roundNearEven = (roundingMode == softfloat_round_near_even);
     doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
@@ -96,7 +98,7 @@ float128_t
                 && sigExtra;
     }
 
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
     if (doIncrement) {
         sig128 = softfloat_add128(sig64, sig0, 0, 1);
         savesig.v.v64 = sig128.v64;
@@ -135,8 +137,12 @@ float128_t
 
 #endif  /*   IBM_IEEE   */
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( 0x7FFD <= (uint32_t) exp ) {
         if ( exp < 0 ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             isTiny =
                    (softfloat_detectTininess
                         == softfloat_tininess_beforeRounding)
@@ -154,7 +160,7 @@ float128_t
             sig0  = sig128Extra.v.v0;
             sigExtra = sig128Extra.extra;
             exp = 0;
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
             /* ************************************************************************************ */
             /* At this point, savesig has the rounded result, and sigSign, sigExp, sig64, sig0,     */
             /* and sigExtra contain the caller's parameters.  The caller's exponent is less than    */
@@ -181,7 +187,7 @@ float128_t
         } else if (
                (0x7FFD < exp)
             || ((exp == 0x7FFD)
-                    && softfloat_eq128( 
+                    && softfloat_eq128(
                            sig64,
                            sig0,
                            UINT64_C( 0x0001FFFFFFFFFFFF ),
@@ -189,6 +195,8 @@ float128_t
                        )
                     && doIncrement)
         ) {
+            /*----------------------------------------------------------------
+            *----------------------------------------------------------------*/
             softfloat_raiseFlags(
                 softfloat_flag_overflow | softfloat_flag_inexact );
             if (
@@ -208,9 +216,18 @@ float128_t
             goto uiZ;
         }
     }
-    if ( sigExtra ) softfloat_exceptionFlags |= softfloat_flag_inexact;
-
-#ifdef IBM_IEEE
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    if ( sigExtra ) {
+        softfloat_exceptionFlags |= softfloat_flag_inexact;
+#ifdef SOFTFLOAT_ROUND_ODD
+        if ( roundingMode == softfloat_round_odd ) {
+            sig0 |= 1;
+            goto packReturn;
+        }
+#endif
+    }
+#if defined( IBM_IEEE )
     if ( doIncrement && isTiny ) {
         sig128 = softfloat_add128( sig64, sig0, 0, 1 );   /* increment subnormal result                     */
         sig128.v0 &= ~(uint64_t)(! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF )) & roundNearEven);
@@ -242,10 +259,11 @@ float128_t
         if ( ! (sig64 | sig0) ) exp = 0;
     }
 #endif  /* IBM_IEEE  */
-
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+ packReturn:
     uiZ64 = packToF128UI64( sign, exp, sig64 );
     uiZ0  = sig0;
-
  uiZ:
     uZ.ui.v64 = uiZ64;
     uZ.ui.v0  = uiZ0;

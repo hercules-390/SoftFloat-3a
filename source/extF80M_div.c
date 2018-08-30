@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015, 2016 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -73,7 +73,7 @@ void
     bool signZ;
     uint64_t sigA, x64;
     int32_t expZ;
-    int shiftCount;
+    int shiftDist;
     uint32_t y[3], recip32, sigB[3];
     int ix;
     uint32_t q, qs[2];
@@ -123,12 +123,12 @@ void
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     expZ = expA - expB + 0x3FFF;
-    shiftCount = 29;
+    shiftDist = 29;
     if ( sigA < x64 ) {
         --expZ;
-        shiftCount = 30;
+        shiftDist = 30;
     }
-    softfloat_shortShiftLeft64To96M( sigA, shiftCount, y );
+    softfloat_shortShiftLeft64To96M( sigA, shiftDist, y );
     recip32 = softfloat_approxRecip32_1( x64>>32 );
     sigB[indexWord( 3, 0 )] = (uint32_t) x64<<30;
     x64 >>= 2;

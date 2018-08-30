@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2015 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,14 +34,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -53,19 +53,23 @@ float128_t f32_to_f128( float32_t a )
     uint_fast32_t uiA;
     bool sign;
     int_fast16_t exp;
-    uint_fast32_t sig;
+    uint_fast32_t frac;
     struct commonNaN commonNaN;
     struct uint128 uiZ;
     struct exp16_sig32 normExpSig;
     union ui128_f128 uZ;
 
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     uA.f = a;
     uiA = uA.ui;
     sign = signF32UI( uiA );
     exp  = expF32UI( uiA );
-    sig  = fracF32UI( uiA );
+    frac = fracF32UI( uiA );
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( exp == 0xFF ) {
-        if ( sig ) {
+        if ( frac ) {
             softfloat_f32UIToCommonNaN( uiA, &commonNaN );
             uiZ = softfloat_commonNaNToF128UI( &commonNaN );
         } else {
@@ -74,17 +78,21 @@ float128_t f32_to_f128( float32_t a )
         }
         goto uiZ;
     }
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
     if ( ! exp ) {
-        if ( ! sig ) {
+        if ( ! frac ) {
             uiZ.v64 = packToF128UI64( sign, 0, 0 );
             uiZ.v0  = 0;
             goto uiZ;
         }
-        normExpSig = softfloat_normSubnormalF32Sig( sig );
+        normExpSig = softfloat_normSubnormalF32Sig( frac );
         exp = normExpSig.exp - 1;
-        sig = normExpSig.sig;
+        frac = normExpSig.sig;
     }
-    uiZ.v64 = packToF128UI64( sign, exp + 0x3F80, (uint_fast64_t) sig<<25 );
+    /*------------------------------------------------------------------------
+    *------------------------------------------------------------------------*/
+    uiZ.v64 = packToF128UI64( sign, exp + 0x3F80, (uint_fast64_t) frac<<25 );
     uiZ.v0  = 0;
  uiZ:
     uZ.ui = uiZ;

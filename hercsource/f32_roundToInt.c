@@ -2,10 +2,10 @@
 /*============================================================================
 
 This C source file is part of the SoftFloat IEEE Floating-Point Arithmetic
-Package, Release 3a, by John R. Hauser.
+Package, Release 3e, by John R. Hauser.
 
-Copyright 2011, 2012, 2013, 2014 The Regents of the University of California.
-All rights reserved.
+Copyright 2011, 2012, 2013, 2014, 2017 The Regents of the University of
+California.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -47,14 +47,14 @@ Modifications:
     included incrementation.
 =============================================================================*/
 
-#ifdef HAVE_PLATFORM_H 
-#include "platform.h" 
+#ifdef HAVE_PLATFORM_H
+#include "platform.h"
 #endif
-#if !defined(false) 
-#include <stdbool.h> 
+#if !defined(false)
+#include <stdbool.h>
 #endif
-#if !defined(int32_t) 
-#include <stdint.h>             /* C99 standard integers */ 
+#if !defined(int32_t)
+#include <stdint.h>             /* C99 standard integers */
 #endif
 #include "internals.h"
 #include "specialize.h"
@@ -76,17 +76,17 @@ float32_t f32_roundToInt( float32_t a, uint_fast8_t roundingMode, bool exact )
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     if ( exp <= 0x7E ) {
-        if ( ! (uint32_t) (uiA<<1) ) return a;          /* Zero, return input unchanged                                 */
-        if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;    /* fractional input, result is inexact      */
-        uiZ = uiA & packToF32UI( 1, 0, 0 );             /* Starting point: zero result with sign of input               */
+        if ( !(uint32_t) (uiA<<1) ) return a;
+        if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
+        uiZ = uiA & packToF32UI( 1, 0, 0 );
         switch ( roundingMode ) {
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
          case softfloat_round_stickybit:                       /* Round to odd: result is 1 with sign of input                 */
             uiZ = packToF32UI(signF32UI(uiA), 0x7F, 0);
             break;
 #endif /* IBM_IEEE  */
          case softfloat_round_near_even:
-            if ( ! fracF32UI( uiA ) ) break;
+            if ( !fracF32UI( uiA ) ) break;
          case softfloat_round_near_maxMag:
             if ( exp == 0x7E ) uiZ |= packToF32UI( 0, 0x7F, 0 );
             break;
@@ -94,8 +94,13 @@ float32_t f32_roundToInt( float32_t a, uint_fast8_t roundingMode, bool exact )
             if ( uiZ ) uiZ = packToF32UI( 1, 0x7F, 0 );
             break;
          case softfloat_round_max:
-            if ( ! uiZ ) uiZ = packToF32UI( 0, 0x7F, 0 );
+            if ( !uiZ ) uiZ = packToF32UI( 0, 0x7F, 0 );
             break;
+#ifdef SOFTFLOAT_ROUND_ODD
+         case softfloat_round_odd:
+            uiZ |= packToF32UI( 0, 0x7F, 0 );
+            break;
+#endif
         }
         goto uiZ;
     }
@@ -117,22 +122,26 @@ float32_t f32_roundToInt( float32_t a, uint_fast8_t roundingMode, bool exact )
         uiZ += lastBitMask>>1;
     } else if ( roundingMode == softfloat_round_near_even ) {
         uiZ += lastBitMask>>1;
-        if ( ! (uiZ & roundBitsMask) ) uiZ &= ~lastBitMask;
-#ifdef IBM_IEEE
+        if ( !(uiZ & roundBitsMask) ) uiZ &= ~lastBitMask;
+#if defined( IBM_IEEE )
     } else if ((roundingMode == softfloat_round_stickybit) && (uiZ & roundBitsMask)) {
         uiZ |= lastBitMask;
 #endif
-    } else if ( roundingMode != softfloat_round_minMag ) {
-        if ( signF32UI( uiZ ) ^ (roundingMode == softfloat_round_max) ) {
-            uiZ += roundBitsMask;
-        }
+    } else if (
+        roundingMode
+            == (signF32UI( uiZ ) ? softfloat_round_min : softfloat_round_max)
+    ) {
+        uiZ += roundBitsMask;
     }
     uiZ &= ~roundBitsMask;
-    if ( exact && (uiZ != uiA) ) {
-        softfloat_exceptionFlags |= softfloat_flag_inexact;
+    if ( uiZ != uiA ) {
+#ifdef SOFTFLOAT_ROUND_ODD
+        if ( roundingMode == softfloat_round_odd ) uiZ |= lastBitMask;
+#endif
+        if ( exact ) softfloat_exceptionFlags |= softfloat_flag_inexact;
     }
  uiZ:
-#ifdef IBM_IEEE
+#if defined( IBM_IEEE )
     if ((uiZ & 0x7FFFFFFF) > (uiA & 0x7FFFFFFF))
         softfloat_exceptionFlags |= softfloat_flag_incremented;
 #endif /* IBM_IEEE  */

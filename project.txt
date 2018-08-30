@@ -2,8 +2,18 @@
 #   Define the project
 #------------------------------------------------------------------------------
 
+#  PROGRAMMING NOTE: SoftFloat doesn't have a numeric version.  Rather, it has
+#  an alphabetic version: '3e'.  But numeric versions are preferred since they
+#  can be more easily compared with one another than alphabetic versions.  We
+#  choose "3.5.0" as our version to correspond to version "3e", where '3' is
+#  the major version number and '5' represents the letter 'e', being the fifth
+#  letter of the alphabet.  The '0' is a fix number, and would be incremented
+#  whenever a important bug fix was released.
+
+#------------------------------------------------------------------------------
+
 set( EXTPKG_NAME  "SoftFloat"                                   )
-set( EXTPKG_VERS  "3.1.0"                                       )
+set( EXTPKG_VERS  "3.5.0"                                       )
 set( EXTPKG_DESC  "Berkeley IEEE Binary Floating-Point Library" )
 
 project( ${EXTPKG_NAME} VERSION ${EXTPKG_VERS} )
