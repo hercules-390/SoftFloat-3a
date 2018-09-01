@@ -1415,9 +1415,6 @@
     <ClInclude Include="source\8086\specialize.h">
       <Filter>Source Files\source\8086</Filter>
     </ClInclude>
-    <ClInclude Include="source\8086-SSE\softfloat-specialize.h">
-      <Filter>Source Files\source\8086-SSE</Filter>
-    </ClInclude>
     <ClInclude Include="source\8086-SSE\specialize.h">
       <Filter>Source Files\source\8086-SSE</Filter>
     </ClInclude>

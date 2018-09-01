@@ -136,6 +136,7 @@ set( SoftFloat_SPECIALISED_UNUSED
      source/8086-SSE/s_propagateNaNF32UI.c
      source/8086-SSE/s_propagateNaNF64UI.c
      source/8086-SSE/softfloat_raiseFlags.c
+     source/8086-SSE/specialize.h.unmodified
      source/8086/extF80M_isSignalingNaN.c
      source/8086/f128M_isSignalingNaN.c
      source/8086/s_commonNaNToExtF80M.c
@@ -317,6 +318,7 @@ set( SoftFloat_OTHERS
 
 set( SoftFloat_OTHERS_UNUSED
 
+     include/softfloat.h.unmodified
      source/extF80_add.c
      source/extF80_div.c
      source/extF80_eq.c

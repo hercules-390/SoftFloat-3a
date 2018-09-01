@@ -584,7 +584,6 @@
     <ClInclude Include="platforms\Win32-MinGW\platform.h" />
     <ClInclude Include="platforms\Win32-SSE2-MinGW\platform.h" />
     <ClInclude Include="platforms\Win64-MinGW-w64\platform.h" />
-    <ClInclude Include="source\8086-SSE\softfloat-specialize.h" />
     <ClInclude Include="source\8086-SSE\specialize.h" />
     <ClInclude Include="source\8086\specialize.h" />
     <ClInclude Include="source\ARM-VFPv2-defaultNaN\specialize.h" />
@@ -624,6 +623,8 @@
     <None Include="platforms\Win32-SSE2-MinGW\Makefile" />
     <None Include="platforms\Win64-MinGW-w64\Makefile" />
     <None Include="softfloat.README.html" />
+    <None Include="source\include\softfloat.h.unmodified" />
+    <None Include="source\8086-SSE\specialize.h.unmodified" />
     <None Include="README.md" />
     <None Include="vstools.cmd" />
     <None Include="SoftFloat_VS2008.sln" />
