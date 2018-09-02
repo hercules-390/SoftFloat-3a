@@ -1582,7 +1582,12 @@
     <None Include="vstools.cmd">
       <Filter>Other Files\build\scripts\Windows</Filter>
     </None>
-  </ItemGroup>
+    <None Include="source\include\softfloat.h.unmodified">
+      <Filter>Source Files\source\include</Filter>
+    </None>
+    <None Include="source\8086-SSE\specialize.h.unmodified">
+      <Filter>Source Files\source\8086-SSE</Filter>
+    </None>  </ItemGroup>
   <ItemGroup>
     <Text Include="softfloat.LICENSE.txt">
       <Filter>Other Files\doc</Filter>
