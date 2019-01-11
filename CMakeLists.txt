@@ -449,11 +449,37 @@ set(    SoftFloat_SRCS
         ${SoftFloat_HERCMODS} )
 
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   Define the target for the object library.  The object library will
+#   be used to create both the static and the shared libraries without
+#   compiling the sources twice.
+
+add_library( SoftFloat_obj OBJECT ${SoftFloat_SRCS} )
+
+# Because the static library will be included in a shared library,
+# Position-independent code is required for non-Windows builds.
+
+if ( NOT WIN32 )
+    set_target_properties( SoftFloat_obj PROPERTIES POSITION_INDEPENDENT_CODE ON )
+endif ( )
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Define the target for the static library.
 
-add_library( SoftFloat STATIC ${SoftFloat_SRCS} )
+add_library( SoftFloat STATIC $<TARGET_OBJECTS:SoftFloat_obj> )
+
 set_target_properties(  SoftFloat PROPERTIES
 						OUTPUT_NAME SoftFloat
+						PUBLIC_HEADER "${public_headers}" )
+
+# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#   Define the target for the shared library.
+
+add_library( h390s3fh SHARED $<TARGET_OBJECTS:SoftFloat_obj>
+                             ${CMAKE_SOURCE_DIR}/hercsource/h390s3fh.def
+                             )
+
+set_target_properties(  h390s3fh PROPERTIES
+						OUTPUT_NAME h390s3fh
 						PUBLIC_HEADER "${public_headers}" )
 
 
@@ -468,20 +494,20 @@ target_include_directories(SoftFloat PUBLIC
                         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
                         $<INSTALL_INTERFACE:include> )
 
-
-# Because the static library will be included in a shared library,
-# Position-independent code is required for non-Windows builds.
-if ( NOT WIN32 )
-    set_target_properties( SoftFloat PROPERTIES POSITION_INDEPENDENT_CODE ON )
-endif ( )
+target_include_directories(h390s3fh PUBLIC
+                        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                        $<INSTALL_INTERFACE:include> )
 
 
-# Install the target.  Include this target in the export of the install
-# targets.
 
-install( TARGETS SoftFloat
+# Install the targets.  Include these targets in the export of the
+# install targets.
+
+install( TARGETS SoftFloat h390s3fh
         EXPORT s3fh
-        ARCHIVE DESTINATION lib
+        ARCHIVE DESTINATION lib      # Static library and Windows import libary
+        LIBRARY DESTINATION lib      # shared library for non-Windows
+        RUNTIME DESTINATION bin      # Windows .dll
         PUBLIC_HEADER DESTINATION include)
 
 # Create the export of the target.  This export can be imported by a user
@@ -499,24 +525,6 @@ install( EXPORT s3fh DESTINATION s3fh-targets )
 
 export( EXPORT s3fh FILE s3fh-targets/s3fh.cmake  )
 
-
-# ------Shared library support is not available at the moment   ----
-# ------When more than one Hercules shared library requires Softfloat,
-# ------it can either be moved to hercu and shared, or created as a
-# ------separate shared library.
-# ------And note that use of a shared library has not been tested.
-# 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   the shared library
-#### if( SHARED_LIBRARY )
-#### add_library( SoftFloat_shared SHARED ${SoftFloat_SRCS} )
-#### set_target_properties(  SoftFloat_shared PROPERTIES
-#### 						OUTPUT_NAME SoftFloat
-####                         PUBLIC_HEADER "${public_headers}" )
-####
-#### install( TARGETS SoftFloat_shared
-####         LIBRARY DESTINATION lib
-####         PUBLIC_HEADER DESTINATION include)
-#### endif()
 
 install(FILES "COPYING.txt" DESTINATION "." )
 install(FILES "README.txt"  DESTINATION "." )

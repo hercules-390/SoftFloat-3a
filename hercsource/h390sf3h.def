@@ -1,0 +1,92 @@
+LIBRARY			H390sf3h
+
+; Define the SoftFloat-3 external interfaces used by Hyperion.  There
+; are other routines in SoftFloat-3a , but these are internal to
+; SoftFloat-3 and need not be exposed by the shared library.
+
+EXPORTS
+;
+; Following are data areas used to communicate with SoftFloat's caller.
+; These areas must be in thread-local storage.
+;
+    softfloat_exceptionFlags
+    softfloat_raw
+    softfloat_roundingMode
+
+; 128-bit precision routines
+
+    f128_add
+    f128_div
+    f128_eq
+    f128_isSignalingNaN
+    f128_lt_quiet
+    f128_mul
+    f128_mulAdd
+    f128_roundToInt
+    f128_scaledResult
+    f128_sqrt
+    f128_sub
+    f128_to_f32
+    f128_to_f64
+    f128_to_i32
+    f128_to_i64
+    f128_to_ui32
+    f128_to_ui64
+
+; 32-bit precision routines
+
+    f32_add
+    f32_div
+    f32_eq
+    f32_isSignalingNaN
+    f32_lt_quiet
+    f32_mul
+    f32_mulAdd
+    f32_roundToInt
+    f32_scaledResult
+    f32_sqrt
+    f32_sub
+    f32_to_f128
+    f32_to_f64
+    f32_to_i32
+    f32_to_i64
+    f32_to_ui32
+    f32_to_ui64
+
+; 64-bit precision routines
+
+    f64_add
+    f64_div
+    f64_eq
+    f64_isSignalingNaN
+    f64_lt_quiet
+    f64_mul
+    f64_mulAdd
+    f64_roundToInt
+    f64_scaledResult
+    f64_sqrt
+    f64_sub
+    f64_to_f128
+    f64_to_f32
+    f64_to_i32
+    f64_to_i64
+    f64_to_ui32
+    f64_to_ui64
+
+; Signed integer to float routines
+
+    i32_to_f128
+    i32_to_f32
+    i32_to_f64
+    i64_to_f128
+    i64_to_f32
+    i64_to_f64
+
+; Unsigned integer to float routines
+
+    ui32_to_f128
+    ui32_to_f32
+    ui32_to_f64
+    ui64_to_f128
+    ui64_to_f32
+    ui64_to_f64
