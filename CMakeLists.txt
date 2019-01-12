@@ -474,9 +474,13 @@ set_target_properties(  SoftFloat PROPERTIES
 # 	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Define the target for the shared library.
 
-add_library( h390s3fh SHARED $<TARGET_OBJECTS:SoftFloat_obj>
-                             ${CMAKE_SOURCE_DIR}/hercsource/h390s3fh.def
-                             )
+add_library( h390s3fh SHARED $<TARGET_OBJECTS:SoftFloat_obj> )
+
+if ( WIN32 )
+    target_sources( h390s3fh PRIVATE ${CMAKE_SOURCE_DIR}/hercsource/h390s3fh.def )
+endif( WIN32 )
+
+
 
 set_target_properties(  h390s3fh PROPERTIES
 						OUTPUT_NAME h390s3fh
