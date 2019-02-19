@@ -8,6 +8,17 @@
 #define SOFTFLOAT_FAST_INT64
 #define SOFTFLOAT_FAST_DIV64TO32
 
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   The following determines whether IBM IEEE definitions and functions
+   are used.  The same define must exist in softfloat.h because it is
+   a public header that compiles differently based on the IBM_IEEE
+   macro.  It is defined here because internal.h also compiles
+   differently, and softfloat.h must be included _after_ internals.h.
+   See the respective headers for details on the changes.
+*/
+#define IBM_IEEE
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 #cmakedefine HAVE_STDBOOL_H

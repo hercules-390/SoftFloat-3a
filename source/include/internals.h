@@ -91,7 +91,10 @@ struct exp16_sig32 { int_fast16_t exp; uint_fast32_t sig; };
 struct exp16_sig32 softfloat_normSubnormalF32Sig( uint_fast32_t );
 
 float32_t softfloat_roundPackToF32( bool, int_fast16_t, uint_fast32_t );
+
+#ifndef IBM_IEEE
 float32_t softfloat_normRoundPackToF32( bool, int_fast16_t, uint_fast32_t );
+#endif
 
 float32_t softfloat_addMagsF32( uint_fast32_t, uint_fast32_t, bool );
 float32_t softfloat_subMagsF32( uint_fast32_t, uint_fast32_t, bool );
@@ -112,7 +115,10 @@ struct exp16_sig64 { int_fast16_t exp; uint_fast64_t sig; };
 struct exp16_sig64 softfloat_normSubnormalF64Sig( uint_fast64_t );
 
 float64_t softfloat_roundPackToF64( bool, int_fast16_t, uint_fast64_t );
+
+#ifndef IBM_IEEE
 float64_t softfloat_normRoundPackToF64( bool, int_fast16_t, uint_fast64_t );
+#endif
 
 float64_t softfloat_addMagsF64( uint_fast64_t, uint_fast64_t, bool );
 float64_t softfloat_subMagsF64( uint_fast64_t, uint_fast64_t, bool );
@@ -166,9 +172,12 @@ struct exp32_sig128
 float128_t
  softfloat_roundPackToF128(
      bool, int_fast32_t, uint_fast64_t, uint_fast64_t, uint_fast64_t );
+
+#ifndef IBM_IEEE
 float128_t
  softfloat_normRoundPackToF128(
      bool, int_fast32_t, uint_fast64_t, uint_fast64_t );
+#endif
 
 float128_t
  softfloat_addMagsF128(

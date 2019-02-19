@@ -1,4 +1,4 @@
-LIBRARY			H390sf3h
+LIBRARY			H390s3fh
 
 ; Define the SoftFloat-3 external interfaces used by Hyperion.  There
 ; are other routines in SoftFloat-3a , but these are internal to
@@ -32,6 +32,7 @@ EXPORTS
     f128_to_i64
     f128_to_ui32
     f128_to_ui64
+    softfloat_normRoundPackToF128
 
 ; 32-bit precision routines
 
@@ -52,6 +53,7 @@ EXPORTS
     f32_to_i64
     f32_to_ui32
     f32_to_ui64
+    softfloat_normRoundPackToF32
 
 ; 64-bit precision routines
 
@@ -72,6 +74,7 @@ EXPORTS
     f64_to_i64
     f64_to_ui32
     f64_to_ui64
+    softfloat_normRoundPackToF64
 
 ; Signed integer to float routines
 

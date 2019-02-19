@@ -54,8 +54,6 @@ Modifications:
 
 #include "softfloat_types.h"
 
-#define IBM_IEEE                /* must do here as well as in softfloat.h */   /* @SRO  */
-
 /*----------------------------------------------------------------------------
 | Default value for `softfloat_detectTininess'.
 *----------------------------------------------------------------------------*/
